@@ -103,7 +103,7 @@ const MODES={solo:{n:'Chacun pour soi',d:'4 équipages, 1 pirate chacun.'},duo:{
 const OPT_RES=[{n:'Lentes',v:.7},{n:'Normales',v:1},{n:'Rapides',v:1.5}];
 const OPT_START=[{n:'Aucun',r:{}},{n:'Petit pécule',r:{bronze:40,silver:10}},{n:'Butin de départ',r:{bronze:120,silver:40,gold:6,diamond:3}}];
 const OPT_CORE=[{n:'Fragiles',v:.6},{n:'Normaux',v:1},{n:'Solides',v:1.7}];
-let game={state:'menu',diff:'normal',cls:'matelot',look:{skin:0,hat:0,hair:0,face:0,patch:1},pname:'Toi',opts:{mode:'solo',map:'classic',res:1,start:0,core:1},t:0,win:false,hurtFx:0,hitmark:0,flash:0,flashCol:'#fff'};
+let game={state:'menu',diff:'normal',cls:'matelot',look:{skin:0,hat:0,hair:0,face:0,patch:1},pname:'Toi',opts:{mode:'solo',map:'classic',res:1,start:0,core:1,roster:20,evf:2,ev:{coins:1,curse:1,shark:1,storm:1,volcano:1,fog:1,kraken:1,rush:1}},t:0,win:false,hurtFx:0,hitmark:0,flash:0,flashCol:'#fff'};
 let player=null;
 let shake=0, banner={txt:'',col:'#fff',t:0,max:3};
 let selId='block', selAnim=0;
@@ -224,13 +224,14 @@ function newGame(){
       silver:{t:0,stock:0,cap:Infinity,int:()=>FS_INT[U().fs]*(td.ent.isBot?getD().income:1)},
       gold:{t:0,stock:0,cap:Infinity,int:()=>GOLD_INT[U().gold]}}});
   });
-  player=ents[0];
+  player=ents[0]; resetEvents(); makeRoster();
   for(const e of ents){ if(e===player){ e.cls=CLASSES[game.cls]?game.cls:'matelot'; e.look=Object.assign({},game.look); e.name=(game.pname||'Toi').slice(0,14); } else { e.cls=CLS_IDS[Math.floor(Math.random()*CLS_IDS.length)]; e.look=randomLook(); } }
   const SR=(OPT_START[O.start]||OPT_START[0]).r; for(const e of ents) for(const k in SR) e.res[k]+=SR[k];
   ents.forEach(e=>{ applyClass(e); spawnEnt(e); }); syncBar(player);
   game.t=0; game.win=false; game.state='play'; game.hurtFx=0;
   announce('C\'EST PARTI !','#fde68a');
   msg('Protège ton coffre au trésor. Espace pour sauter, E pour la boutique.', '#fff');
+  if(ROSTER) msg(`Roster aléatoire : ${ROSTER.size} objets en boutique cette partie.`,'#fde68a');
   if(typeof onNewGame==='function') onNewGame();
 }
 function spawnEnt(e){
@@ -244,7 +245,7 @@ function spawnEnt(e){
   if(e.ai){e.ai.mode='home'; e.ai.leaveAt=e.ai.t+rnd(12,22)*(getD().leave[0]/40);}
 }
 const maxhp=e=>(e.isBot?getD().hp:20)+6*e.up.hp+cv(e,'hp');
-const speedOf=e=>cv(e,'spd')*138*(1+.08*e.up.sp)*(e.jetT>0?1.3:1)*(e.isBot?getD().speed:1)*(e.slip>0?1.35:1)*(e.haste>0?1.5:1)*(e.slow>0?.55:1)*(e.flagBuff>0?1.2:1);
+const speedOf=e=>(e.rage>0?1.2:1)*(e.curse>0?.75:1)*cv(e,'spd')*138*(1+.08*e.up.sp)*(e.jetT>0?1.3:1)*(e.isBot?getD().speed:1)*(e.slip>0?1.35:1)*(e.haste>0?1.5:1)*(e.slow>0?.55:1)*(e.flagBuff>0?1.2:1);
 function msg(txt,col){feed.push({txt,col:col||'#dbe4ff',t:7}); if(feed.length>4)feed.shift();}
 function announce(txt,col){banner.txt=txt;banner.col=col||'#fff';banner.t=banner.max;sfx('fanfare');}
 
@@ -290,7 +291,7 @@ function inShield(x,y,team){
 function hurt(e,amount,by,kx,ky){
   if(!e.alive||e.inv>0||e.aegis>0) return;
   if(by&&by.isBot&&!e.isBot) amount*=getD().dmg;
-  amount*=(1-.12*e.up.ar)*cv(e,'def'); kx*=cv(e,'kb'); ky*=cv(e,'kb');
+  amount*=(1-.12*e.up.ar)*cv(e,'def')*(e.plate>0?.4:1)*(e.curse>0?1.3:1)*(by&&by.rage>0?1.5:1); kx*=cv(e,'kb'); ky*=cv(e,'kb');
   e.hp-=amount; e.vx+=kx; e.vy+=ky; e.lastBy=by; e.lastByT=5; e.sinceHurt=0;
   if(amount>0){
     e.flash=.15; burst(e.x,e.y-e.z,'#ff6b6b',5,120,.4,3);
@@ -427,7 +428,7 @@ function doSword(e){
     if(d<T*1.9&&d>0&&(dx*ax+dy*ay)/d>.35){ hurt(o,dmg,e,ax*300,ay*300); burst(o.x,o.y-8,'#fff',5,140,.25,2); if(e===player) shake=Math.max(shake,3); }
   }
 }
-function hitGuards(e,cx,cy,R,dmg){ for(const g of guards){ if(g.team===e.team) continue; if(Math.hypot(g.x-cx,g.y-cy)<R){ g.hp-=dmg; burst(g.x,g.y,'#fff',5,120,.3,3); } } }
+function hitGuards(e,cx,cy,R,dmg){ const tm=e?e.team:-1; for(const g of guards){ if(g.team===tm) continue; if(Math.hypot(g.x-cx,g.y-cy)<R){ g.hp-=dmg; burst(g.x,g.y,'#fff',5,120,.3,3); } } }
 function doGlove(e){
   if(e.cd.atk>0) return; e.cd.atk=.9; e.swing=.35; e.swingMax=.35; sfx('swing',e.x,e.y);
   const ax=Math.cos(e.ang),ay=Math.sin(e.ang);
@@ -464,7 +465,7 @@ function fireGun(e,id){
   sfx(id==='gun'?'shot':id==='rocket'?'whoosh':id==='bow'?'bow':id==='woolgun'?'woof':id,e.x,e.y);
   for(let i=0;i<g.pel;i++){
     const a=e.ang+(g.pel>1?rnd(-spr,spr):(Math.random()*2-1)*spr*.7+Math.sin(s.n*1.7)*s.b*.45);
-    projs.push({x:e.x+Math.cos(e.ang)*14,y:e.y+Math.sin(e.ang)*14,z:12,vx:Math.cos(a)*g.sp,vy:Math.sin(a)*g.sp,team:e.team,owner:e,life:g.life,dmg:g.dmg*cv(e,'gun'),kb:g.kb,kind:g.kind||'bullet',col:g.col,pierce:g.pierce,hit:g.pierce?[]:null});
+    projs.push({x:e.x+Math.cos(e.ang)*14,y:e.y+Math.sin(e.ang)*14,z:12,vx:Math.cos(a)*g.sp,vy:Math.sin(a)*g.sp,team:e.team,owner:e,life:g.life,dmg:g.dmg*cv(e,'gun'),kb:g.kb,kind:g.kind||'bullet',col:g.col,pierce:g.pierce,hit:g.pierce?[]:null,short:g.short});
   }
   e.vx-=Math.cos(e.ang)*g.rec; e.vy-=Math.sin(e.ang)*g.rec;
   if(id!=='flame'&&id!=='bow'){ burst(e.x+Math.cos(e.ang)*16,e.y+Math.sin(e.ang)*16,g.col,4,120,.15,3); if(e===player) shake=Math.max(shake,id==='shotgun'||id==='sniper'||id==='rocket'?6:2); }
@@ -629,7 +630,7 @@ function useGadget(e,id,wx,wy){
       e.hp=Math.min(maxhp(e),e.hp+12); floatTxt(e.x,e.y-34,'+12 ♥','#4ade80',16);
       for(let i=0;i<8;i++) parts.push({x:e.x+rnd(-10,10),y:e.y,z:rnd(0,10),vz:rnd(60,120),vx:0,vy:0,life:.8,max:.8,col:'#4ade80',size:4});
       break;
-    default: return false;
+    default: if(!useGadget2(e,id,wx,wy,ax,ay)) return false; break;
   }
   e.am[id]--; e.cd.gad=.5*cv(e,'gcd'); sfx('gadget',e.x,e.y); return true;
 }
@@ -637,7 +638,7 @@ function blastTiles(cx,cy,R,dmg,src,team){
   for(let ty=Math.floor((cy-R)/T);ty<=Math.floor((cy+R)/T);ty++)for(let tx=Math.floor((cx-R)/T);tx<=Math.floor((cx+R)/T);tx++){
     if(!inb(tx,ty)) continue; const d=Math.hypot((tx+.5)*T-cx,(ty+.5)*T-cy); if(d>R||protectedTile(tx,ty,team)) continue;
     const i=idx(tx,ty), k=dmg*(1-d/(R*1.1));
-    if(wallT[i]>0){ if(wallT[i]===CORE&&ownW[i]===team) continue; damageTile(tx,ty,k,src,0); } else if(floorT[i]>=2) damageTile(tx,ty,k,src,1);
+    if(wallT[i]>0){ if(wallT[i]===CORE&&(ownW[i]===team||team<0)) continue; damageTile(tx,ty,k,src,0); } else if(floorT[i]>=2) damageTile(tx,ty,k,src,1);
   }
 }
 function explode(b){
@@ -667,7 +668,7 @@ function explode(b){
       if(protectedTile(tx,ty,b.team)) continue;
       const dmg=36*(b.bd||1)*(1-d/(R*1.05)), i=idx(tx,ty);
       if(wallT[i]>0){
-        if(wallT[i]===CORE&&ownW[i]===b.team) continue;
+        if(wallT[i]===CORE&&(ownW[i]===b.team||b.team<0)) continue;
         damageTile(tx,ty,dmg,b.owner,0);
       } else if(floorT[i]>=2) damageTile(tx,ty,dmg,b.owner,1);
     }
@@ -805,7 +806,7 @@ SHOP.find(i=>i.id==='core').cat='Défense';
 const SHOPMAP={}; SHOP.forEach(s=>SHOPMAP[s.id]=s);
 function canAfford(e,c){for(const k in c) if(e.res[k]<c[k]) return false; return true;}
 function buy(e,id){
-  const it=SHOPMAP[id]; if(!it) return false;
+  const it=SHOPMAP[id]; if(!it||!inRoster(id)) return false;
   const inf=it.info(e); if(inf.ok===false) return false;
   if(!canAfford(e,inf.cost)) return false;
   for(const k in inf.cost) e.res[k]-=inf.cost[k];
@@ -826,7 +827,7 @@ function renderShop(){
   const e=player, sc=shopEl.scrollTop;
   let h=`<div class="top"><h2>Boutique</h2><div class="res">${Object.keys(RESCOL).map(k=>`<span style="color:${RESCOL[k]}"><img class="ri" src="${ICON[k]}"> ${e.res[k]}</span>`).join('')}</div><span class="x" data-close="1">✕</span></div>`;
   h+='<div class="tabs">'+TABS.map(t=>`<div class="tab ${t===shopTab?'on':''}" data-tab="${t}">${t==='Base'?'Améliorations (diamants)':t}</div>`).join('')+'</div><div class="grid">';
-  for(const it of SHOP.filter(s=>s.cat===shopTab)){
+  for(const it of SHOP.filter(s=>s.cat===shopTab&&inRoster(s.id))){
     const inf=it.info(e), can=inf.ok!==false&&canAfford(e,inf.cost);
     const c0=Object.keys(inf.cost)[0], bcol=c0?RESCOL[c0]:'#33407a';
     h+=`<div class="item ${can?'':'no'}" data-buy="${it.id}" style="border-left-color:${bcol}"><div class="ic">${shopIco(it.id)}</div><div class="n">${inf.name}${inf.tag?` <small style="color:#9fb0e0">[${inf.tag}]</small>`:''}</div><div class="d">${inf.desc}</div><div class="c">${costHtml(inf.cost)}</div></div>`;
@@ -913,7 +914,7 @@ function updateSpawners(dt){
     for(const r in sp.types){
       const ty=sp.types[r], iv=ty.int();
       if(iv===Infinity) continue;
-      ty.t+=dt*(game.opts.res||1);
+      ty.t+=dt*(game.opts.res||1)*(sp.kind!=='base'&&EV.rush?3:1);
       while(ty.t>=iv){ty.t-=iv; ty.stock++;}
     }
     const R=(sp.kind==='base'?6:2.3)*T, cx=(sp.x+.5)*T, cy=(sp.y+.5)*T;
@@ -1150,7 +1151,7 @@ function update(dt){
       }
       updateEnt(e,dt);
     }
-    updateSpawners(dt); updateProj(dt); updateBombs(dt); updateShields(dt); updateHooks(dt); updateTraps(dt); updateChickens(dt); updatePearls(dt); updateGuards(dt);
+    updateEvents(dt); updateSpawners(dt); updateProj(dt); updateBombs(dt); updateShields(dt); updateHooks(dt); updateTraps(dt); updateChickens(dt); updatePearls(dt); updateGuards(dt);
   }
   updateFx(dt);
   syncBar(player); if(!player.bar.includes(selId)) selId='sword';
@@ -1282,6 +1283,7 @@ function botGadgets(b,foe,fd,dt,nearCore){
   else if((am.guard||0)>0&&nearCore&&guards.filter(g=>g.team===b.team).length<2&&r<dt*.8) useGadget(b,'guard',b.x,b.y);
   else if((am.turret2||0)>0&&nearCore&&r<dt*.6) useGadget(b,'turret2',b.x+Math.cos(b.ang-1.57)*1.5*T,b.y+Math.sin(b.ang-1.57)*1.5*T);
   else if((am.wallgad||0)>0&&nearCore&&r<dt*.5) useGadget(b,'wallgad',b.x+Math.cos(b.ang)*2.2*T,b.y+Math.sin(b.ang)*2.2*T);
+  else if(botGadgets2(b,foe,fd,nearCore,r,dt)) return;
   else if((am.frostnova||0)>0&&fd<3.2*T&&r<dt*.6) useGadget(b,'frostnova',b.x,b.y);
   else if((am.quake||0)>0&&fd<3*T&&r<dt*.5) useGadget(b,'quake',b.x,b.y);
   else if((am.aegis||0)>0&&b.hp<maxhp(b)*.45&&r<dt*1.2) useGadget(b,'aegis',b.x,b.y);
@@ -1307,7 +1309,7 @@ function botDefend(b,dt){
 function botBuy(b){
   if(!nearBase(b)) return;
   for(const [id,cond] of BOT_BUY){
-    if(!cond(b)) continue;
+    if(!inRoster(id)||!cond(b)) continue;
     const inf=SHOPMAP[id].info(b); if(inf.ok===false||!canAfford(b,inf.cost)) continue;
     buy(b,id); if(id==='wall') b.walled=true; return;
   }

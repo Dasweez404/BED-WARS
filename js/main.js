@@ -54,6 +54,8 @@ const OPTDEF=[
   {k:'map',t:'Carte',list:()=>Object.entries(MAPS).map(([v,m])=>({v,n:m.n,d:m.d})),prev:true},
   {k:'res',t:'Ressources',list:()=>OPT_RES.map(o=>({v:o.v,n:o.n,d:'Vitesse de production des ressources.'}))},
   {k:'start',t:'Départ',list:()=>OPT_START.map((o,i)=>({v:i,n:o.n,d:'Ressources de départ de chaque pirate.'}))},
+  {k:'roster',t:'Roster',list:()=>[10,15,20,30,0].map(v=>({v,n:v?v+' objets':'Tous',d:'Objets disponibles en boutique : tirés au hasard à chaque partie ('+(v?v:'tous')+').'}))},
+  {k:'evf',t:'Événements',list:()=>EV_FREQ.map((o,i)=>({v:i,n:o.n,d:'Fréquence des événements aléatoires (pluie de pièces, requin, tempête…).'}))},
   {k:'core',t:'Coffres',list:()=>OPT_CORE.map((o,i)=>({v:i,n:o.n,d:'Résistance des coffres au trésor.'}))}
 ];
 function saveChar(){ try{localStorage.setItem('pirates_char',JSON.stringify({cls:game.cls,look:game.look,pname:game.pname}));}catch(e){} }
@@ -73,7 +75,9 @@ function saveOpts(){ try{localStorage.setItem('pirates_opts',JSON.stringify(game
 function renderOpts(){
   const box=document.getElementById('opts'); let desc='';
   box.innerHTML=OPTDEF.map(o=>`<div class="orow"><span class="olab">${o.t}</span>${o.list().map(it=>`<button class="obtn ${game.opts[o.k]===it.v?'on':''}" data-k="${o.k}" data-v="${it.v}" title="${it.d}">${it.n}</button>`).join('')}</div>`).join('');
-  box.querySelectorAll('.obtn').forEach(b=>b.onclick=()=>{
+  box.insertAdjacentHTML('beforeend',`<div class="orow"><span class="olab">Activés</span>${Object.keys(EVENTS).map(k=>`<button class="obtn ${game.opts.ev[k]?'on':''}" data-ev="${k}" title="${EVENTS[k].d}">${EVENTS[k].ico} ${EVENTS[k].n}</button>`).join('')}</div>`);
+  box.querySelectorAll('[data-ev]').forEach(b=>b.onclick=()=>{ const k=b.dataset.ev; game.opts.ev[k]=game.opts.ev[k]?0:1; saveOpts(); renderOpts(); document.getElementById('optDesc').textContent=EVENTS[k].ico+' '+EVENTS[k].n+' : '+EVENTS[k].d+(game.opts.ev[k]?'':' (désactivé)'); });
+  box.querySelectorAll('.obtn[data-k]').forEach(b=>b.onclick=()=>{
     const k=b.dataset.k, def=OPTDEF.find(o=>o.k===k), it=def.list().find(x=>String(x.v)===b.dataset.v);
     game.opts[k]=it.v; saveOpts(); renderOpts(); document.getElementById('optDesc').textContent=it.d;
     if(def.prev){ const st=game.state; newGame(); game.state='menu'; }
@@ -94,6 +98,7 @@ function boot(){
   initRender(); initUI(); bindMouse(document.getElementById('ui'));
   document.querySelectorAll('#diff .dbtn').forEach(b=>b.onclick=()=>selectDiff(b.dataset.d));
   try{ const o=JSON.parse(localStorage.getItem('pirates_opts')||'null'); if(o) for(const k in game.opts) if(o[k]!==undefined) game.opts[k]=o[k]; }catch(e){}
+  for(const k of Object.keys(EVENTS)) if(game.opts.ev[k]===undefined) game.opts.ev[k]=1;
   if(!MAPS[game.opts.map]) game.opts.map='classic'; if(!MODES[game.opts.mode]) game.opts.mode='solo'; renderOpts();
   try{ const c=JSON.parse(localStorage.getItem('pirates_char')||'null'); if(c){ if(CLASSES[c.cls]) game.cls=c.cls; if(c.look) game.look=lookOf(c.look); if(typeof c.pname==='string') game.pname=c.pname; } }catch(e){}
   renderChar(); initPreview();

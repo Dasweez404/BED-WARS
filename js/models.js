@@ -121,7 +121,7 @@ const TINT={frozen:new THREE.Color('#9ad8f5'),root:new THREE.Color('#d6dde6'),sl
 function setPirateTint(g,e){
   const mat=g.userData.mat;
   mat.color.copy(e.frozen>0?TINT.frozen:e.root>0?TINT.root:e.slow>0?TINT.slow:TINT.none);
-  const f=e.flash>0?.9:0; mat.emissive.setRGB(f,f*.8,f*.8);
+  const f=e.flash>0?.9:0; if(e.curse>0) mat.emissive.setRGB(Math.max(f,.32+.12*Math.sin(game.t*8)),f*.8,Math.max(f,.5)); else mat.emissive.setRGB(f,f*.8,f*.8);
 }
 function animatePirate(e,m,dt){
   const u=m.userData, gh=groundH(e), air=Math.max(0,e.z-gh), moving=(Math.abs(e.ix)+Math.abs(e.iy)>.05)&&air<2, t=game.t+e.team*.7;
@@ -139,9 +139,9 @@ function animatePirate(e,m,dt){
 }
 
 /* ---------- animations propres à chaque objet tenu (bras, corps, objet) ---------- */
-const H_THROW=['bomb','repel','coco','anchor','cluster','barrage','storm','chicken','kraken','tp','vortex'];
-const H_PLACE=['mine','banana','net','turret','turret2','trampo','wallgad','guard','decoy','flag','repair','buoy','bridge'];
-const H_BUFF=['springs','cloak','haste','aegis','frostnova','siren','quake','swap','dash','shield','jet'];
+const H_THROW=['bomb','repel','coco','anchor','cluster','barrage','storm','chicken','kraken','tp','vortex','firecracker','meteor','raid','lasso','sharkbait','crabs'];
+const H_PLACE=['stonewall','battery','bridge2','mine','banana','net','turret','turret2','trampo','wallgad','guard','decoy','flag','repair','buoy','bridge'];
+const H_BUFF=['hurricane','rage','hull','smokebomb','rod','springs','cloak','haste','aegis','frostnova','siren','quake','swap','dash','shield','jet'];
 const H_GUN={ // z = élévation du bras, two = 2e main en appui, spin = rotation de l'objet en tirant, pump = va-et-vient, shake = tremblement, lean = penché en avant
   gun:{z:1.5},smg:{z:1.45,shake:.07,two:true},shotgun:{z:1.5,pump:true,two:true},sniper:{z:1.55,two:true},rocket:{z:2.25,two:true},woolgun:{z:1.45,pump:true},
   boomerang:{z:2.5,spinIdle:5},bubble:{z:1.4,pump:true},ice:{z:1.5},flame:{z:1.45,shake:.05,lean:.14,two:true},bow:{z:1.5,two:true,draw:true},flarebow:{z:1.5,two:true,draw:true},
@@ -153,7 +153,7 @@ function heldAnim(e,m){
   B.rotation.set(0,0,0); A.rotation.set(0,0,0); A.position.set(0,-.26,0); A.scale.setScalar(1.6); R.rotation.x=0; L.rotation.x=0;
   const sw=e.swingMax?Math.max(0,e.swing/e.swingMax):0, p=1-sw, sp=Math.sin(p*Math.PI);
   const gmax=.5*cv(e,'gcd'), gp=e.cd.gad>0?Math.max(0,1-e.cd.gad/gmax):1, used=e.cd.gad>0;
-  const gd=H_GUN[id];
+  const gd=H_GUN[id]||(GUNS[id]?{z:1.5}:null);
   if(gd){
     const s=e.ws[id]||{a:1,r:0,last:-9}, kick=Math.min(1,(e.muzzle||0)/.08), firing=game.t-s.last<.16, rl=s.r>0;
     R.rotation.z=gd.z-kick*.45; R.rotation.y=0; A.position.y=-.26+kick*.14+(gd.stab?-kick*.3:0);
@@ -174,7 +174,7 @@ function heldAnim(e,m){
     case 'block': if(e.cd.place>0){ R.rotation.z=1.0+.75*Math.sin(Math.min(1,e.cd.place*7)*Math.PI); B.rotation.z=.08; } else R.rotation.z=1.0+Math.sin(t*2)*.04; break;
     case 'pick': if(e.cd.mine>0||sw>0){ const c=Math.sin(game.t*17); R.rotation.z=1.75+c*1.05; B.rotation.y=c*.12; B.rotation.z=.07; } else { R.rotation.z=2.2; A.rotation.z=.3; } break;
     case 'grap': R.rotation.z=1.5; A.rotation.y=Math.sin(t*2)*.5; if(e.hook||e.pull) { R.rotation.z=1.8; B.rotation.z=-.15; } break;
-    case 'heal': if(used){ const q=Math.sin(Math.min(1,gp*1.4)*Math.PI); R.rotation.z=1.0+2.1*q; u.head.rotation.z=-.4*q; B.rotation.z=-.1*q; } else { R.rotation.z=1.1; A.rotation.z=Math.sin(t*3)*.12; } break;
+    case 'grog': case 'blessing': case 'heal': if(used){ const q=Math.sin(Math.min(1,gp*1.4)*Math.PI); R.rotation.z=1.0+2.1*q; u.head.rotation.z=-.4*q; B.rotation.z=-.1*q; } else { R.rotation.z=1.1; A.rotation.z=Math.sin(t*3)*.12; } break;
     default:
       if(H_THROW.includes(id)){
         if(used){ if(gp<.35){ const q=_sm(gp/.35); R.rotation.z=1.0+1.9*q; B.rotation.y=-.3*q; B.rotation.z=-.1*q; } else { const q=_sm((gp-.35)/.65); R.rotation.z=2.9-2.2*q; B.rotation.y=-.3+.6*q; B.rotation.z=.15*(1-q); } }

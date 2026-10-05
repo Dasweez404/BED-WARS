@@ -211,7 +211,7 @@ function makeHeld(id,e){
     case 'gatling': add(GEO.box,wd,.12,-.06,0,.2,.18,.12); for(const [y,z] of [[.04,0],[-.03,.06],[-.03,-.06]]) add(GEO.box,gr,.4,y,z,.5,.045,.045); add(GEO.box,M('#dc2626'),.22,.1,0,.1,.08,.1); break;
     case 'javelin': add(GEO.box,wd,.32,0,0,.8,.04,.04); add(GEO.cone,steel,.76,0,0,.05,.18,.05).rotation.z=-Math.PI/2; add(GEO.box,M('#f87171'),.0,0,0,.1,.06,.06); break;
     case 'flarebow': add(GEO.box,M('#7c2d12'),.3,0,0,.08,.08,.7); add(GEO.box,wd,.3,0,0,.5,.06,.06); add(GEO.box,M('#fb923c'),.18,0,0,.01,.01,.68); add(GEO.sphere,new THREE.MeshBasicMaterial({color:0xfb923c}),.5,0,0,.07,.07,.07); break;
-    default: { const it=ITEMMAP[id]; add(GEO.sphere,M(it?it.col:'#fff'),.3,0,0,.17,.17,.17); }
+    default: { const it=ITEMMAP[id]; if(GUNS[id]){ add(GEO.box,wd,.14,-.07,0,.18,.18,.1); add(GEO.box,M(it?it.col:'#9ca3af',{metalness:.4,roughness:.4}),.4,.03,0,.55,.07,.07); } else add(GEO.sphere,M(it?it.col:'#fff'),.3,0,0,.17,.17,.17); }
   }
   return g;
 }

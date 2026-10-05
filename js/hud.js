@@ -69,6 +69,7 @@ const TIPS={block:'Clic : poser (pont sur le vide, mur sur le sol) · C / clic d
   bomb:'Clic : lance une bombe',repel:'Clic : onde de choc',mine:'Clic : pose une mine',banana:'Clic : pose une banane',chicken:'Clic : lance un mouton kamikaze',heal:'Clic : +12 PV',shield:'Clic : dôme de protection',
   turret:'Clic : pose une tourelle automatique',turret2:'Clic : pose une tourelle givrante',guard:'Clic : appelle deux moutons gardiens',repair:'Clic : répare ton mouton ultime',
   hammer2:'',springs:'Clic : super sauts 25 s',cloak:'Clic : invisible 7 s',haste:'Clic : vitesse +50 % 8 s',wallgad:'Clic : mur de 3 blocs',storm:'Clic : foudre sur la zone visée',cluster:'Clic : bombe à fragmentation',vortex:'Clic : trou noir qui aspire'};
+Object.assign(TIPS,TIPS2);
 Object.assign(TIPS,{pick:'Maintiens le clic pour casser blocs, ponts et le coffre ennemi',baa:'Clic : souffle de brume qui repousse les ennemis et dévie les tirs',
   glove:'Clic : coup de crochet qui projette très loin',hammer:'Clic : onde de choc qui projette et casse les blocs',bow:'Clic : tirer un carreau (recharge entre chaque tir)',
   gun:'Maintiens le clic : la dispersion augmente en rafale · R : recharger',smg:'Deux pistolets : rafale rapide, le spray s\'élargit vite · R : recharger',shotgun:'Clic : 8 plombs en éventail · R : recharger',
@@ -335,6 +336,7 @@ function drawHud(){
   ctx.fillStyle='#fff'; ctx.font='bold 15px '+FONT; ctx.fillText(label,VW/2,hb.y-70); ctx.fillStyle='#a9c2f0'; ctx.font='12px '+FONT; ctx.fillText(tip,VW/2,hb.y-54);
   if(nearBase(e)&&!shopOpen&&e.alive){ const w=300,pp=1+.03*Math.sin(game.t*5); ctx.save(); ctx.translate(VW/2,hb.y-114); ctx.scale(pp,pp); panel(-w/2,-15,w,30,15,'#fde68a'); ctx.fillStyle='#fde68a'; ctx.font='bold 15px '+FONT; ctx.fillText('[E]  Ouvrir la boutique',0,5); ctx.restore(); }
   ctx.textAlign='left'; ctx.fillStyle='rgba(20,40,90,.8)'; ctx.font='13px '+FONT; ctx.lineWidth=3; ctx.strokeStyle='rgba(255,255,255,.7)'; const hint='Espace saut · R recharger · Tab réserve · E boutique'; ctx.globalAlpha=.7; ctx.strokeText(hint,12,VH-12); ctx.fillText(hint,12,VH-12); ctx.globalAlpha=1;
+  if(EV.cur){ const E=EVENTS[EV.cur.id], w=210; panel(VW/2-w/2,52,w,30,12,'rgba(253,230,138,.6)'); ctx.textAlign='left'; ctx.font='bold 14px '+FONT; ctx.fillStyle='#fde68a'; ctx.fillText(E.ico+' '+E.n,VW/2-w/2+12,72); ctx.textAlign='right'; ctx.fillStyle='#fff'; ctx.fillText(Math.ceil(EV.cur.t)+' s',VW/2+w/2-12,72); ctx.fillStyle='rgba(253,230,138,.8)'; ctx.fillRect(VW/2-w/2+10,79,(w-20)*Math.max(0,EV.cur.t/EV.cur.dur),2); ctx.textAlign='center'; }
   drawMini();
   if(banner.t>0){
     const p=1-banner.t/banner.max, s=p<.12?1.6-p/.12*.6:1, a=Math.min(1,banner.t*1.5,p*8);

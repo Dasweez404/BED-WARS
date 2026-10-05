@@ -1,11 +1,11 @@
 'use strict';
 /* =====================  RENDU 3D : navire, îles, objets dynamiques, effets, caméra  ===================== */
-const entM=new Map(), guardM=new Map(), chickM=new Map(), projM=new Map(), bombM=new Map(), trapM=new Map(), shieldM=new Map(), hookM=new Map(), pearlM=new Map(), pullM=new Map();
+const entM=new Map(), guardM=new Map(), chickM=new Map(), projM=new Map(), bombM=new Map(), trapM=new Map(), shieldM=new Map(), hookM=new Map(), pearlM=new Map(), pullM=new Map(), sharkM=new Map(), dropM=new Map();
 let coreM=[], propM=[], propInst=[], ringPool=[], beamPool=[], playerRing=null, ghostMesh=null, shipGroup=null, jrTex=null, ambient=null, syncFrame=0, frameN=0;
 let padInst=null, padList=[];
 
 function clearDynamic(){
-  for(const mp of [entM,guardM,chickM,projM,bombM,trapM,shieldM,hookM,pearlM,pullM]){ for(const [,m] of mp) scene.remove(m); mp.clear(); }
+  for(const mp of [entM,guardM,chickM,projM,bombM,trapM,shieldM,hookM,pearlM,pullM,sharkM,dropM]){ for(const [,m] of mp) scene.remove(m); mp.clear(); }
   for(const m of coreM) scene.remove(m); coreM=[];
   for(const g of propM) scene.remove(g.m); propM=[];
   for(const m of propInst) scene.remove(m); propInst=[];
@@ -286,6 +286,18 @@ function updateShieldM(s,m){ const R=s.r*U*(.7+.3*s.a); m.position.set(s.x*U,0,s
 function createHook(h){ const g=new THREE.Group(); const l=new THREE.Mesh(GEO.cyl,M('#c9a24a')); g.add(l); const tip=new THREE.Mesh(GEO.cone,M('#9ca3af',{metalness:.5})); tip.scale.setScalar(.12); g.add(tip); g.userData={l,tip}; return g; }
 function updateHookM(h,m){ const o=h.owner; const L=m.userData.l; beamBetween(L,o.x*U,.4,o.y*U,h.x*U,.4,h.y*U,.025); m.userData.tip.position.set(h.x*U,.4,h.y*U); }
 function createPearl(){ const m=new THREE.Mesh(GEO.torus,new THREE.MeshStandardMaterial({color:0xfbbf24,emissive:0xb07a00,emissiveIntensity:.7,flatShading:true})); m.scale.setScalar(.2); return m; }
+function createShark(){
+  const g=new THREE.Group(), mat=new THREE.MeshStandardMaterial({vertexColors:true,flatShading:true,roughness:.6}), S=GEO.sphere;
+  const body=new THREE.Mesh(mergeParts([{geo:S,pos:[0,0,0],scale:[1.0,.3,.34],color:'#6b8aa6'},{geo:S,pos:[.15,-.14,0],scale:[.8,.17,.28],color:'#e8eef4'},
+    {geo:GEO.cone,pos:[0,.38,0],scale:[.12,.46,.3],rot:[0,0,-.25],color:'#587691'},{geo:S,pos:[.85,.05,.14],scale:[.05,.05,.05],color:'#111'},{geo:S,pos:[.85,.05,-.14],scale:[.05,.05,.05],color:'#111'},
+    {geo:GEO.cone,pos:[.25,-.05,.38],scale:[.1,.3,.2],rot:[1.2,0,-.6],color:'#587691'},{geo:GEO.cone,pos:[.25,-.05,-.38],scale:[.1,.3,.2],rot:[-1.2,0,-.6],color:'#587691'}]),mat);
+  body.castShadow=true; g.add(body);
+  const tail=new THREE.Group(); tail.position.set(-.95,0,0); g.add(tail); const tm=new THREE.Mesh(mergeParts([{geo:GEO.cone,pos:[-.1,.18,0],scale:[.08,.4,.3],rot:[0,0,.5],color:'#587691'},{geo:GEO.cone,pos:[-.1,-.12,0],scale:[.06,.3,.22],rot:[0,0,-.4],color:'#587691'}]),mat); tail.add(tm);
+  g.userData={tail}; g.scale.setScalar(1.15); return g;
+}
+function updateSharkM(s,m){ m.position.set(s.x*U,-1.0,s.y*U); m.rotation.y=-s.ang; m.userData.tail.rotation.y=Math.sin(s.ph*1.4)*.5; m.rotation.z=s.bite>0?-.35:0; m.rotation.x=Math.sin(s.ph*.7)*.05; }
+function createDrop(d){ const col={bronze:'#cd7f32',silver:'#d6dde6',gold:'#fbbf24'}[d.kind]; const m=new THREE.Mesh(GEO.cyl,new THREE.MeshStandardMaterial({color:col,metalness:.6,roughness:.3,emissive:col,emissiveIntensity:.25})); m.scale.set(.26,.05,.26); m.rotation.x=Math.PI/2; const g=new THREE.Group(); g.add(m); g.userData={m}; return g; }
+function updateDropM(d,g){ g.position.set(d.x*U,.3+d.h*U+Math.sin(d.ph)*.05,d.y*U); g.userData.m.rotation.y=0; g.rotation.y=d.ph*1.5; g.visible=d.t>2||Math.floor(game.t*8)%2===0; }
 function createGuard(g){ return createPirate({light:TEAMS[g.team].light,col:TEAMS[g.team].col,dark:TEAMS[g.team].dark},{scale:.36,neutral:true}); }
 function updateGuardM(g,m){
   const u=m.userData; m.position.set(g.x*U,0,g.y*U); m.rotation.y=-(g.ang||0);
@@ -407,16 +419,23 @@ function syncEnts(dt){
   if(pullM.size){ for(const [e,pm] of pullM) if(!e.pull||!e.alive){ scene.remove(pm); pullM.delete(e); } }
   if(player&&player.alive){ playerRing.visible=true; const gh=groundH(player)*U; playerRing.position.set(player.x*U,gh+.06,player.y*U); playerRing.scale.setScalar(.5+.04*Math.sin(game.t*5)); playerRing.material.opacity=.6+.3*Math.sin(game.t*5); playerRing.material.color.set(TEAMS[player.team].light); } else if(playerRing) playerRing.visible=false;
 }
+let envInit=null;
+function envTick(){
+  if(!envInit) envInit={fogc:scene.fog.color.clone(),far:scene.fog.far,h:hemi.intensity,s:sun.intensity,bg:null};
+  const d=EV.dark, f=EV.fog; scene.fog.far=envInit.far-70*f; scene.fog.near=Math.max(14,50-34*f); hemi.intensity=envInit.h*(1-.38*d); sun.intensity=envInit.s*(1-.6*d);
+  scene.fog.color.copy(envInit.fogc).lerp(colT.set(d>f?'#4a5a6a':'#c9d3da'),Math.max(d,f)*.85);
+}
 function render3d(dt){
   if(!renderer) return;
   qualityTick(dt); frameN++;
   sigTick++; if(sigTick%3===0||popActive){ const sig=(popActive&&sigTick%2)?worldSig:worldSignature(); if(sig!==worldSig||(popActive&&sigTick%2===0)){ rebuildWorld(); worldSig=sig; renderer.shadowMap.needsUpdate=true; } }
   updateSea(game.t); updateShip(); updateAmbient(dt); syncEnts(dt); syncCores(); syncPads(); syncProps();
+  sync(sharkM,sharks,createShark,updateSharkM); sync(dropM,drops,createDrop,updateDropM);
   sync(guardM,guards,createGuard,updateGuardM); sync(chickM,chickens,createCrab,updateCrabM);
   sync(projM,projs,createProj,updateProjM); sync(bombM,bombs,createBomb,updateBombM); sync(trapM,traps,createTrap,updateTrapM);
   sync(shieldM,shields,createShield,updateShieldM); sync(hookM,hooks,createHook,updateHookM); sync(pearlM,pearls,createPearl,(p,m)=>{ m.position.set(p.x*U,.5,p.y*U); m.rotation.y=game.t*6; });
   syncRings(); fillParticles();
-  updateCamera(dt); updateAim();
+  updateCamera(dt); updateAim(); envTick();
   if(Q.level>=2&&frameN%3===0) renderer.shadowMap.needsUpdate=true;
   renderer.render(scene,camera3);
 }
