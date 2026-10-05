@@ -54,7 +54,7 @@ const OPTDEF=[
   {k:'map',t:'Carte',list:()=>Object.entries(MAPS).map(([v,m])=>({v,n:m.n,d:m.d})),prev:true},
   {k:'res',t:'Ressources',list:()=>OPT_RES.map(o=>({v:o.v,n:o.n,d:'Vitesse de production des ressources.'}))},
   {k:'start',t:'Départ',list:()=>OPT_START.map((o,i)=>({v:i,n:o.n,d:'Ressources de départ de chaque pirate.'}))},
-  {k:'roster',t:'Roster',list:()=>[10,15,20,30,0].map(v=>({v,n:v?v+' objets':'Tous',d:'Objets disponibles en boutique : tirés au hasard à chaque partie ('+(v?v:'tous')+').'}))},
+  {k:'roster',t:'Roster',list:()=>[10,15,20,30,40,50,60,0].map(v=>({v,n:v?v+' objets':'Tous',d:'Objets disponibles en boutique : tirés au hasard à chaque partie ('+(v?v:'tous')+').'}))},
   {k:'evf',t:'Événements',list:()=>EV_FREQ.map((o,i)=>({v:i,n:o.n,d:'Fréquence des événements aléatoires (pluie de pièces, requin, tempête…).'}))},
   {k:'core',t:'Coffres',list:()=>OPT_CORE.map((o,i)=>({v:i,n:o.n,d:'Résistance des coffres au trésor.'}))}
 ];
