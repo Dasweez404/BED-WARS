@@ -902,7 +902,7 @@ function updateEnt(e,dt){
     let ix=e.ix,iy=e.iy;
     if(e.frozen>0||e.bubble>0||e.root>0){ix=iy=0;}
     if(e.slip>0){ e.slip-=dt; ix=e.sdx; iy=e.sdy; e.ang+=dt*16; if(Math.random()<dt*12) parts.push({x:e.x,y:e.y-e.z-12,vx:rnd(-30,30),vy:-20,life:.5,max:.5,col:'#fde047',size:3}); }
-    const sp=speedOf(e); moveEnt(e,(ix*sp+e.vx)*dt,(iy*sp+e.vy)*dt);
+    const sp=speedOf(e); const fo=e._follow; moveEnt(e,((fo?0:ix*sp)+e.vx)*dt,((fo?0:iy*sp)+e.vy)*dt);
     const f=Math.exp(-7*dt); e.vx*=f; e.vy*=f;
     if((ix||iy)&&e.z<=gh+1){
       e.stepPh+=dt*sp*.09; e.stepT-=dt;
@@ -1159,7 +1159,7 @@ function update(dt){
     for(const e of ents){
       if(e.alive){
         if(e===player){ if(game.state==='play') playerControl(e,dt); else {e.ix=e.iy=0;} }
-        else if(e.remote){ if(game.state==='play'){ syncBar(e); const q=e.inp; if(!e.bar.includes(q.sel)) q.sel='sword'; controlEnt(e,dt,q); q.clicked=false; } else {e.ix=e.iy=0;} }
+        else if(e.remote){ if(game.state==='play'){ syncBar(e); const q=e.inp; if(!e.bar.includes(q.sel)) q.sel='sword'; netFollow(e,dt,q); controlEnt(e,dt,q); q.clicked=false; } else {e.ix=e.iy=0;} }
         else if(e.isBot) botThink(e,dt);
       }
       updateEnt(e,dt);
