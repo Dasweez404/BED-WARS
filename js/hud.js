@@ -129,7 +129,7 @@ function drawAim(){
         const s=w2s((tx+.5)*T,(ty+.5)*T,z+22), k=hp/mx;
         ctx.fillStyle='rgba(10,20,50,.85)'; rr(s[0]-22,s[1]-7,44,9,4); ctx.fill(); ctx.fillStyle=k>.5?'#86efac':k>.25?'#fbbf24':'#f87171'; rr(s[0]-20,s[1]-5,Math.max(4,40*k),5,2); ctx.fill();
         gLabel((tx+.5)*T,(ty+.5)*T,z+40,prot?'Protégé !':`${nh} coup${nh>1?'s':''}`,col);
-      } else { const tx=Math.floor(wx/T),ty=Math.floor(wy/T); if(wl(tx,ty)>0){ gQuad(tx,ty,BAD,.12,WH); gLabel((tx+.5)*T,(ty+.5)*T,WH+22,wl(tx,ty)===CORE&&ownW[idx(tx,ty)]===e.team?'Ton mouton !':'Trop loin',BAD); } }
+      } else { const tx=Math.floor(wx/T),ty=Math.floor(wy/T); if(wl(tx,ty)>0){ gQuad(tx,ty,BAD,.12,WH); gLabel((tx+.5)*T,(ty+.5)*T,WH+22,wl(tx,ty)===CORE&&ownW[idx(tx,ty)]===e.team?'Ton coffre !':'Trop loin',BAD); } }
       break;}
     case 'sword':case 'glove':case 'baa':{
       const R=id==='sword'?1.9*T:id==='glove'?2.3*T:5*T, half=id==='sword'?1.2:id==='glove'?1.37:.64; let hit=false;
