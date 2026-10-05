@@ -312,7 +312,7 @@ function die(e,by){
   const killer=by&&by!==e?by:null;
   if(killer){
     killer.kills++;
-    for(const k in e.res){const g=Math.floor(e.res[k]*.5); killer.res[k]+=g; e.res[k]-=g;}
+    for(const k in e.res){killer.res[k]+=e.res[k]; if(killer===player&&e.res[k]>0) floatTxt(e.x,e.y-40-k.length*0,'+'+e.res[k]+' '+RESNAME[k],RESCOL[k],15);}
     msg(`${killer.name} a éliminé ${e.name}`,TEAMS[killer.team].light);
     if(killer===player){ announce('ÉLIMINATION !','#fde68a'); flashScreen('#fff',.15); }
   } else msg(`${e.name} est tombé dans le vide`,'#9aa7cf');
