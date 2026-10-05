@@ -514,6 +514,7 @@ function useGrapple(e){
 }
 function jump(e,power){
   if(e.bubble>0||e.root>0||e.z>groundH(e)+1||e.vz>0||e.pull||e.frozen>0) return;
+  if(!floorSupport(e.x,e.y)&&e.jetT<=0){ if(e.waterJumps>=1) return; e.waterJumps=(e.waterJumps||0)+1; } // un seul saut de rattrapage au-dessus de l'eau
   sfx('jump',e.x,e.y); e.vz=(power||(e.springT>0?540:320))*cv(e,'jump'); e.squash=-.5; burst(e.x,e.y+6-e.z,'#e5e7eb',6,70,.3,3);
 }
 function useGadget(e,id,wx,wy){
@@ -907,7 +908,7 @@ function updateEnt(e,dt){
       if((e.am.buoy||0)>0&&e.lastSafe){ e.am.buoy--; splash(e.x,e.y); e.x=e.lastSafe.x; e.y=e.lastSafe.y; e.z=50; e.vz=0; e.vx=e.vy=0; e.voidT=0; e.inv=1.2; e.grace=.4; floatTxt(e.x,e.y-44,'REPÊCHÉ !','#fb923c',17); ring(e.x,e.y,T*1.5,'#fb923c',.5,true); sfx('buy'); }
       else die(e,e.lastByT>0?e.lastBy:null,true);
     }
-  } else e.voidT=Math.max(0,e.voidT-dt*2);
+  } else { e.voidT=Math.max(0,e.voidT-dt*2); if(floorSupport(e.x,e.y)) e.waterJumps=0; }
 }
 function updateSpawners(dt){
   for(const sp of spawners){
