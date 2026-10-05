@@ -10,14 +10,14 @@ addEventListener('keydown',ev=>{
   if(ev.repeat) return;
   if(game.state==='over'&&(k==='Enter'||k==='r')){showMenu();return;}
   if(game.state==='over'&&k==='Escape'){showMenu();return;}
-  if(ev.code==='Space'){ if(player.alive&&game.state==='play') jump(player); return; }
+  if(ev.code==='Space'){ if(player.alive&&game.state==='play') actJump(); return; }
   let d=0;
   if(/^Digit[0-9]$/.test(ev.code)) d=+ev.code.slice(5)||10; else if(/^Numpad[0-9]$/.test(ev.code)) d=+ev.code.slice(6)||10; else if(DIGIT[k]) d=DIGIT[k]; else if(k==='à') d=10;
-  if(d){ const l=hotList(player); if(l[d-1]){ if(selId==='block'&&l[d-1].id==='block') cycleBlock(player); setSel(l[d-1].id); } }
-  else if(k==='Tab'){ ev.preventDefault(); if(player.alive) swapPack(player); }
+  if(d){ const l=hotList(player); if(l[d-1]){ if(selId==='block'&&l[d-1].id==='block') actCycle(); setSel(l[d-1].id); } }
+  else if(k==='Tab'){ ev.preventDefault(); if(player.alive) actSwap(); }
   else if(k==='e') toggleShop();
-  else if(k==='r'){ if(GUNS[selId]&&player.alive){ if(startReload(player,selId)) floatTxt(player.x,player.y-40,'Recharge…','#ffd27d',13); } }
-  else if(k==='c') cycleBlock(player);
+  else if(k==='r'){ if(player.alive) actReload(); }
+  else if(k==='c') actCycle();
   else if(k==='g') setQuality((Q.level+2)%3,true);
   else if(k==='m'){muted=!muted;msg(muted?'Son coupé (M)':'Son activé (M)','#cfe0ff');}
   else if(k==='Escape') toggleShop(false);
@@ -31,10 +31,10 @@ function bindMouse(c){
     mouse.x=ev.clientX;mouse.y=ev.clientY;
     if(game.state==='over'){showMenu();return;}
     if(game.state!=='play') return;
-    if(ev.button===2){cycleBlock(player);return;}
+    if(ev.button===2){actCycle();return;}
     const l=hotList(player), hb=hotbarRect(l.length);
     if(mouse.y>=hb.y-6&&mouse.y<=hb.y+hb.s&&mouse.x>=hb.x&&mouse.x<hb.x+l.length*(hb.s+hb.g)){
-      const i=Math.floor((mouse.x-hb.x)/(hb.s+hb.g)); if(l[i]){ if(selId==='block'&&l[i].id==='block') cycleBlock(player); setSel(l[i].id);} return;
+      const i=Math.floor((mouse.x-hb.x)/(hb.s+hb.g)); if(l[i]){ if(selId==='block'&&l[i].id==='block') actCycle(); setSel(l[i].id);} return;
     }
     mouse.down=true;mouse.clicked=true;
   });
@@ -47,7 +47,7 @@ function bindMouse(c){
 addEventListener('mouseup',()=>{mouse.down=false;});
 addEventListener('pointerdown',audioInit);addEventListener('keydown',audioInit);
 
-function showMenu(){ toggleShop(false); newGame(); game.state='menu'; document.getElementById('start').classList.remove('hidden'); }
+function showMenu(){ netLeave(false); toggleShop(false); newGame(); game.state='menu'; document.getElementById('start').classList.remove('hidden'); }
 function selectDiff(d){ game.diff=d; try{localStorage.setItem('pirates_diff',d);}catch(e){} document.querySelectorAll('#diff .dbtn').forEach(b=>b.classList.toggle('on',b.dataset.d===d)); document.getElementById('diffDesc').textContent=DIFFS[d].desc; }
 const OPTDEF=[
   {k:'mode',t:'Mode',list:()=>Object.entries(MODES).map(([v,m])=>({v,n:m.n,d:m.d})),prev:true},
@@ -58,7 +58,7 @@ const OPTDEF=[
   {k:'evf',t:'Événements',list:()=>EV_FREQ.map((o,i)=>({v:i,n:o.n,d:'Fréquence des événements aléatoires (pluie de pièces, requin, tempête…).'}))},
   {k:'core',t:'Coffres',list:()=>OPT_CORE.map((o,i)=>({v:i,n:o.n,d:'Résistance des coffres au trésor.'}))}
 ];
-function saveChar(){ try{localStorage.setItem('pirates_char',JSON.stringify({cls:game.cls,look:game.look,pname:game.pname}));}catch(e){} }
+function saveChar(){ if(typeof netHello==='function') netHello(); try{localStorage.setItem('pirates_char',JSON.stringify({cls:game.cls,look:game.look,pname:game.pname}));}catch(e){} }
 function renderChar(){
   const L=game.look, el=document.getElementById('charui'), ci=CLASSES[game.cls], sw=(arr,k)=>arr.map((c,i)=>`<button class="sw ${L[k]===i?'on':''}" data-lk="${k}" data-v="${i}" style="background:${c}"></button>`).join(''), bt=(arr,k)=>arr.map((n,i)=>`<button class="obtn ${L[k]===i?'on':''}" data-lk="${k}" data-v="${i}">${n}</button>`).join('');
   el.innerHTML=`<div class="orow"><span class="olab">Nom</span><input id="pname" maxlength="14" value="${(game.pname||'').replace(/"/g,'')}"></div>
@@ -70,6 +70,23 @@ function renderChar(){
   el.querySelector('#pname').oninput=ev=>{ game.pname=ev.target.value; saveChar(); };
   el.querySelectorAll('[data-cls]').forEach(b=>b.onclick=()=>{ game.cls=b.dataset.cls; saveChar(); renderChar(); });
   el.querySelectorAll('[data-lk]').forEach(b=>b.onclick=()=>{ game.look[b.dataset.lk]=+b.dataset.v; saveChar(); renderChar(); });
+}
+function renderMp(){
+  const el=id=>document.getElementById(id), role=NET.role;
+  let info=''; if(role==='host') info=`Code du salon : <b>${NET.code}</b><br>${NET.status}`; else if(role==='guest') info=NET.status+(NET.code?` (salon ${NET.code})`:''); else info=NET.status||'';
+  el('mpInfo').innerHTML=info;
+  el('mpPlayers').textContent=NET.lobby&&NET.lobby.length&&role!=='none'?'Joueurs : '+NET.lobby.map(p=>p.name).join(' · '):'';
+  el('mpStart').style.display=role==='host'&&!NET.started?'':'none'; el('mpLeave').style.display=role!=='none'&&!NET.started?'':'none';
+  el('playBtn').style.display=role==='none'?'':'none'; el('mpHost').disabled=el('mpJoin').disabled=role!=='none';
+}
+function bindMp(){
+  const el=id=>document.getElementById(id);
+  NET.onLobby=renderMp; NET.onEnd=txt=>{ showMenu(); NET.status=txt; renderMp(); };
+  el('mpHost').onclick=()=>{ netHost(el('mpLocal').checked); renderMp(); };
+  el('mpJoin').onclick=()=>{ const c=el('mpCode').value.trim(); if(!c){ NET.status='Entre le code du salon.'; renderMp(); return; } netJoin(c,el('mpLocal').checked); renderMp(); };
+  el('mpStart').onclick=()=>netHostStart();
+  el('mpLeave').onclick=()=>{ netLeave(false); renderMp(); };
+  renderMp();
 }
 function saveOpts(){ try{localStorage.setItem('pirates_opts',JSON.stringify(game.opts));}catch(e){} }
 function renderOpts(){
@@ -87,7 +104,7 @@ let hudN=0, last=performance.now(), shopT=0;
 function frame(now){
   const dt=Math.min(.05,(now-last)/1000); last=now;
   if(game.state!=='menu'){
-    update(dt); mouse.clicked=false;
+    if(NETCLIENT) netClientFrame(dt); else { update(dt); mouse.clicked=false; if(NETON) netHostTick(dt); }
     shopT+=dt; if(shopOpen&&shopT>.4){shopT=0;renderShop();}
   } else { game.t+=dt; updateFx(dt); }
   if(game.state==='menu') renderPreview(game.t);
@@ -101,7 +118,7 @@ function boot(){
   for(const k of Object.keys(EVENTS)) if(game.opts.ev[k]===undefined) game.opts.ev[k]=1;
   if(!MAPS[game.opts.map]) game.opts.map='classic'; if(!MODES[game.opts.mode]) game.opts.mode='solo'; renderOpts();
   try{ const c=JSON.parse(localStorage.getItem('pirates_char')||'null'); if(c){ if(CLASSES[c.cls]) game.cls=c.cls; if(c.look) game.look=lookOf(c.look); if(typeof c.pname==='string') game.pname=c.pname; } }catch(e){}
-  renderChar(); initPreview();
+  renderChar(); initPreview(); bindMp();
   let d0='normal'; try{ d0=localStorage.getItem('pirates_diff')||'normal'; }catch(e){} selectDiff(DIFFS[d0]?d0:'normal');
   document.getElementById('playBtn').onclick=()=>{audioInit();document.getElementById('start').classList.add('hidden');newGame();};
   newGame(); game.state='menu';

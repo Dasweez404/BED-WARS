@@ -192,6 +192,8 @@ function makeEnt(team,isBot,name){
     root:0,flagBuff:0,lastSafe:null,lastSafeT:0,bubble:0,cloak:0,haste:0,springT:0,frozen:0,slip:0,sdx:0,sdy:0,squash:0,muzzle:0,stepPh:0,stepT:0,burn:0,
     lastBy:null,lastByT:0,sinceHurt:99,ai:null,hook:null,aegis:0,slot:0,bar:[],pack:[],cls:'matelot',look:null};
 }
+function makeBotAI(){ return {mode:'home',t:0,leaveAt:rnd(getD().leave[0],getD().leave[1]),buyT:rnd(0,1),goal:null,wait:0,target:-1,lastX:0,lastY:0,stuckT:0,jig:0,jx:0,jy:0,react:0,foe:null,likes:new Set(BOT_OPTIONAL.filter(()=>Math.random()<getD().likeP))}; }
+let NETSLOTS=null;
 function newGame(){
   floorT=new Uint8Array(W*H); wallT=new Uint8Array(W*H); hpF=new Float32Array(W*H); hpW=new Float32Array(W*H);
   ownF=new Int8Array(W*H).fill(-1); ownW=new Int8Array(W*H).fill(-1); region=new Int8Array(W*H).fill(-1); pop=new Float32Array(W*H);
@@ -217,7 +219,7 @@ function newGame(){
     const col=['','Rouge','Vert','Jaune'][i];
     const ent=makeEnt(i,i!==0,i===0?'Toi':'Cap. '+col); td.ent=ent; td.members=[ent]; ents.push(ent);
     if(DUO){ const m=makeEnt(i,true,i===0?'Matelot':'Second '+col); m.slot=1; m.up=ent.up; td.members.push(m); ents.push(m); }
-    for(const m of td.members){ if(m.isBot) m.ai={mode:'home',t:0,leaveAt:rnd(getD().leave[0],getD().leave[1]),buyT:rnd(0,1),goal:null,wait:0,target:-1,lastX:0,lastY:0,stuckT:0,jig:0,jx:0,jy:0,react:0,foe:null,likes:new Set(BOT_OPTIONAL.filter(()=>Math.random()<getD().likeP))}; }
+    for(const m of td.members){ if(m.isBot) m.ai=makeBotAI(); }
     const U=()=>td.ent.up;
     spawners.push({x:td.padTile[0],y:td.padTile[1],kind:'base',team:i,types:{
       bronze:{t:0,stock:0,cap:Infinity,int:()=>FB_INT[U().fb]*(td.ent.isBot?getD().income:1)},
@@ -225,7 +227,9 @@ function newGame(){
       gold:{t:0,stock:0,cap:Infinity,int:()=>GOLD_INT[U().gold]}}});
   });
   player=ents[0]; resetEvents(); makeRoster();
-  for(const e of ents){ if(e===player){ e.cls=CLASSES[game.cls]?game.cls:'matelot'; e.look=Object.assign({},game.look); e.name=(game.pname||'Toi').slice(0,14); } else { e.cls=CLS_IDS[Math.floor(Math.random()*CLS_IDS.length)]; e.look=randomLook(); } }
+  for(const e of ents){ if(e===player){ e.cls=CLASSES[game.cls]?game.cls:'matelot'; e.look=Object.assign({},game.look); e.name=(game.pname||'Toi').slice(0,14); } else { e.cls=CLS_IDS[Math.floor(Math.random()*CLS_IDS.length)]; e.look=randomLook(); }
+    const rs=NETSLOTS&&e.slot===0&&e!==player?NETSLOTS[e.team]:null;
+    if(rs){ e.remote=true; e.isBot=false; e.ai=null; e.name=String(rs.name||'Pirate').slice(0,14); e.cls=CLASSES[rs.cls]?rs.cls:'matelot'; e.look=lookOf(rs.look); e.inp={ix:0,iy:0,wx:e.x,wy:e.y,down:false,clicked:false,sel:'sword'}; } }
   const SR=(OPT_START[O.start]||OPT_START[0]).r; for(const e of ents) for(const k in SR) e.res[k]+=SR[k];
   ents.forEach(e=>{ applyClass(e); spawnEnt(e); }); syncBar(player);
   game.t=0; game.win=false; game.state='play'; game.hurtFx=0;
@@ -331,6 +335,11 @@ function die(e,by,sea){
 const teamElim=t=>TD[t].members.every(m=>m.elim);
 function checkOver(){
   if(game.state!=='play') return;
+  if(typeof NETON!=='undefined'&&NETON){ // en ligne : la partie s'arrête quand il ne reste qu'un équipage, ou plus aucun humain
+    const alive=TD.filter(t=>!teamElim(t.id)), humans=ents.filter(e=>(e===player||e.remote)&&!e.elim);
+    if(alive.length<=1||!humans.length){ game.state='over'; game.winTeam=alive.length===1?alive[0].id:-1; game.win=game.winTeam===player.team; }
+    return;
+  }
   if(teamElim(player.team)){game.state='over';game.win=false;return;}
   if(TD.every(t=>t.id===player.team||teamElim(t.id))){game.state='over';game.win=true;}
 }
@@ -848,6 +857,7 @@ shopEl.addEventListener('mousedown',ev=>{
   if(t.dataset.close) toggleShop(false);
   else if(t.dataset.tab){shopTab=t.dataset.tab;renderShop();}
   else if(t.dataset.buy){
+    if(typeof NETCLIENT!=='undefined'&&NETCLIENT){ netSend({t:'buy',id:t.dataset.buy}); sfx('buy'); renderShop(); return; }
     if(!buy(player,t.dataset.buy)) sfx('fail'); else { sfx('buy'); ring(player.x,player.y,T*1.2,'#fde68a',.35); burst(player.x,player.y-10,'#fde68a',10,120,.5,3); floatTxt(player.x,player.y-40,'Acheté !','#fde68a',15); }
     renderShop();
   }
@@ -1149,6 +1159,7 @@ function update(dt){
     for(const e of ents){
       if(e.alive){
         if(e===player){ if(game.state==='play') playerControl(e,dt); else {e.ix=e.iy=0;} }
+        else if(e.remote){ if(game.state==='play'){ syncBar(e); const q=e.inp; if(!e.bar.includes(q.sel)) q.sel='sword'; controlEnt(e,dt,q); q.clicked=false; } else {e.ix=e.iy=0;} }
         else if(e.isBot) botThink(e,dt);
       }
       updateEnt(e,dt);
@@ -1187,10 +1198,11 @@ function syncBar(e){
     if(e.bar.length<BAR_MAX) e.bar.push(it.id); else { e.pack.push(it.id); if(e===player) msg(`Barre pleine ! ${it.n} est en réserve (Tab : échanger)`,'#fde68a'); } }
   while(e.bar.length<BAR_MAX&&e.pack.length) e.bar.push(e.pack.shift());
 }
-function swapPack(e){
+function swapPack(e,sel){
+  sel=sel||selId; const remote=e!==player;
   if(!e.pack.length){ floatTxt(e.x,e.y-40,'Rien en réserve','#cbd5e1',13); return; }
-  const i=e.bar.indexOf(selId); if(i<0||PROTECT.includes(selId)){ floatTxt(e.x,e.y-40,'Sélectionne l\'objet à remplacer','#fde68a',13); return; }
-  const nid=e.pack.shift(); e.pack.push(selId); e.bar[i]=nid; setSel(nid); sfx('tick');
+  const i=e.bar.indexOf(sel); if(i<0||PROTECT.includes(sel)){ floatTxt(e.x,e.y-40,'Sélectionne l\'objet à remplacer','#fde68a',13); return; }
+  const nid=e.pack.shift(); e.pack.push(sel); e.bar[i]=nid; if(remote) e.inp.sel=nid; else setSel(nid); sfx('tick');
 }
 const hotList=e=>e.bar.map(id=>ITEMMAP[id]);
 function curWorld(){return [aim.x,aim.y];}
@@ -1198,11 +1210,15 @@ function setSel(id){ if(id!==selId){selId=id;selAnim=1;} }
 function playerControl(e,dt){
   const up=keys.KeyW||keys['k:z']||keys.ArrowUp, dn=keys.KeyS||keys['k:s']||keys.ArrowDown,
         lf=keys.KeyA||keys['k:q']||keys.ArrowLeft, rt=keys.KeyD||keys['k:d']||keys.ArrowRight;
-  let ix=(rt?1:0)-(lf?1:0), iy=(dn?1:0)-(up?1:0); const m=Math.hypot(ix,iy)||1; e.ix=ix/m; e.iy=iy/m;
-  const [wx,wy]=curWorld(); if(e.slip<=0) e.ang=Math.atan2(wy-e.y,wx-e.x);
-  e.held=selId;
-  if(!(mouse.down||mouse.clicked)||e.frozen>0) return;
-  const id=selId, click=mouse.clicked;
+  const [wx,wy]=curWorld();
+  controlEnt(e,dt,{ix:(rt?1:0)-(lf?1:0),iy:(dn?1:0)-(up?1:0),wx,wy,down:mouse.down,clicked:mouse.clicked,sel:selId});
+}
+function controlEnt(e,dt,inp){ // commandes d'un pirate humain (local ou distant)
+  let ix=inp.ix, iy=inp.iy; const m=Math.hypot(ix,iy)||1; e.ix=ix/m; e.iy=iy/m;
+  const wx=inp.wx, wy=inp.wy; if(e.slip<=0) e.ang=Math.atan2(wy-e.y,wx-e.x);
+  e.held=inp.sel;
+  if(!(inp.down||inp.clicked)||e.frozen>0) return;
+  const id=inp.sel, click=inp.clicked;
   switch(id){
     case 'block':{const t=placeTarget(e,wx,wy); if(t) doPlace(e,t[0],t[1]); break;}
     case 'pick':{const h=findMine(e,e.ang,3.1*T,wx,wy); doMine(e,h); break;}
