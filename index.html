@@ -3,41 +3,41 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Moutons des nuages — Bed Wars 3D</title>
+<title>Pirates & Trésors — Bed Wars 3D</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Lilita+One&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Pirata+One&family=Lilita+One&display=swap" rel="stylesheet">
 <style>
-  html,body{margin:0;height:100%;background:#6fb2ff;overflow:hidden;font-family:'Fredoka',system-ui,Segoe UI,Roboto,sans-serif;color:#eef4ff;user-select:none}
+  html,body{margin:0;height:100%;background:#2a78b0;overflow:hidden;font-family:'Fredoka',system-ui,Segoe UI,Roboto,sans-serif;color:#fff6e0;user-select:none}
   canvas{position:fixed;left:0;top:0;display:block}
   #ui{cursor:none;z-index:2}
   body.shop #ui{cursor:default}
   .hidden{display:none!important}
-  #start{position:fixed;inset:0;background:linear-gradient(180deg,rgba(40,80,160,.35),rgba(255,255,255,.18));backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;z-index:10}
-  #start .box{max-width:680px;padding:28px 36px;background:linear-gradient(160deg,#2a4a9aee,#16295eee);border:3px solid #bcd6ff;border-radius:26px;box-shadow:0 20px 70px #0a1a4acc,0 0 0 6px #ffffff22}
-  #start h1{margin:0 0 6px;font-size:50px;letter-spacing:1px;font-family:'Lilita One',system-ui,sans-serif;font-weight:400;text-shadow:0 4px 0 #0a1a4a99}
-  #start h1 span{color:#ffe27a}
-  #start p,#start li{font-size:15px;line-height:1.5;color:#dbe8ff}
+  #start{position:fixed;inset:0;background:linear-gradient(180deg,rgba(10,40,70,.45),rgba(255,200,120,.2));backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;z-index:10}
+  #start .box{max-width:690px;padding:28px 36px;background:linear-gradient(160deg,#5b3a22f2,#2e1c10f2);border:4px solid #e2b14f;border-radius:20px;box-shadow:0 20px 70px #04101ccc,0 0 0 6px #00000033,inset 0 0 40px #00000055}
+  #start h1{margin:0 0 6px;font-size:58px;letter-spacing:1px;font-family:'Pirata One','Lilita One',serif;font-weight:400;color:#ffe9b0;text-shadow:0 4px 0 #000a}
+  #start h1 span{color:#ffb84a}
+  #start p,#start li{font-size:15px;line-height:1.5;color:#f4e4c4}
   #start ul{padding-left:20px;margin:8px 0 16px}
   #start b{color:#fff}
-  button.big{font-family:'Lilita One',system-ui,sans-serif;background:#ffd24a;color:#4a2e00;border:0;border-radius:16px;padding:12px 34px;font-size:22px;cursor:pointer;box-shadow:0 6px 0 #c28a00,0 12px 24px #0a1a4a88;transition:transform .1s}
+  button.big{font-family:'Pirata One','Lilita One',serif;background:#e2b14f;color:#3a2000;border:0;border-radius:12px;padding:10px 38px;font-size:28px;cursor:pointer;box-shadow:0 6px 0 #9a6b14,0 12px 24px #0008;transition:transform .1s}
   button.big:hover{transform:translateY(-2px)}
-  button.big:active{transform:translateY(4px);box-shadow:0 2px 0 #c28a00}
-  #shop{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(800px,96vw);max-height:80vh;overflow:auto;background:linear-gradient(170deg,#2a4390f4,#151f4af4);border:3px solid #bcd6ff;border-radius:22px;padding:16px;z-index:5;box-shadow:0 20px 70px #0a1a4acc;animation:pop .15s ease-out}
+  button.big:active{transform:translateY(4px);box-shadow:0 2px 0 #9a6b14}
+  #shop{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(820px,96vw);max-height:80vh;overflow:auto;background:linear-gradient(170deg,#5a3a22f6,#2a190ef6);border:4px solid #e2b14f;border-radius:18px;padding:16px;z-index:5;box-shadow:0 20px 70px #000c,inset 0 0 40px #00000055;animation:pop .15s ease-out}
   @keyframes pop{from{transform:translate(-50%,-48%) scale(.94);opacity:0}to{transform:translate(-50%,-50%) scale(1);opacity:1}}
   #shop .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px}
-  #shop h2{margin:0;font-size:28px;font-family:'Lilita One',system-ui,sans-serif;font-weight:400;letter-spacing:1px}
+  #shop h2{margin:0;font-size:34px;font-family:'Pirata One','Lilita One',serif;font-weight:400;letter-spacing:1px;color:#ffe9b0}
   #shop .tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
-  #shop .tab{padding:6px 14px;border-radius:12px;background:#2d3f86;cursor:pointer;font-size:15px;font-weight:600}
-  #shop .tab:hover{background:#3a51a8}
-  #shop .tab.on{background:#ffd24a;color:#4a2e00}
-  #shop .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:9px}
-  #shop .item{background:linear-gradient(160deg,#33489a,#1d2a66);border:2px solid #4a62b8;border-left:5px solid #4a62b8;border-radius:14px;padding:9px 11px;cursor:pointer;transition:transform .08s;display:grid;grid-template-columns:36px 1fr;column-gap:9px;align-items:center}
+  #shop .tab{padding:6px 14px;border-radius:10px;background:#4a2f1b;border:2px solid #7a5230;cursor:pointer;font-size:15px;font-weight:600}
+  #shop .tab:hover{background:#5d3b22}
+  #shop .tab.on{background:#e2b14f;color:#3a2000;border-color:#ffe08a}
+  #shop .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:9px}
+  #shop .item{background:linear-gradient(160deg,#6b4527,#3d2614);border:2px solid #8a5f36;border-left:5px solid #8a5f36;border-radius:12px;padding:9px 11px;cursor:pointer;transition:transform .08s;display:grid;grid-template-columns:36px 1fr;column-gap:9px;align-items:center}
   #shop .item .ic{font-size:28px;grid-row:1/4;text-align:center;filter:drop-shadow(0 2px 3px #0008)}
-  #shop .item:hover{border-color:#ffe27a;transform:translateY(-2px)}
+  #shop .item:hover{border-color:#ffe08a;transform:translateY(-2px)}
   #shop .item:active{transform:scale(.97)}
   #shop .item.no{opacity:.5;cursor:not-allowed}
-  #shop .item .n{font-weight:700;font-size:15px}
-  #shop .item .d{font-size:12px;color:#b9cdf6;margin:2px 0 4px;line-height:1.3}
+  #shop .item .n{font-weight:700;font-size:15px;color:#fff3d6}
+  #shop .item .d{font-size:12px;color:#e6cfa5;margin:2px 0 4px;line-height:1.3}
   #shop .item .c{font-size:14px;font-weight:700}
   #shop .x{cursor:pointer;font-size:22px;padding:0 8px}
   .ri{height:16px;vertical-align:-3px}
@@ -50,16 +50,16 @@
 <div id="shop" class="hidden"></div>
 <div id="start">
   <div class="box">
-    <h1>MOUTONS <span>DES NUAGES</span></h1>
-    <p>4 îles-nuages, 4 équipes de moutons : toi (<b style="color:#8fc2ff">Bleus</b>, au sud) contre 3 bots. Détruis leur <b>mouton ultime</b> puis élimine-les. Garde le tien en vie pour pouvoir réapparaître !</p>
+    <h1>PIRATES <span>& TRÉSORS</span></h1>
+    <p>4 îles, 4 équipages, un galion au milieu des flots : toi (<b style="color:#8fc2ff">Bleus</b>, au sud) contre 3 capitaines bots. Pille leur <b>coffre au trésor</b> puis coule leurs équipages. Garde le tien en vie pour pouvoir réapparaître !</p>
     <ul>
       <li><b>Z Q S D</b> : bouger · <b>Espace</b> : sauter · <b>Souris</b> : viser · <b>Clic gauche</b> : utiliser l'objet</li>
-      <li>Munitions <b>illimitées</b> : chaque arme a un chargeur, un temps de recharge (<b>R</b>) et une dispersion qui lui est propre.</li>
-      <li><b>Molette</b> ou <b>1-9</b> : changer d'objet · <b>C</b> / clic droit : changer de bloc · <b>E</b> : boutique (à ta base)</li>
-      <li>Blocs : sur le vide = pont, sur le sol = mur. Onglet <b>Défense</b> : tourelles, moutons gardiens, murs, réparation…</li>
-      <li>Bronze/argent à ta base, <b>or</b> au centre, <b>diamants</b> sur les îlots en diagonale. Tomber dans le vide = mort.</li>
+      <li>Munitions <b>illimitées</b> : chaque arme a un chargeur, un temps de recharge (<b>R</b>) et une dispersion propres.</li>
+      <li><b>Molette</b> ou <b>1-9</b> : changer d'objet · <b>C</b> / clic droit : changer de bloc · <b>E</b> : boutique (sur ton île) · <b>G</b> : graphismes</li>
+      <li>Blocs : sur la mer = passerelle, sur le sol = palissade. Onglet <b>Défense</b> : canons, matelots gardiens, filets, pavillon noir, bouée…</li>
+      <li>Bronze/argent sur ton île, <b>or</b> sur le galion, <b>diamants</b> sur les îlots. Tomber à la mer = mort (sauf bouée de sauvetage).</li>
     </ul>
-    <button class="big" id="playBtn">Jouer</button>
+    <button class="big" id="playBtn">À l'abordage !</button>
   </div>
 </div>
 <script src="js/three.min.js"></script>

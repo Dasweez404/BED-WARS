@@ -14,41 +14,41 @@ const TEAMS=[
   {name:'Jaunes',col:'#eab308',dark:'#a16207',light:'#fde047',bx:76,by:50,dir:[-1,0],g:['#ecd98a','#e2cf80'],cl:'#9a8a3f'}
 ];
 const REGCOL={4:{g:['#d9c58c','#cfba80'],cl:'#8a7a48'},5:{g:['#8de0e6','#7fd6dd'],cl:'#3f8f96'}};
-const SWORDS=[{n:'Épée en bois',d:4,c:'#b98a52'},{n:'Épée en pierre',d:6,c:'#a7afb8'},{n:'Épée en fer',d:8,c:'#e5e7eb'},{n:'Épée en diamant',d:11,c:'#67e8f9'}];
-const PICKS=[{n:'Pioche en bois',d:2},{n:'Pioche en pierre',d:4},{n:'Pioche en fer',d:7},{n:'Pioche en diamant',d:12}];
+const SWORDS=[{n:'Coutelas rouillé',d:4,c:'#b98a52'},{n:'Sabre d\'abordage',d:6,c:'#a7afb8'},{n:'Cimeterre',d:8,c:'#e5e7eb'},{n:'Sabre du capitaine',d:11,c:'#67e8f9'}];
+const PICKS=[{n:'Pioche rouillée',d:2},{n:'Pioche de forban',d:4},{n:'Pioche en fer noir',d:7},{n:'Pioche du capitaine',d:12}];
 const SWORD_COST=[null,{bronze:40},{silver:10},{gold:3}];
 const PICK_COST=[null,{bronze:30},{silver:12},{gold:4}];
 const FB_INT=[.8,.55,.4,.3], FS_INT=[4,3,2.3,1.7], GOLD_INT=[Infinity,12,7];
 // catalogue de la barre d'objets : seuls les objets possédés apparaissent
 const ITEMS=[
-  {id:'block',n:'Blocs',ico:'🧱',col:'#fff'},{id:'pick',n:'Pioche',ico:'⛏️',col:'#fde047'},{id:'sword',n:'Épée',ico:'🗡️',col:'#e5e7eb'},
-  {id:'glove',n:'Gant de boxe géant',ico:'🥊',col:'#ef4444'},{id:'hammer',n:'Marteau sismique',ico:'🔨',col:'#9ca3af'},{id:'baa',n:'Cri du mouton',ico:'📣',col:'#f9a8d4'},
-  {id:'bow',n:'Arc',ico:'🏹',col:'#d6b27a'},{id:'gun',n:'Pistolet',ico:'🔫',col:'#fde047'},{id:'smg',n:'Mitraillette',ico:'💢',col:'#fde047'},{id:'shotgun',n:'Fusil à pompe',ico:'💥',col:'#fb923c'},
-  {id:'sniper',n:'Sniper',ico:'🎯',col:'#a5f3fc'},{id:'rocket',n:'Lance-roquettes',ico:'🧨',col:'#f87171'},{id:'woolgun',n:'Lance-laine',ico:'🧶',col:'#f9a8d4'},
-  {id:'boomerang',n:'Boomerang',ico:'↩️',col:'#fbbf24'},{id:'bubble',n:'Canon à bulles',ico:'🧼',col:'#bfdbfe'},{id:'ice',n:'Pistolet de glace',ico:'❄️',col:'#7dd3fc'},{id:'flame',n:'Lance-flammes',ico:'🔥',col:'#fb923c'},
-  {id:'grap',n:'Grappin',ico:'🪝',col:'#fde68a'},{id:'jet',n:'Jetpack',ico:'🎒',col:'#fb923c'},{id:'dash',n:'Dash',ico:'💨',col:'#e0f2fe'},
-  {id:'trampo',n:'Trampoline',ico:'🦘',col:'#f472b6'},{id:'tp',n:'Perle de téléportation',ico:'🔮',col:'#c084fc'},{id:'bridge',n:'Pont éclair',ico:'🌉',col:'#fde047'},
-  {id:'springs',n:'Bottes à ressort',ico:'👟',col:'#4ade80'},{id:'cloak',n:'Cape d\'invisibilité',ico:'👻',col:'#e5e7eb'},{id:'haste',n:'Potion de vitesse',ico:'🧪',col:'#38bdf8'},
-  {id:'storm',n:'Foudre',ico:'⚡',col:'#fde047'},{id:'cluster',n:'Bombe à fragmentation',ico:'🎆',col:'#16a34a'},{id:'bomb',n:'Bombe',ico:'💣',col:'#374151'},{id:'repel',n:'Bombe repoussoir',ico:'🌀',col:'#a78bfa'},
-  {id:'vortex',n:'Trou noir',ico:'🕳️',col:'#7c3aed'},{id:'chicken',n:'Mouton kamikaze',ico:'🐑',col:'#fff'},{id:'heal',n:'Pomme de soin',ico:'🍎',col:'#ef4444'},
-  {id:'turret',n:'Tourelle',ico:'🗼',col:'#94a3b8'},{id:'turret2',n:'Tourelle givrante',ico:'🧊',col:'#7dd3fc'},{id:'wallgad',n:'Mur éclair',ico:'🏰',col:'#b98a52'},
-  {id:'mine',n:'Mine',ico:'⚙️',col:'#9ca3af'},{id:'banana',n:'Peau de banane',ico:'🍌',col:'#fde047'},{id:'guard',n:'Mouton gardien',ico:'🐏',col:'#fff'},
-  {id:'repair',n:'Réparation du bloc',ico:'🔧',col:'#86efac'},{id:'shield',n:'Champ de force',ico:'🛡️',col:'#60a5fa'}
+  {id:'block',n:'Blocs',ico:'🧱',col:'#fff'},{id:'pick',n:'Pioche',ico:'⛏️',col:'#fde047'},{id:'sword',n:'Sabre',ico:'🗡️',col:'#e5e7eb'},
+  {id:'glove',n:'Crochet de fer',ico:'🦾',col:'#9ca3af'},{id:'hammer',n:'Masse de forgeron',ico:'🔨',col:'#9ca3af'},{id:'baa',n:'Corne de brume',ico:'📯',col:'#fde68a'},
+  {id:'bow',n:'Arbalète',ico:'🏹',col:'#d6b27a'},{id:'gun',n:'Pistolet à silex',ico:'🔫',col:'#fde047'},{id:'smg',n:'Pistolets jumeaux',ico:'⚡',col:'#fde047'},{id:'shotgun',n:'Tromblon',ico:'💥',col:'#fb923c'},
+  {id:'sniper',n:'Mousquet long',ico:'🎯',col:'#a5f3fc'},{id:'rocket',n:'Canon de poche',ico:'🧨',col:'#f87171'},{id:'woolgun',n:'Lance-filet',ico:'🕸️',col:'#d6dde6'},
+  {id:'boomerang',n:'Hache de lancer',ico:'🪓',col:'#fbbf24'},{id:'bubble',n:'Lance-écume',ico:'🧼',col:'#bfdbfe'},{id:'ice',n:'Harpon givré',ico:'❄️',col:'#7dd3fc'},{id:'flame',n:'Torche cracheuse',ico:'🔥',col:'#fb923c'},
+  {id:'grap',n:'Grappin d\'abordage',ico:'🪝',col:'#fde68a'},{id:'jet',n:'Perroquet porteur',ico:'🦜',col:'#4ade80'},{id:'dash',n:'Élan du flibustier',ico:'💨',col:'#e0f2fe'},
+  {id:'trampo',n:'Hamac rebondissant',ico:'🛏️',col:'#f472b6'},{id:'tp',n:'Boussole ensorcelée',ico:'🧭',col:'#c084fc'},{id:'bridge',n:'Planche d\'abordage',ico:'🪵',col:'#b98a52'},
+  {id:'springs',n:'Bottes de mousse',ico:'👢',col:'#4ade80'},{id:'cloak',n:'Brume magique',ico:'🌫️',col:'#e5e7eb'},{id:'haste',n:'Rhum de contrebande',ico:'🍾',col:'#38bdf8'},
+  {id:'storm',n:'Orage',ico:'🌩️',col:'#fde047'},{id:'barrage',n:'Salve de canons',ico:'🎇',col:'#f87171'},{id:'cluster',n:'Baril à grappes',ico:'🎆',col:'#16a34a'},{id:'bomb',n:'Baril de poudre',ico:'🛢️',col:'#92400e'},{id:'repel',n:'Vague scélérate',ico:'🌊',col:'#38bdf8'},
+  {id:'vortex',n:'Maelström',ico:'🌀',col:'#7c3aed'},{id:'kraken',n:'Tentacule du kraken',ico:'🐙',col:'#34d399'},{id:'anchor',n:'Ancre',ico:'⚓',col:'#9ca3af'},{id:'chicken',n:'Crabe kamikaze',ico:'🦀',col:'#ef4444'},{id:'heal',n:'Ration de bord',ico:'🍖',col:'#ef4444'},
+  {id:'turret',n:'Canon de pont',ico:'🗼',col:'#94a3b8'},{id:'turret2',n:'Canon givrant',ico:'🧊',col:'#7dd3fc'},{id:'wallgad',n:'Palissade',ico:'🚧',col:'#b98a52'},
+  {id:'mine',n:'Mine marine',ico:'🧿',col:'#9ca3af'},{id:'banana',n:'Peau de banane',ico:'🍌',col:'#fde047'},{id:'net',n:'Filet piégé',ico:'🥅',col:'#d6dde6'},{id:'guard',n:'Matelots gardiens',ico:'💀',col:'#fff'},
+  {id:'repair',n:'Réparation du coffre',ico:'🔧',col:'#86efac'},{id:'flag',n:'Pavillon noir',ico:'🏴',col:'#111827'},{id:'buoy',n:'Bouée de sauvetage',ico:'🛟',col:'#fb923c'},{id:'shield',n:'Bouclier de brume',ico:'🛡️',col:'#60a5fa'}
 ];
 const ITEMMAP={}; ITEMS.forEach(i=>ITEMMAP[i.id]=i);
 const GUNS={
   // mag = chargeur, cd = cadence (s entre deux tirs), reload = rechargement (s), spread = dispersion de base, bloom = dispersion ajoutée à chaque tir, bmax = dispersion max
-  bow:{n:'Arc',mag:1,cd:.1,reload:.85,sp:620,life:1.4,dmg:5,kb:217,col:'#f1f5f9',pel:1,spread:0,bloom:0,bmax:0,kind:'arrow',rec:0},
-  gun:{n:'Pistolet',mag:12,cd:.2,reload:1.1,sp:820,life:.7,dmg:3,kb:140,col:'#fde047',pel:1,spread:.02,bloom:.014,bmax:.1,rec:55},
-  smg:{n:'Mitraillette',mag:30,cd:.075,reload:1.7,sp:800,life:.6,dmg:1.5,kb:60,col:'#fde047',pel:1,spread:.045,bloom:.02,bmax:.24,rec:20},
-  shotgun:{n:'Fusil à pompe',mag:6,cd:.85,reload:2.3,sp:720,life:.36,dmg:2.2,kb:230,col:'#fb923c',pel:8,spread:.27,bloom:0,bmax:0,rec:260},
-  sniper:{n:'Sniper',mag:4,cd:1.3,reload:2.5,sp:1700,life:.9,dmg:11,kb:520,col:'#a5f3fc',pel:1,spread:0,bloom:0,bmax:0,pierce:true,rec:200,moveSpread:.1},
-  rocket:{n:'Lance-roquettes',mag:1,cd:.1,reload:2.2,sp:430,life:2.2,dmg:0,kb:0,col:'#f87171',pel:1,spread:0,bloom:0,bmax:0,kind:'rocket',rec:300},
-  woolgun:{n:'Lance-laine',mag:8,cd:.34,reload:1.8,sp:560,life:.9,dmg:1.5,kb:150,col:'#f9a8d4',pel:1,spread:.06,bloom:.02,bmax:.16,kind:'wool',rec:40},
-  boomerang:{n:'Boomerang',mag:1,cd:.1,reload:1.1,sp:560,life:1.3,dmg:4,kb:200,col:'#fbbf24',pel:1,spread:0,bloom:0,bmax:0,kind:'boomerang',pierce:true,rec:0},
-  bubble:{n:'Canon à bulles',mag:3,cd:.45,reload:2.4,sp:360,life:1.2,dmg:0,kb:0,col:'#bfdbfe',pel:1,spread:0,bloom:0,bmax:0,kind:'bubble',rec:30},
-  ice:{n:'Pistolet de glace',mag:5,cd:.4,reload:2,sp:600,life:.9,dmg:1,kb:0,col:'#7dd3fc',pel:1,spread:.02,bloom:0,bmax:0,kind:'ice',rec:40},
-  flame:{n:'Lance-flammes',mag:70,cd:.07,reload:2.6,sp:390,life:.32,dmg:1.1,kb:25,col:'#fb923c',pel:1,spread:.17,bloom:0,bmax:0,kind:'flame',rec:6}
+  bow:{n:'Arbalète',mag:1,cd:.1,reload:.85,sp:620,life:1.4,dmg:5,kb:217,col:'#f1f5f9',pel:1,spread:0,bloom:0,bmax:0,kind:'arrow',rec:0},
+  gun:{n:'Pistolet à silex',mag:12,cd:.2,reload:1.1,sp:820,life:.7,dmg:3,kb:140,col:'#fde047',pel:1,spread:.02,bloom:.014,bmax:.1,rec:55},
+  smg:{n:'Pistolets jumeaux',mag:30,cd:.075,reload:1.7,sp:800,life:.6,dmg:1.5,kb:60,col:'#fde047',pel:1,spread:.045,bloom:.02,bmax:.24,rec:20},
+  shotgun:{n:'Tromblon',mag:6,cd:.85,reload:2.3,sp:720,life:.36,dmg:2.2,kb:230,col:'#fb923c',pel:8,spread:.27,bloom:0,bmax:0,rec:260},
+  sniper:{n:'Mousquet long',mag:4,cd:1.3,reload:2.5,sp:1700,life:.9,dmg:11,kb:520,col:'#a5f3fc',pel:1,spread:0,bloom:0,bmax:0,pierce:true,rec:200,moveSpread:.1},
+  rocket:{n:'Canon de poche',mag:1,cd:.1,reload:2.2,sp:430,life:2.2,dmg:0,kb:0,col:'#f87171',pel:1,spread:0,bloom:0,bmax:0,kind:'rocket',rec:300},
+  woolgun:{n:'Lance-filet',mag:8,cd:.34,reload:1.8,sp:560,life:.9,dmg:1.5,kb:150,col:'#f9a8d4',pel:1,spread:.06,bloom:.02,bmax:.16,kind:'wool',rec:40},
+  boomerang:{n:'Hache de lancer',mag:1,cd:.1,reload:1.1,sp:560,life:1.3,dmg:4,kb:200,col:'#fbbf24',pel:1,spread:0,bloom:0,bmax:0,kind:'boomerang',pierce:true,rec:0},
+  bubble:{n:'Lance-écume',mag:3,cd:.45,reload:2.4,sp:360,life:1.2,dmg:0,kb:0,col:'#bfdbfe',pel:1,spread:0,bloom:0,bmax:0,kind:'bubble',rec:30},
+  ice:{n:'Harpon givré',mag:5,cd:.4,reload:2,sp:600,life:.9,dmg:1,kb:0,col:'#7dd3fc',pel:1,spread:.02,bloom:0,bmax:0,kind:'ice',rec:40},
+  flame:{n:'Torche cracheuse',mag:70,cd:.07,reload:2.6,sp:390,life:.32,dmg:1.1,kb:25,col:'#fb923c',pel:1,spread:.17,bloom:0,bmax:0,kind:'flame',rec:6}
 };
 const isGun=id=>!!GUNS[id];
 const hash=(x,y)=>(((x*73856093)^(y*19349663))>>>0);
@@ -114,6 +114,7 @@ function sfx(n,x,y){
     case 'fanfare':tone(523,.12,'square',.07);tone(659,.12,'square',.07,1,.1);tone(784,.2,'square',.07,1,.2);break;
     case 'alarm':tone(880,.12,'square',.09);tone(660,.12,'square',.09,1,.14);break;
     case 'ui':tone(700,.04,'triangle',.05);break;
+    case 'splash':noise(.35,.2*v,2200);tone(220,.3,'sine',.07*v,.4);break;
     case 'reload':tone(300,.05,'square',.05*v);tone(500,.07,'square',.05*v,1,.12);break;
     case 'baa':tone(380,.5,'sawtooth',.12*v,.7);tone(390,.5,'square',.05*v,.7);break;
     case 'woof':noise(.07,.1*v,1800);tone(260,.1,'triangle',.06*v,.5);break;
@@ -135,13 +136,18 @@ function island(cx,cy,r,cut,reg){
     if(Math.abs(dx)+Math.abs(dy)<=cut){ const i=idx(cx+dx,cy+dy); floorT[i]=1; region[i]=reg; }
   }
 }
+function ship(cx,cy){
+  ISLANDS.push({x:cx,y:cy,r:7,reg:4,ship:true});
+  for(let dy=-6;dy<=6;dy++){ const a=Math.abs(dy), hw=dy<0?(a<=3?3:a===4?2:a===5?1:0):(dy<=5?3:2);
+    for(let dx=-hw;dx<=hw;dx++){ const i=idx(cx+dx,cy+dy); floorT[i]=1; region[i]=4; } }
+}
 function makeEnt(team,isBot,name){
   return {team,isBot,name,x:0,y:0,z:0,vx:0,vy:0,vz:0,ix:0,iy:0,ang:0,hp:20,alive:false,elim:false,resp:0,inv:0,flash:0,
     res:{bronze:0,silver:0,gold:0,diamond:0},blocks:{2:8,3:0,4:0,5:0},bsel:2,pick:0,sword:0,ws:{},slow:0,
     grap:0,jet:0,bomb:0,repel:0,shield:0,own:{},am:{},held:'sword',
     up:{fb:0,fs:0,hp:0,sp:0,ar:0,gold:0,core:0},
     cd:{atk:0,mine:0,place:0,bow:0,gad:0},jetT:0,voidT:0,pull:null,grace:0,swing:0,swingMax:.2,kills:0,deaths:0,
-    bubble:0,cloak:0,haste:0,springT:0,frozen:0,slip:0,sdx:0,sdy:0,squash:0,muzzle:0,stepPh:0,stepT:0,burn:0,
+    root:0,flagBuff:0,lastSafe:null,lastSafeT:0,bubble:0,cloak:0,haste:0,springT:0,frozen:0,slip:0,sdx:0,sdy:0,squash:0,muzzle:0,stepPh:0,stepT:0,burn:0,
     lastBy:null,lastByT:0,sinceHurt:99,ai:null,hook:null};
 }
 function newGame(){
@@ -149,7 +155,7 @@ function newGame(){
   ownF=new Int8Array(W*H).fill(-1); ownW=new Int8Array(W*H).fill(-1); region=new Int8Array(W*H).fill(-1); pop=new Float32Array(W*H);
   TD=[];ents=[];spawners=[];projs=[];bombs=[];shields=[];hooks=[];parts=[];rings=[];floats=[];feed=[];traps=[];chickens=[];pearls=[];beams=[];guards=[];
   selId='block'; banner.t=0; ISLANDS=[];
-  island(CX,CY,4,6,4);
+  ship(CX,CY);
   for(const [sx,sy] of [[-1,-1],[1,-1],[-1,1],[1,1]]){
     const dx=CX+sx*20, dy=CY+sy*20; island(dx,dy,2,3,5);
     spawners.push({x:dx,y:dy,kind:'dia',team:-1,types:{diamond:{t:0,stock:0,cap:5,int:()=>20}}});
@@ -162,7 +168,7 @@ function newGame(){
     const td={id:i,...t,coreAlive:true,spawnTile:[t.bx+d[0]*3,t.by+d[1]*3],padTile:[t.bx+p[0]*3,t.by+p[1]*3],ent:null};
     TD.push(td);
     const ci=idx(t.bx,t.by); wallT[ci]=CORE; hpW[ci]=BHP[CORE]; ownW[ci]=i;
-    const ent=makeEnt(i,i!==0,i===0?'Toi':'Bot '+t.name); td.ent=ent; ents.push(ent);
+    const ent=makeEnt(i,i!==0,i===0?'Toi':'Cap. '+['','Rouge','Vert','Jaune'][i]); td.ent=ent; ents.push(ent);
     if(ent.isBot) ent.ai={mode:'home',t:0,leaveAt:rnd(45,70),buyT:rnd(0,1),goal:null,wait:0,target:-1,lastX:0,lastY:0,stuckT:0,jig:0,jx:0,jy:0,react:0,foe:null,likes:new Set(BOT_OPTIONAL.filter(()=>Math.random()<.7))};
     const U=()=>td.ent.up;
     spawners.push({x:td.padTile[0],y:td.padTile[1],kind:'base',team:i,types:{
@@ -174,7 +180,7 @@ function newGame(){
   ents.forEach(spawnEnt);
   game.t=0; game.win=false; game.state='play'; game.hurtFx=0;
   announce('C\'EST PARTI !','#fde68a');
-  msg('Protège ton mouton ultime. Espace pour sauter, E pour la boutique.', '#fff');
+  msg('Protège ton coffre au trésor. Espace pour sauter, E pour la boutique.', '#fff');
   if(typeof onNewGame==='function') onNewGame();
 }
 function spawnEnt(e){
@@ -188,7 +194,7 @@ function spawnEnt(e){
   if(e.ai){e.ai.mode='home'; e.ai.leaveAt=e.ai.t+rnd(12,22);}
 }
 const maxhp=e=>(e.isBot?16:20)+6*e.up.hp;
-const speedOf=e=>150*(1+.08*e.up.sp)*(e.jetT>0?1.3:1)*(e.isBot?.85:1)*(e.slip>0?1.35:1)*(e.haste>0?1.5:1)*(e.slow>0?.55:1);
+const speedOf=e=>150*(1+.08*e.up.sp)*(e.jetT>0?1.3:1)*(e.isBot?.85:1)*(e.slip>0?1.35:1)*(e.haste>0?1.5:1)*(e.slow>0?.55:1)*(e.flagBuff>0?1.2:1);
 function msg(txt,col){feed.push({txt,col:col||'#dbe4ff',t:7}); if(feed.length>7)feed.shift();}
 function announce(txt,col){banner.txt=txt;banner.col=col||'#fff';banner.t=banner.max;sfx('fanfare');}
 
@@ -245,8 +251,10 @@ function hurt(e,amount,by,kx,ky){
   }
   if(e.hp<=0) die(e,by);
 }
-function die(e,by){
+function splash(x,y){ burst(x,y,'#bfe9ff',22,230,.8,4); burst(x,y,'#ffffff',10,160,.6,3); ring(x,y,T*1.6,'#bfe9ff',.6,true); ring(x,y,T*2.6,'#ffffff',.8); sfx('splash',x,y); }
+function die(e,by,sea){
   if(!e.alive) return;
+  if(sea) splash(e.x,e.y);
   e.alive=false; e.deaths++; e.pull=null; e.hook=null;
   sfx('die',e.x,e.y); burst(e.x,e.y,TEAMS[e.team].col,22,230,.8,4); chunks(e.x,e.y,TEAMS[e.team].light,10); ring(e.x,e.y,T*1.6,'#fff',.4);
   const killer=by&&by!==e?by:null;
@@ -255,7 +263,7 @@ function die(e,by){
     for(const k in e.res){killer.res[k]+=e.res[k]; if(killer===player&&e.res[k]>0) floatTxt(e.x,e.y-40-k.length*0,'+'+e.res[k]+' '+RESNAME[k],RESCOL[k],15);}
     msg(`${killer.name} a éliminé ${e.name}`,TEAMS[killer.team].light);
     if(killer===player){ announce('ÉLIMINATION !','#fde68a'); flashScreen('#fff',.15); }
-  } else msg(`${e.name} est tombé dans le vide`,'#9aa7cf');
+  } else msg(`${e.name} est tombé à la mer`,'#9aa7cf');
   // mort hors de sa base : on perd tout son équipement (les améliorations de base sont conservées)
   if(!nearBase(e)){
     const had=Object.keys(e.own).length+Object.values(e.am).filter(v=>v>0).length+e.grap+e.jet+e.bomb+e.repel+e.shield+(e.pick>0?1:0)+(e.sword>0?1:0)+totalBlocks(e);
@@ -350,10 +358,10 @@ function damageTile(tx,ty,dmg,src,layer){
     if(t===CORE){
       const td=TD[ownW[i]]; td.coreAlive=false;
       burst(cx,cy,td.col,50,340,1.1,5); chunks(cx,cy,td.col,24); ring(cx,cy,T*4,td.col,.8); ring(cx,cy,T*6,'#fff',.6); shake=Math.max(shake,16);
-      msg(`Le mouton ultime des ${td.name} est détruit !`,td.light);
-      announce(`MOUTON DES ${td.name.toUpperCase()} DÉTRUIT !`,td.light); flashScreen(td.col,.3);
+      msg(`Le coffre des ${td.name} est détruit !`,td.light);
+      announce(`COFFRE DES ${td.name.toUpperCase()} DÉTRUIT !`,td.light); flashScreen(td.col,.3);
       if(td.ent===player) msg('Tu ne pourras plus réapparaître !','#ff7b7b');
-      else if(src===player) msg('Bien joué, tu as détruit un mouton ultime !','#fde68a');
+      else if(src===player) msg('Bien joué, tu as détruit un coffre au trésor !','#fde68a');
     } else { chunks(cx,cy,blockColor(t,Math.max(0,ownW[i]))[0],10); smoke(cx,cy,2,5,.6); }
     wallT[i]=0; ownW[i]=-1;
   }
@@ -453,7 +461,7 @@ function useGrapple(e){
   hooks.push(e.hook);
 }
 function jump(e,power){
-  if(e.bubble>0||e.z>groundH(e)+1||e.vz>0||e.pull||e.frozen>0) return;
+  if(e.bubble>0||e.root>0||e.z>groundH(e)+1||e.vz>0||e.pull||e.frozen>0) return;
   sfx('jump',e.x,e.y); e.vz=power||(e.springT>0?540:320); e.squash=-.5; burst(e.x,e.y+6-e.z,'#e5e7eb',6,70,.3,3);
 }
 function useGadget(e,id,wx,wy){
@@ -524,6 +532,23 @@ function useGadget(e,id,wx,wy){
     case 'cluster':{
       const dx=wx-e.x,dy=wy-e.y,d=Math.hypot(dx,dy)||1,m=Math.min(d,9*T);
       bombs.push({x:e.x,y:e.y,tx:e.x+dx/d*m,ty:e.y+dy/d*m,fuse:1.1,team:e.team,owner:e,kind:'cluster',h:20}); break;}
+    case 'flag': traps.push({kind:'flag',x:e.x,y:e.y,t:12,age:0,team:e.team,owner:e}); ring(e.x,e.y,T*4,'#111827',.5,true); ring(e.x,e.y,T*4,'#fde68a',.7); break;
+    case 'anchor':{
+      const dx=wx-e.x,dy=wy-e.y,d=Math.hypot(dx,dy)||1,m=Math.min(d,8*T);
+      bombs.push({x:e.x+dx/d*m,y:e.y+dy/d*m,tx:e.x+dx/d*m,ty:e.y+dy/d*m,fuse:.8,team:e.team,owner:e,kind:'anchor',drop:true,h:0}); break;}
+    case 'kraken':{
+      const dx=wx-e.x,dy=wy-e.y,d=Math.hypot(dx,dy)||1,m=Math.min(d,9*T), tx=e.x+dx/d*m, ty=e.y+dy/d*m;
+      if(fl(Math.floor(tx/T),Math.floor(ty/T))===0) return false;
+      traps.push({kind:'kraken',x:tx,y:ty,t:6.5,age:0,team:e.team,owner:e,cd:.9,slam:0}); ring(tx,ty,T*2,'#34d399',.5,true); break;}
+    case 'barrage':{
+      const dx=wx-e.x,dy=wy-e.y,d=Math.hypot(dx,dy)||1,m=Math.min(d,10*T), tx=e.x+dx/d*m, ty=e.y+dy/d*m;
+      for(let k=0;k<6;k++){ const x=tx+rnd(-2.4*T,2.4*T), y=ty+rnd(-2.4*T,2.4*T); bombs.push({x,y,tx:x,ty:y,fuse:.9+k*.3,team:e.team,owner:e,kind:'bomb',R:1.5*T,dm:7,bd:.75,shell:true,drop:true,h:0}); }
+      break;}
+    case 'net':{
+      const tx=Math.floor(wx/T),ty=Math.floor(wy/T);
+      if(fl(tx,ty)===0||wl(tx,ty)>0||Math.hypot((tx+.5)*T-e.x,(ty+.5)*T-e.y)>3.7*T) return false;
+      traps.push({kind:'net',x:(tx+.5)*T,y:(ty+.5)*T,t:40,age:0,team:e.team,owner:e}); break;}
+    case 'buoy': floatTxt(e.x,e.y-40,'Passif : te repêche en mer','#fb923c',14); return false;
     case 'heal':
       if(e.hp>=maxhp(e)-.5) return false;
       e.hp=Math.min(maxhp(e),e.hp+12); floatTxt(e.x,e.y-34,'+12 ♥','#4ade80',16);
@@ -533,8 +558,21 @@ function useGadget(e,id,wx,wy){
   }
   e.am[id]--; e.cd.gad=.5; sfx('gadget',e.x,e.y); return true;
 }
+function blastTiles(cx,cy,R,dmg,src,team){
+  for(let ty=Math.floor((cy-R)/T);ty<=Math.floor((cy+R)/T);ty++)for(let tx=Math.floor((cx-R)/T);tx<=Math.floor((cx+R)/T);tx++){
+    if(!inb(tx,ty)) continue; const d=Math.hypot((tx+.5)*T-cx,(ty+.5)*T-cy); if(d>R||protectedTile(tx,ty,team)) continue;
+    const i=idx(tx,ty), k=dmg*(1-d/(R*1.1));
+    if(wallT[i]>0){ if(wallT[i]===CORE&&ownW[i]===team) continue; damageTile(tx,ty,k,src,0); } else if(floorT[i]>=2) damageTile(tx,ty,k,src,1);
+  }
+}
 function explode(b){
   const cx=b.x,cy=b.y;
+  if(b.kind==='anchor'){
+    const R=1.8*T; sfx('boom',cx,cy); ring(cx,cy,R,'#94a3b8',.45,true); ring(cx,cy,R*1.4,'#e2e8f0',.5); burst(cx,cy,'#cbd5e1',22,260,.6,4); chunks(cx,cy,'#6b7280',10); shake=Math.max(shake,10);
+    blastTiles(cx,cy,R*.9,26,b.owner,b.team);
+    for(const o of ents){ if(!o.alive||(o.team===b.team&&o!==b.owner)) continue; const dx=o.x-cx,dy=o.y-cy,d=Math.hypot(dx,dy); if(d>R||inShield(o.x,o.y,o.team)) continue; if(o===b.owner) continue; hurt(o,6,b.owner,dx/(d||1)*300,dy/(d||1)*300); o.root=1.6; floatTxt(o.x,o.y-40,'ASSOMMÉ !','#e2e8f0',15); }
+    return;
+  }
   if(b.kind==='cluster'){
     sfx('boom',cx,cy); ring(cx,cy,T*1.5,'#86efac',.35,true); burst(cx,cy,'#86efac',16,260,.5,3);
     for(let k=0;k<6;k++){ const a=k*Math.PI/3+rnd(-.3,.3), d=rnd(1.6,2.8)*T;
@@ -612,64 +650,70 @@ function wallRing(e){
   }
 }
 const SHOP=[
-  mk('wool','Blocs',e=>({name:'Laine ×8',desc:'Faible résistance. Idéal pour les ponts.',cost:{bronze:6}}),e=>e.blocks[2]+=8),
-  mk('wood','Blocs',e=>({name:'Bois ×4',desc:'Résistance moyenne.',cost:{silver:4}}),e=>e.blocks[3]+=4),
-  mk('stone','Blocs',e=>({name:'Pierre ×4',desc:'Solide. Résiste à une bombe.',cost:{silver:8}}),e=>e.blocks[4]+=4),
+  mk('wool','Blocs',e=>({name:'Toile ×8',desc:'Voile de toile : faible résistance, idéal pour les passerelles.',cost:{bronze:6}}),e=>e.blocks[2]+=8),
+  mk('wood','Blocs',e=>({name:'Planches ×4',desc:'Résistance moyenne.',cost:{silver:4}}),e=>e.blocks[3]+=4),
+  mk('stone','Blocs',e=>({name:'Pierre de cale ×4',desc:'Solide. Résiste à une bombe.',cost:{silver:8}}),e=>e.blocks[4]+=4),
   mk('obs','Blocs',e=>({name:'Obsidienne ×2',desc:'Très solide : 2 bombes pour la casser.',cost:{gold:3}}),e=>e.blocks[5]+=2),
   mk('sword','Combat',e=>{
     const t=e.sword; if(t>=3) return {name:SWORDS[3].n,desc:'Niveau maximum',cost:{},ok:false,tag:'MAX'};
     return {name:SWORDS[t+1].n,desc:`Dégâts ${SWORDS[t+1].d} (actuel ${SWORDS[t].d})`,cost:SWORD_COST[t+1]};
   },e=>e.sword++),
-  mk('glove','Combat',e=>e.own.glove?{name:'Gant de boxe géant',desc:'Déjà possédé',cost:{},ok:false,tag:'OK'}:{name:'Gant de boxe géant',desc:'Dégâts faibles mais propulse l\'ennemi très loin (dans le vide !).',cost:{silver:8}},e=>{e.own.glove=true;}),
-  mk('hammer','Combat',e=>e.own.hammer?{name:'Marteau sismique',desc:'Déjà possédé',cost:{},ok:false,tag:'OK'}:{name:'Marteau sismique',desc:'Onde de choc : projette en l\'air, casse les blocs proches.',cost:{silver:14}},e=>{e.own.hammer=true;}),
-  mk('baa','Combat',e=>e.own.baa?{name:'Cri du mouton',desc:'Déjà possédé',cost:{},ok:false,tag:'OK'}:{name:'Cri du mouton',desc:'Onde sonore en cône : repousse les ennemis et dévie les tirs. Illimité.',cost:{silver:12}},e=>{e.own.baa=true;}),
-  mk('heal','Combat',e=>({name:'Pomme de soin ×1',desc:'Soigne 12 PV instantanément.',cost:{bronze:25}}),e=>{e.am.heal=(e.am.heal||0)+1;}),
-  gunItem('bow','Arc','Flèche puissante, dégâts 5.',{silver:8}),
-  gunItem('gun','Pistolet','Tir rapide, précis au début mais la dispersion augmente en rafale.',{silver:10}),
-  gunItem('smg','Mitraillette','Rafale très rapide, le spray s\'élargit vite.',{silver:16}),
-  gunItem('shotgun','Fusil à pompe','8 plombs en éventail, recul énorme.',{silver:14}),
-  gunItem('sniper','Sniper','Tir perçant ultra précis, imprécis en courant. 11 dégâts.',{gold:3}),
-  gunItem('rocket','Lance-roquettes','Roquette explosive qui détruit les blocs.',{gold:4}),
-  gunItem('woolgun','Lance-laine','Pelotes de laine qui emmêlent et ralentissent l\'ennemi.',{silver:12}),
-  gunItem('boomerang','Boomerang','Part, touche, revient et retouche.',{silver:12}),
-  gunItem('bubble','Canon à bulles','Enferme l\'ennemi dans une bulle qui flotte 2 s.',{silver:14}),
-  gunItem('ice','Pistolet de glace','Gèle l\'ennemi sur place 1,6 s.',{silver:12}),
-  gunItem('flame','Lance-flammes','Jet de flammes continu, courte portée.',{gold:3}),
+  mk('glove','Combat',e=>e.own.glove?{name:'Crochet de fer',desc:'Déjà possédé',cost:{},ok:false,tag:'OK'}:{name:'Crochet de fer',desc:'Dégâts faibles mais propulse l\'ennemi très loin (dans le vide !).',cost:{silver:8}},e=>{e.own.glove=true;}),
+  mk('hammer','Combat',e=>e.own.hammer?{name:'Masse de forgeron',desc:'Déjà possédé',cost:{},ok:false,tag:'OK'}:{name:'Masse de forgeron',desc:'Onde de choc : projette en l\'air, casse les blocs proches.',cost:{silver:14}},e=>{e.own.hammer=true;}),
+  mk('baa','Combat',e=>e.own.baa?{name:'Corne de brume',desc:'Déjà possédé',cost:{},ok:false,tag:'OK'}:{name:'Corne de brume',desc:'Souffle en cône : repousse les ennemis et dévie les tirs. Illimité.',cost:{silver:12}},e=>{e.own.baa=true;}),
+  mk('heal','Combat',e=>({name:'Ration de bord ×1',desc:'Soigne 12 PV instantanément.',cost:{bronze:25}}),e=>{e.am.heal=(e.am.heal||0)+1;}),
+  gunItem('bow','Arbalète','Flèche puissante, dégâts 5.',{silver:8}),
+  gunItem('gun','Pistolet à silex','Tir rapide, précis au début mais la dispersion augmente en rafale.',{silver:10}),
+  gunItem('smg','Pistolets jumeaux','Rafale très rapide, le spray s\'élargit vite.',{silver:16}),
+  gunItem('shotgun','Tromblon','8 plombs en éventail, recul énorme.',{silver:14}),
+  gunItem('sniper','Mousquet long','Tir perçant ultra précis, imprécis en courant. 11 dégâts.',{gold:3}),
+  gunItem('rocket','Canon de poche','Roquette explosive qui détruit les blocs.',{gold:4}),
+  gunItem('woolgun','Lance-filet','Filet qui emmêle et ralentit l\'ennemi.',{silver:12}),
+  gunItem('boomerang','Hache de lancer','Part, touche, revient et retouche.',{silver:12}),
+  gunItem('bubble','Lance-écume','Enferme l\'ennemi dans une bulle qui flotte 2 s.',{silver:14}),
+  gunItem('ice','Harpon givré','Harpon glacé : gèle l\'ennemi sur place 1,6 s.',{silver:12}),
+  gunItem('flame','Torche cracheuse','Jet de flammes continu, courte portée.',{gold:3}),
   mk('pick','Outils',e=>{
     const t=e.pick; if(t>=3) return {name:PICKS[3].n,desc:'Niveau maximum',cost:{},ok:false,tag:'MAX'};
     return {name:PICKS[t+1].n,desc:`Casse plus vite : dégâts ${PICKS[t+1].d} (actuel ${PICKS[t].d})`,cost:PICK_COST[t+1]};
   },e=>e.pick++),
-  mk('grap','Gadgets',e=>({name:'Grappin ×3',desc:'Accroche un bloc ou un ennemi et te tire (portée 11 cases).',cost:{silver:8}}),e=>e.grap+=3),
-  mk('jet','Gadgets',e=>({name:'Jetpack ×1',desc:'Vol stationnaire 4 s : traverse le vide.',cost:{gold:2}}),e=>e.jet+=1),
-  gadItem('dash','Dash','Fonce en avant, sans tomber pendant l\'élan.',{bronze:25},3),
-  gadItem('trampo','Trampoline','Pose un trampoline qui te propulse très haut.',{silver:6},2),
-  gadItem('tp','Perle de téléportation','Lance-la : tu te téléportes là où elle tombe.',{gold:1},1),
-  gadItem('bridge','Pont éclair','Construit instantanément 8 blocs de pont devant toi.',{silver:10},1),
-  mk('bomb','Gadgets',e=>({name:'Bombe ×1',desc:'Explose après 1,7 s. Détruit blocs et ponts.',cost:{silver:6}}),e=>e.bomb+=1),
-  mk('repel','Gadgets',e=>({name:'Bombe repoussoir ×1',desc:'Projette tout le monde loin (dans le vide !).',cost:{silver:5}}),e=>e.repel+=1),
-  gadItem('turret','Tourelle','Tire seule sur les ennemis proches pendant 18 s.',{silver:14},1,'Défense'),
-  gadItem('turret2','Tourelle givrante','Gèle brièvement les ennemis proches pendant 22 s.',{silver:16},1,'Défense'),
-  gadItem('guard','Mouton gardien','Deux moutons gardiens défendent ta base pendant 45 s.',{silver:12},1,'Défense'),
-  gadItem('repair','Réparation du bloc','Soigne ton mouton ultime de 14 PV.',{silver:8},1,'Défense'),
-  gadItem('vortex','Trou noir','Aspire les ennemis vers son centre pendant 3,5 s.',{gold:2},1),
-  gadItem('springs','Bottes à ressort','Sauts très hauts 25 s, et l\'atterrissage fait mal.',{silver:8},1),
-  gadItem('cloak','Cape d\'invisibilité','Invisible 7 s : les bots ne te voient plus de loin.',{silver:10},1),
-  gadItem('haste','Potion de vitesse','+50 % de vitesse pendant 8 s.',{bronze:30},1),
-  gadItem('wallgad','Mur éclair','Dresse un mur de 3 blocs de bois en un clic.',{silver:7},2,'Défense'),
-  gadItem('storm','Foudre','La foudre frappe la zone visée après 1 s.',{gold:2},2),
-  gadItem('cluster','Bombe à fragmentation','Explose en 6 mini-bombes.',{silver:10},1),
-  gadItem('mine','Mine','Se pose à tes pieds, explose au passage d\'un ennemi.',{silver:6},2,'Défense'),
+  mk('grap','Gadgets',e=>({name:'Grappin d\'abordage ×3',desc:'Accroche un bloc ou un ennemi et te tire (portée 11 cases).',cost:{silver:8}}),e=>e.grap+=3),
+  mk('jet','Gadgets',e=>({name:'Perroquet porteur ×1',desc:'Vol stationnaire 4 s : traverse la mer.',cost:{gold:2}}),e=>e.jet+=1),
+  gadItem('dash','Élan du flibustier','Fonce en avant, sans tomber pendant l\'élan.',{bronze:25},3),
+  gadItem('trampo','Hamac rebondissant','Pose un trampoline qui te propulse très haut.',{silver:6},2),
+  gadItem('tp','Boussole ensorcelée','Lance-la : tu te téléportes là où elle tombe.',{gold:1},1),
+  gadItem('bridge','Planche d\'abordage','Construit instantanément 8 blocs de pont devant toi.',{silver:10},1),
+  mk('bomb','Gadgets',e=>({name:'Baril de poudre ×1',desc:'Explose après 1,7 s. Détruit blocs et ponts.',cost:{silver:6}}),e=>e.bomb+=1),
+  mk('repel','Gadgets',e=>({name:'Vague scélérate ×1',desc:'Projette tout le monde loin (dans le vide !).',cost:{silver:5}}),e=>e.repel+=1),
+  gadItem('turret','Canon de pont','Tire seule sur les ennemis proches pendant 18 s.',{silver:14},1,'Défense'),
+  gadItem('turret2','Canon givrant','Gèle brièvement les ennemis proches pendant 22 s.',{silver:16},1,'Défense'),
+  gadItem('guard','Matelots gardiens','Deux matelots gardiens défendent ta base pendant 45 s.',{silver:12},1,'Défense'),
+  gadItem('repair','Réparation du coffre','Soigne ton coffre au trésor de 14 PV.',{silver:8},1,'Défense'),
+  gadItem('vortex','Maelström','Aspire les ennemis vers son centre pendant 3,5 s.',{gold:2},1),
+  gadItem('springs','Bottes de mousse','Sauts très hauts 25 s, et l\'atterrissage fait mal.',{silver:8},1),
+  gadItem('cloak','Brume magique','Invisible 7 s : les bots ne te voient plus de loin.',{silver:10},1),
+  gadItem('haste','Rhum de contrebande','+50 % de vitesse pendant 8 s.',{bronze:30},1),
+  gadItem('wallgad','Palissade','Dresse une palissade de 3 planches en un clic.',{silver:7},2,'Défense'),
+  gadItem('storm','Orage','La foudre frappe la zone visée après 1 s.',{gold:2},2),
+  gadItem('cluster','Baril à grappes','Explose en 6 mini-bombes.',{silver:10},1),
+  gadItem('flag','Pavillon noir','Zone 12 s : tes alliés se soignent et vont plus vite, les ennemis sont ralentis.',{silver:12},1,'Défense'),
+  gadItem('anchor','Ancre','Jette une ancre : dégâts, assomme 1,6 s et brise les blocs.',{silver:12},2),
+  gadItem('buoy','Bouée de sauvetage','Passif : te repêche une fois si tu tombes à la mer.',{silver:10},1,'Défense'),
+  gadItem('kraken','Tentacule du kraken','Un tentacule frappe la zone visée pendant 6 s.',{gold:2},1),
+  gadItem('barrage','Salve de canons','6 boulets pleuvent sur la zone visée.',{gold:3},1),
+  gadItem('net','Filet piégé','Piège : immobilise 2 s l\'ennemi qui marche dessus.',{bronze:25},2,'Défense'),
+  gadItem('mine','Mine marine','Se pose à tes pieds, explose au passage d\'un ennemi.',{silver:6},2,'Défense'),
   gadItem('banana','Peau de banane','Fait déraper et tourner l\'ennemi qui marche dessus.',{bronze:20},2,'Défense'),
-  gadItem('chicken','Mouton kamikaze','Un mouton court vers l\'ennemi le plus proche et explose.',{silver:9},1),
-  mk('shield','Défense',e=>({name:'Champ de force ×1',desc:'Dôme 12 s : bloque ennemis, flèches et bombes.',cost:{gold:2}}),e=>e.shield+=1),
+  gadItem('chicken','Crabe kamikaze','Un crabe court vers l\'ennemi le plus proche et explose.',{silver:9},1),
+  mk('shield','Défense',e=>({name:'Bouclier de brume ×1',desc:'Dôme 12 s : bloque ennemis, flèches et bombes.',cost:{gold:2}}),e=>e.shield+=1),
   upItem('fb','Forge de bronze',3,[3,5,8],['Bronze toutes les 0,7 s','Bronze toutes les 0,5 s','Bronze toutes les 0,35 s']),
   upItem('fs','Forge d\'argent',3,[3,5,8],['Argent toutes les 3,8 s','Argent toutes les 2,8 s','Argent toutes les 2 s']),
   upItem('hp','Vitalité',3,[3,5,8],['+6 PV max','+6 PV max','+6 PV max'],e=>{e.hp+=6;}),
   upItem('sp','Agilité',3,[3,5,8],['+8% vitesse','+8% vitesse','+8% vitesse']),
   upItem('ar','Armure',3,[3,5,8],['-12% dégâts','-12% dégâts','-12% dégâts']),
-  upItem('core','Blindage du mouton',3,[4,6,9],['Le mouton ultime subit -20% de dégâts','-35% de dégâts','-50% de dégâts'],null),
+  upItem('core','Blindage du coffre',3,[4,6,9],['Le coffre au trésor subit -20% de dégâts','-35% de dégâts','-50% de dégâts'],null),
   upItem('gold','Forge d\'or',2,[6,12],['Ta base produit de l\'or (1 / 14 s)','L\'or arrive plus vite (1 / 8 s)']),
-  mk('wall','Défense',e=>({name:'Mur d\'obsidienne',desc:'Entoure ton mouton ultime d\'obsidienne.',cost:{diamond:5}}),e=>wallRing(e))
+  mk('wall','Défense',e=>({name:'Mur d\'obsidienne',desc:'Entoure ton coffre au trésor d\'obsidienne.',cost:{diamond:5}}),e=>wallRing(e))
 ];
 SHOP.find(i=>i.id==='core').cat='Défense';
 const SHOPMAP={}; SHOP.forEach(s=>SHOPMAP[s.id]=s);
@@ -732,7 +776,7 @@ function updateEnt(e,dt){
   e.inv=Math.max(0,e.inv-dt); e.flash=Math.max(0,e.flash-dt); e.jetT=Math.max(0,e.jetT-dt);
   e.grace=Math.max(0,e.grace-dt); e.swing=Math.max(0,e.swing-dt); e.lastByT-=dt; e.sinceHurt+=dt;
   if(e.bubble>0){ e.bubble-=dt; e.vx+=rnd(-1,1)*260*dt; e.vy+=rnd(-1,1)*260*dt-30*dt; if(e.bubble<=0){ ring(e.x,e.y-e.z,T*1.3,'#bfdbfe',.35,true); burst(e.x,e.y-e.z,'#e0f2fe',16,180,.5,3); } }
-  e.slow=Math.max(0,e.slow-dt); e.cloak=Math.max(0,e.cloak-dt); e.haste=Math.max(0,e.haste-dt); e.springT=Math.max(0,e.springT-dt);
+  e.slow=Math.max(0,e.slow-dt); e.root=Math.max(0,e.root-dt); e.flagBuff=Math.max(0,e.flagBuff-dt); e.cloak=Math.max(0,e.cloak-dt); e.haste=Math.max(0,e.haste-dt); e.springT=Math.max(0,e.springT-dt);
   e.frozen=Math.max(0,e.frozen-dt); e.muzzle=Math.max(0,e.muzzle-dt); e.squash*=Math.exp(-9*dt);
   if(e.burn>0){ e.burn-=dt; if(Math.random()<dt*10) parts.push({x:e.x+rnd(-6,6),y:e.y,z:rnd(0,10),vz:rnd(50,120),vx:0,vy:0,life:.4,max:.4,col:'#fb923c',size:4}); if(Math.random()<dt*4) hurt(e,.5,e.burnBy,0,0); }
   if(e.sinceHurt>5&&e.hp<maxhp(e)) e.hp=Math.min(maxhp(e),e.hp+.5*dt);
@@ -754,7 +798,7 @@ function updateEnt(e,dt){
     }
   } else {
     let ix=e.ix,iy=e.iy;
-    if(e.frozen>0||e.bubble>0){ix=iy=0;}
+    if(e.frozen>0||e.bubble>0||e.root>0){ix=iy=0;}
     if(e.slip>0){ e.slip-=dt; ix=e.sdx; iy=e.sdy; e.ang+=dt*16; if(Math.random()<dt*12) parts.push({x:e.x,y:e.y-e.z-12,vx:rnd(-30,30),vy:-20,life:.5,max:.5,col:'#fde047',size:3}); }
     const sp=speedOf(e); moveEnt(e,(ix*sp+e.vx)*dt,(iy*sp+e.vy)*dt);
     const f=Math.exp(-7*dt); e.vx*=f; e.vy*=f;
@@ -765,9 +809,13 @@ function updateEnt(e,dt){
   }
   if(e.jetT>0&&Math.random()<.7) parts.push({x:e.x-Math.cos(e.ang)*6+rnd(-3,3),y:e.y+8,z:Math.max(0,e.z-4),vz:-60,vx:rnd(-30,30),vy:rnd(40,100),life:.35,max:.35,col:Math.random()<.5?'#fb923c':'#fde047',size:4});
   const fx=Math.floor(e.x/T),fy=Math.floor(e.y/T);
+  if(fl(fx,fy)>0&&wl(fx,fy)===0&&e.z<=gh+1&&!e.pull) e.lastSafe={x:(fx+.5)*T,y:(fy+.5)*T};
   if(fl(fx,fy)===0&&e.jetT<=0&&!e.pull&&e.grace<=0&&e.z<1){
     e.voidT+=dt;
-    if(e.voidT>.28){ die(e,e.lastByT>0?e.lastBy:null); }
+    if(e.voidT>.28){
+      if((e.am.buoy||0)>0&&e.lastSafe){ e.am.buoy--; splash(e.x,e.y); e.x=e.lastSafe.x; e.y=e.lastSafe.y; e.z=50; e.vz=0; e.vx=e.vy=0; e.voidT=0; e.inv=1.2; e.grace=.4; floatTxt(e.x,e.y-44,'REPÊCHÉ !','#fb923c',17); ring(e.x,e.y,T*1.5,'#fb923c',.5,true); sfx('buy'); }
+      else die(e,e.lastByT>0?e.lastBy:null,true);
+    }
   } else e.voidT=Math.max(0,e.voidT-dt*2);
 }
 function updateSpawners(dt){
@@ -845,7 +893,8 @@ function updateProj(dt){
 function updateBombs(dt){
   for(const b of bombs){
     const dx=b.tx-b.x,dy=b.ty-b.y,d=Math.hypot(dx,dy);
-    if(d>2){const s=Math.min(d,430*dt);b.x+=dx/d*s;b.y+=dy/d*s; b.h=8+Math.sin(Math.min(1,1-d/(9*T))*Math.PI)*26; } else b.h=8;
+    if(b.drop){ b.h=Math.max(0,b.fuse)*(b.shell?170:140); }
+    else if(d>2){const s=Math.min(d,430*dt);b.x+=dx/d*s;b.y+=dy/d*s; b.h=8+Math.sin(Math.min(1,1-d/(9*T))*Math.PI)*26; } else b.h=8;
     b.fuse-=dt;
     if(nearestShieldBlocking(b.x,b.y,b.team)){b.fuse=-1;burst(b.x,b.y,'#7dd3fc',10,120,.4,3);}
     else if(b.fuse<=0) explode(b);
@@ -909,6 +958,17 @@ function updateTraps(dt){
         projs.push({x:t.x+Math.cos(t.ang)*12,y:t.y+Math.sin(t.ang)*12,vx:Math.cos(t.ang)*760,vy:Math.sin(t.ang)*760,team:t.team,owner:t.owner,life:.8,dmg:2.2,kb:150,kind:'bullet',col:'#93c5fd',hit:null}); } }
       t.muz=Math.max(0,(t.muz||0)-dt); continue;
     }
+    if(t.kind==='flag'){
+      for(const o of ents){ if(!o.alive) continue; const d=Math.hypot(o.x-t.x,o.y-t.y); if(d<4*T){ if(o.team===t.team){ o.hp=Math.min(maxhp(o),o.hp+2*dt); o.flagBuff=.3; } else o.slow=Math.max(o.slow,.3); } }
+      continue;
+    }
+    if(t.kind==='kraken'){
+      t.cd-=dt; t.slam=Math.max(0,(t.slam||0)-dt);
+      if(t.cd<=0){ t.cd=1.1; t.slam=.35; sfx('boom',t.x,t.y); ring(t.x,t.y,T*1.9,'#34d399',.4,true); shake=Math.max(shake,5); chunks(t.x,t.y,'#34d399',6);
+        for(const o of ents){ if(!o.alive||o.team===t.team) continue; const dx=o.x-t.x,dy=o.y-t.y,d=Math.hypot(dx,dy); if(d<1.9*T){ hurt(o,4,t.owner,dx/(d||1)*520,dy/(d||1)*520); o.vz=Math.max(o.vz,320); } }
+        blastTiles(t.x,t.y,1.4*T,12,t.owner,t.team); }
+      continue;
+    }
     if(t.kind==='vortex'){
       for(const o of ents){ if(!o.alive||o.team===t.team) continue; const dx=t.x-o.x,dy=t.y-o.y,d=Math.hypot(dx,dy); if(d<5*T&&d>4){ const k=1-d/(5*T); o.vx+=dx/d*(1500*k+300)*dt; o.vy+=dy/d*(1500*k+300)*dt; o.lastBy=t.owner; o.lastByT=5; } }
       if(Math.random()<dt*30){ const a=rnd(0,6.28); parts.push({x:t.x+Math.cos(a)*5*T*.9,y:t.y+Math.sin(a)*5*T*.9,vx:-Math.cos(a)*180,vy:-Math.sin(a)*180,life:.6,max:.6,col:'#a78bfa',size:3}); }
@@ -921,6 +981,8 @@ function updateTraps(dt){
         o.vz=650; o.squash=-.8; t.anim=1; sfx('boing',t.x,t.y); ring(t.x,t.y,T*1.2,'#f472b6',.35); burst(t.x,t.y,'#f9a8d4',10,130,.4,3);
       } else if(t.kind==='mine'&&t.age>1.2&&o.team!==t.team&&d<T*1.1){
         t.t=-1; explode({x:t.x,y:t.y,team:t.team,owner:t.owner,kind:'bomb',R:1.9*T,dm:12,bd:.9}); break;
+      } else if(t.kind==='net'&&o.team!==t.team&&d<T*.6&&o.z<6){
+        t.t=-1; o.root=2.2; o.lastBy=t.owner; o.lastByT=5; floatTxt(o.x,o.y-36,'PRIS AU FILET !','#e5e7eb',15); burst(o.x,o.y,'#e5e7eb',10,120,.4,3); break;
       } else if(t.kind==='banana'&&o.team!==t.team&&d<T*.55&&o.z<6){
         t.t=-1; o.slip=1.4; const m=Math.hypot(o.ix,o.iy); o.sdx=m>.1?o.ix/m:Math.cos(o.ang); o.sdy=m>.1?o.iy/m:Math.sin(o.ang);
         o.lastBy=t.owner; o.lastByT=5; floatTxt(o.x,o.y-36,'WOUAAH !','#fde047',17); burst(o.x,o.y,'#fde047',10,140,.4,3); break;
@@ -1064,7 +1126,7 @@ const BOT_BUY=[
   ['obs',b=>b.blocks[5]<4],['sp',b=>b.up.sp<1],['wall',b=>b.up.fb>=1&&!b.walled],['fb',b=>b.up.fb<3],
   ['sword',b=>b.sword<3],['pick',b=>b.pick<3],['hp',b=>b.up.hp<3],['ar',b=>b.up.ar<3],['gold',b=>b.up.gold<2],
   ...[
-    ['heal',b=>(b.am.heal||0)<2],['repair',b=>(b.am.repair||0)<1],['guard',b=>(b.am.guard||0)<1],['turret2',b=>(b.am.turret2||0)<1],['woolgun',b=>!b.own.woolgun],['baa',b=>!b.own.baa],['gun',b=>!b.own.gun],
+    ['heal',b=>(b.am.heal||0)<2],['repair',b=>(b.am.repair||0)<1],['buoy',b=>(b.am.buoy||0)<1],['net',b=>(b.am.net||0)<2],['flag',b=>(b.am.flag||0)<1],['anchor',b=>(b.am.anchor||0)<1],['kraken',b=>(b.am.kraken||0)<1],['barrage',b=>(b.am.barrage||0)<1],['guard',b=>(b.am.guard||0)<1],['turret2',b=>(b.am.turret2||0)<1],['woolgun',b=>!b.own.woolgun],['baa',b=>!b.own.baa],['gun',b=>!b.own.gun],
     ['glove',b=>!b.own.glove],['hammer',b=>!b.own.hammer],['bubble',b=>!b.own.bubble],
     ['shotgun',b=>!b.own.shotgun],['smg',b=>!b.own.smg],
     ['boomerang',b=>!b.own.boomerang],['ice',b=>!b.own.ice],
@@ -1077,7 +1139,7 @@ const BOT_BUY=[
   ['wool',b=>b.blocks[2]<60],['wood',b=>b.blocks[3]<20]
 ];
 const BOT_RANGED=[['sniper',5,10],['rocket',3.5,9],['shotgun',0,3.8],['smg',1.5,7],['gun',1.5,8],['boomerang',2.5,7],['bubble',2,7],['ice',2,6],['flame',0,3.2],['woolgun',2,7]];
-const BOT_OPTIONAL=['woolgun','baa','turret2','guard','repair','gun','glove','hammer','bubble','shotgun','smg','boomerang','ice','turret','wallgad','mine','banana','chicken','cluster','haste','springs','cloak','dash','bridge','sniper','rocket','storm','vortex','flame','heal'];
+const BOT_OPTIONAL=['flag','anchor','kraken','barrage','net','buoy','woolgun','baa','turret2','guard','repair','gun','glove','hammer','bubble','shotgun','smg','boomerang','ice','turret','wallgad','mine','banana','chicken','cluster','haste','springs','cloak','dash','bridge','sniper','rocket','storm','vortex','flame','heal'];
 function voidNear(o,ang){ return fl(Math.floor((o.x+Math.cos(ang)*T*1.7)/T),Math.floor((o.y+Math.sin(ang)*T*1.7)/T))===0; }
 function botMelee(b,foe,fd){
   const edge=voidNear(foe,b.ang);
@@ -1098,7 +1160,11 @@ function botGadgets(b,foe,fd,dt,nearCore){
   if(b.cd.gad>0) return;
   if(b.hp<maxhp(b)*.5&&(am.heal||0)>0&&r<dt*3){ useGadget(b,'heal',b.x,b.y); return; }
   const fx=foe.x,fy=foe.y, fok=fl(Math.floor(fx/T),Math.floor(fy/T))>0;
-  if((am.storm||0)>0&&fd>3*T&&fd<10*T&&r<dt*.5) useGadget(b,'storm',fx,fy);
+  if((am.anchor||0)>0&&fd>2*T&&fd<7*T&&r<dt*.6) useGadget(b,'anchor',fx,fy);
+  else if((am.kraken||0)>0&&fd<8*T&&r<dt*.4) useGadget(b,'kraken',fx,fy);
+  else if((am.barrage||0)>0&&fd>4*T&&fd<10*T&&r<dt*.4) useGadget(b,'barrage',fx,fy);
+  else if((am.flag||0)>0&&nearCore&&r<dt*.5) useGadget(b,'flag',b.x,b.y);
+  else if((am.storm||0)>0&&fd>3*T&&fd<10*T&&r<dt*.5) useGadget(b,'storm',fx,fy);
   else if((am.cluster||0)>0&&fd>3*T&&fd<8*T&&r<dt*.5) useGadget(b,'cluster',fx,fy);
   else if((am.chicken||0)>0&&fd>3*T&&fd<9*T&&r<dt*.5) useGadget(b,'chicken',fx,fy);
   else if((am.vortex||0)>0&&fd<6*T&&r<dt*.4) useGadget(b,'vortex',fx,fy);
@@ -1121,6 +1187,7 @@ function botDefend(b,dt){
   if((am.turret||0)>0&&!mine('turret')) useGadget(b,'turret',tx-d[1]*T*1.5,ty+d[0]*T*1.5);
   else if((am.wallgad||0)>0&&wl(Math.floor(tx/T),Math.floor(ty/T))===0) useGadget(b,'wallgad',tx,ty);
   else if((am.mine||0)>0&&mine('mine')<3) useGadget(b,'mine',b.x,b.y);
+  else if((am.net||0)>0&&mine('net')<2) useGadget(b,'net',tx+d[1]*T*2.5,ty-d[0]*T*2.5);
   else if((am.banana||0)>0&&mine('banana')<2) useGadget(b,'banana',tx+d[1]*T*2,ty-d[0]*T*2);
   else if((am.turret2||0)>0&&!mine('turret')) useGadget(b,'turret2',tx+d[1]*T*1.5,ty-d[0]*T*1.5);
   else if((am.guard||0)>0&&guards.filter(g=>g.team===b.team).length<2&&b.cd.gad<=0) useGadget(b,'guard',b.x,b.y);

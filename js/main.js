@@ -15,6 +15,7 @@ addEventListener('keydown',ev=>{
   else if(k==='e') toggleShop();
   else if(k==='r'){ if(GUNS[selId]&&player.alive){ if(startReload(player,selId)) floatTxt(player.x,player.y-40,'Recharge…','#ffd27d',13); } }
   else if(k==='c') cycleBlock(player);
+  else if(k==='g') setQuality((Q.level+2)%3,true);
   else if(k==='m'){muted=!muted;msg(muted?'Son coupé (M)':'Son activé (M)','#cfe0ff');}
   else if(k==='Escape') toggleShop(false);
 });

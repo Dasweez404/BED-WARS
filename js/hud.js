@@ -1,6 +1,7 @@
 'use strict';
 /* =====================  INTERFACE (canvas 2D par-dessus la 3D)  ===================== */
 const FONT='"Fredoka","Lilita One",system-ui,sans-serif';
+const PFONT='"Pirata One","Lilita One","Fredoka",serif';
 let uic=null, ctx=null, DPR=1;
 const miniCv=document.createElement('canvas'); miniCv.width=W; miniCv.height=H;
 const miniCtx=miniCv.getContext('2d'); const miniImg=miniCtx.createImageData(W,H);
@@ -13,8 +14,8 @@ function resizeUI(){ if(!uic) return; DPR=Math.min(2,window.devicePixelRatio||1)
 /* ---------- primitives ---------- */
 function rr(x,y,w,h,r){ r=Math.min(r,w/2,h/2); ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
 function panel(x,y,w,h,r,accent){
-  const g=ctx.createLinearGradient(0,y,0,y+h); g.addColorStop(0,'rgba(36,52,104,.86)'); g.addColorStop(1,'rgba(18,26,62,.9)');
-  rr(x,y,w,h,r||12); ctx.fillStyle=g; ctx.fill(); ctx.lineWidth=2; ctx.strokeStyle=accent||'rgba(190,215,255,.4)'; ctx.stroke();
+  const g=ctx.createLinearGradient(0,y,0,y+h); g.addColorStop(0,'rgba(22,58,88,.88)'); g.addColorStop(1,'rgba(9,26,44,.92)');
+  rr(x,y,w,h,r||12); ctx.fillStyle=g; ctx.fill(); ctx.lineWidth=2; ctx.strokeStyle=accent||'rgba(255,214,120,.5)'; ctx.stroke();
   ctx.save(); rr(x,y,w,h,r||12); ctx.clip(); ctx.fillStyle='rgba(255,255,255,.09)'; ctx.fillRect(x,y,w,h*.42); ctx.restore();
 }
 function drawRes(c,k,x,y,s){
@@ -69,6 +70,17 @@ const TIPS={block:'Clic : poser (pont sur le vide, mur sur le sol) · C / clic d
   bomb:'Clic : lance une bombe',repel:'Clic : onde de choc',mine:'Clic : pose une mine',banana:'Clic : pose une banane',chicken:'Clic : lance un mouton kamikaze',heal:'Clic : +12 PV',shield:'Clic : dôme de protection',
   turret:'Clic : pose une tourelle automatique',turret2:'Clic : pose une tourelle givrante',guard:'Clic : appelle deux moutons gardiens',repair:'Clic : répare ton mouton ultime',
   hammer2:'',springs:'Clic : super sauts 25 s',cloak:'Clic : invisible 7 s',haste:'Clic : vitesse +50 % 8 s',wallgad:'Clic : mur de 3 blocs',storm:'Clic : foudre sur la zone visée',cluster:'Clic : bombe à fragmentation',vortex:'Clic : trou noir qui aspire'};
+Object.assign(TIPS,{pick:'Maintiens le clic pour casser blocs, ponts et le coffre ennemi',baa:'Clic : souffle de brume qui repousse les ennemis et dévie les tirs',
+  glove:'Clic : coup de crochet qui projette très loin',hammer:'Clic : onde de choc qui projette et casse les blocs',bow:'Clic : tirer un carreau (recharge entre chaque tir)',
+  gun:'Maintiens le clic : la dispersion augmente en rafale · R : recharger',smg:'Deux pistolets : rafale rapide, le spray s\'élargit vite · R : recharger',shotgun:'Clic : 8 plombs en éventail · R : recharger',
+  sniper:'Clic : tir perçant, précis à l\'arrêt · R : recharger',rocket:'Clic : boulet de canon explosif',woolgun:'Clic : filet qui emmêle et ralentit',boomerang:'Clic : la hache revient vers toi et touche deux fois',
+  bubble:'Clic : enferme l\'ennemi dans une bulle d\'écume',ice:'Clic : harpon qui gèle la cible',flame:'Maintiens le clic : jet de flammes · R : recharger',grap:'Clic : accroche un bloc ou un ennemi et t\'attire',
+  jet:'Clic : le perroquet te porte 4 s',dash:'Clic : élan',trampo:'Clic : pose un hamac rebondissant',tp:'Clic : lance la boussole, tu t\'y téléportes',bridge:'Clic : 8 planches de passerelle',
+  bomb:'Clic : lance un baril de poudre',repel:'Clic : vague qui repousse tout le monde',mine:'Clic : pose une mine marine',banana:'Clic : pose une peau de banane',chicken:'Clic : lance un crabe kamikaze',
+  heal:'Clic : +12 PV',shield:'Clic : dôme de brume protectrice',turret:'Clic : pose un canon de pont automatique',turret2:'Clic : pose un canon givrant',guard:'Clic : appelle deux matelots gardiens',
+  repair:'Clic : répare ton coffre au trésor',springs:'Clic : super sauts 25 s',cloak:'Clic : invisible 7 s',haste:'Clic : vitesse +50 % 8 s',wallgad:'Clic : palissade de 3 planches',
+  storm:'Clic : l\'orage frappe la zone visée',cluster:'Clic : baril qui explose en 6 mini-barils',vortex:'Clic : maelström qui aspire',flag:'Clic : pavillon noir : soigne tes alliés, ralentit les ennemis',
+  anchor:'Clic : jette une ancre qui assomme',buoy:'Passif : te repêche si tu tombes à la mer',kraken:'Clic : un tentacule frappe la zone',barrage:'Clic : 6 boulets sur la zone visée',net:'Clic : pose un filet piégé'});
 function hotbarRect(n){ const s=Math.min(52,Math.max(24,(VW-30)/Math.max(1,n)-6)),g=6; return {s,g,x:(VW-n*(s+g)+g)/2,y:VH-s-14}; }
 function hoverEnemy(){
   let best=null,bd=34;
@@ -220,17 +232,20 @@ function overlayWorld(){
   for(const f of floats){ if(f.y0===undefined) f.y0=f.y; const s=w2s(f.x,f.y0,40); if(!s[2]) continue; ctx.globalAlpha=Math.min(1,f.t*2); ctx.font=`bold ${Math.round(f.s*1.15)}px ${FONT}`; ctx.textAlign='center'; ctx.lineWidth=4; ctx.strokeStyle='rgba(10,20,50,.9)'; const yy=s[1]-(f.y0-f.y)*1.3; ctx.strokeText(f.txt,s[0],yy); ctx.fillStyle=f.col; ctx.fillText(f.txt,s[0],yy); }
   ctx.globalAlpha=1;
 }
+let miniT=0;
 function drawMini(){
   const S=150,mx=VW-S-10,my=10, d=miniImg.data;
-  for(let i=0;i<W*H;i++){
-    let c='#7ea8e8'; const f=floorT[i],w=wallT[i]; let r,g,b;
-    if(w===CORE) c=TEAMS[ownW[i]].col; else if(w) c=(w===WOOL?TEAMS[ownW[i]].dark:BCOL[w][1]);
-    else if(f===1){ const reg=region[i]; c=reg>=0&&reg<4?TEAMS[reg].light:reg===4?'#ffe6a8':'#aaeaf5'; }
-    else if(f>1) c=blockColor(f,ownF[i])[0]; else c=null;
-    if(!c){ r=24;g=40;b=84; } else { const n=parseInt(c.slice(1),16); r=n>>16; g=(n>>8)&255; b=n&255; }
-    d[i*4]=r;d[i*4+1]=g;d[i*4+2]=b;d[i*4+3]=255;
+  if(--miniT<=0){ miniT=8;
+    for(let i=0;i<W*H;i++){
+      let c; const f=floorT[i],w=wallT[i]; let r,g,b;
+      if(w===CORE) c=TEAMS[ownW[i]].col; else if(w) c=(w===WOOL?TEAMS[ownW[i]].dark:BCOL[w][1]);
+      else if(f===1){ const reg=region[i]; c=reg>=0&&reg<4?'#e9d9a8':reg===4?'#a97b47':'#d8c793'; if(reg>=0&&reg<4&&Math.abs(i%W-TD[reg].bx)<=2&&Math.abs(((i/W)|0)-TD[reg].by)<=2) c=TEAMS[reg].light; }
+      else if(f>1) c=blockColor(f,ownF[i])[0]; else c=null;
+      if(!c){ r=30;g=100;b=150; } else { const n=parseInt(c.slice(1),16); r=n>>16; g=(n>>8)&255; b=n&255; }
+      d[i*4]=r;d[i*4+1]=g;d[i*4+2]=b;d[i*4+3]=255;
+    }
+    miniCtx.putImageData(miniImg,0,0);
   }
-  miniCtx.putImageData(miniImg,0,0);
   panel(mx-5,my-5,S+10,S+10,12);
   ctx.save(); rr(mx,my,S,S,8); ctx.clip(); ctx.imageSmoothingEnabled=false; ctx.drawImage(miniCv,mx,my,S,S); ctx.restore(); ctx.imageSmoothingEnabled=true;
   const cx=cam3.x/T/W*S+mx, cy=cam3.y/T/H*S+my; ctx.strokeStyle='rgba(255,255,255,.6)'; ctx.lineWidth=1; ctx.strokeRect(cx-9,cy-7,18,14);
@@ -262,14 +277,14 @@ function drawHud(){
   TD.forEach((t,i)=>{
     const y=10+i*38, ci=idx(t.bx,t.by), chp=wallT[ci]===CORE?hpW[ci]:0;
     if(t.hpPrev===undefined) t.hpPrev=chp;
-    if(chp<t.hpPrev-.1){ t.alert=1.4; if(i===0&&hud.alertT<=0){ announce('TON MOUTON EST ATTAQUÉ !','#fca5a5'); sfx('alarm'); hud.alertT=7; } }
+    if(chp<t.hpPrev-.1){ t.alert=1.4; if(i===0&&hud.alertT<=0){ announce('TON COFFRE EST ATTAQUÉ !','#fca5a5'); sfx('alarm'); hud.alertT=7; } }
     t.hpPrev=chp; t.alert=Math.max(0,(t.alert||0)-dt);
     panel(10,y,214,33,12,t.alert>0&&Math.floor(game.t*8)%2?'#ef4444':null);
     ctx.fillStyle=t.col; rr(10,y,8,33,4); ctx.fill();
     ctx.fillStyle='#fff'; ctx.font='bold 14px '+FONT; ctx.fillText(t.name+(i===0?' (toi)':''),26,y+15);
     ctx.fillStyle='rgba(10,20,50,.7)'; rr(26,y+21,104,7,3); ctx.fill();
     if(t.coreAlive){ const k=chp/BHP[CORE]; ctx.fillStyle=k>.5?t.col:k>.25?'#f59e0b':'#ef4444'; rr(26,y+21,Math.max(4,104*k),7,3); ctx.fill(); }
-    ctx.font='bold 12px '+FONT; ctx.fillStyle=t.coreAlive?'#9af2b8':'#fca5a5'; ctx.fillText(t.coreAlive?'🐑 vivant':'✖ perdu',138,y+15);
+    ctx.font='bold 12px '+FONT; ctx.fillStyle=t.coreAlive?'#9af2b8':'#fca5a5'; ctx.fillText(t.coreAlive?'💰 intact':'✖ pillé',138,y+15);
     const en=t.ent; ctx.font='13px '+FONT;
     if(en.elim){ctx.fillStyle='#fca5a5';ctx.fillText('☠ éliminé',138,y+28);}
     else if(!en.alive){ctx.fillStyle='#fde68a';ctx.fillText('↻ '+Math.ceil(en.resp)+'s',138,y+28);}
@@ -290,17 +305,17 @@ function drawHud(){
   ctx.fillStyle='#fff'; ctx.font='bold 12px '+FONT; ctx.textAlign='center'; ctx.lineWidth=3; ctx.strokeStyle='rgba(10,30,20,.7)'; const ht=`♥ ${Math.ceil(Math.max(0,e.hp))} / ${maxhp(e)}`; ctx.strokeText(ht,bx+bw/2,hy+17); ctx.fillText(ht,bx+bw/2,hy+17);
   if(e.jetT>0){ctx.fillStyle='#fb923c';rr(bx,hy-8,bw*e.jetT/4,5,2);ctx.fill();}
   { let sx=bx; ctx.textAlign='left'; ctx.font='bold 13px '+FONT;
-    for(const [v,ico,col] of [[e.haste,'🧪','#38bdf8'],[e.cloak,'👻','#e5e7eb'],[e.springT,'👟','#4ade80'],[e.bubble,'🧼','#bfdbfe'],[e.frozen,'❄️','#7dd3fc'],[e.slow,'🧶','#f9a8d4'],[e.burn,'🔥','#fb923c']]) if(v>0){ const t=`${ico} ${v.toFixed(1)}s`, w=ctx.measureText(t).width+16; panel(sx,hy-32,w,22,9,col); ctx.fillStyle='#fff'; ctx.fillText(t,sx+8,hy-16); sx+=w+6; } }
+    for(const [v,ico,col] of [[e.haste,'🧪','#38bdf8'],[e.cloak,'👻','#e5e7eb'],[e.springT,'👟','#4ade80'],[e.bubble,'🧼','#bfdbfe'],[e.frozen,'❄️','#7dd3fc'],[e.slow,'🕸️','#cbd5e1'],[e.root,'⚓','#e5e7eb'],[e.burn,'🔥','#fb923c']]) if(v>0){ const t=`${ico} ${v.toFixed(1)}s`, w=ctx.measureText(t).width+16; panel(sx,hy-32,w,22,9,col); ctx.fillStyle='#fff'; ctx.fillText(t,sx+8,hy-16); sx+=w+6; } }
   // barre d'objets
   const hx0=(VW-(n*(hb.s+hb.g)-hb.g))/2;
   list.forEach((s,i)=>{
     const isel=s.id===selId, k=isel?selAnim:0, sc=1+(isel?.07:0)+k*.12;
     const x=hx0+i*(hb.s+hb.g),y=hb.y-(isel?5:0)-k*6;
     ctx.save(); ctx.translate(x+hb.s/2,y+hb.s/2); ctx.scale(sc,sc); ctx.translate(-hb.s/2,-hb.s/2);
-    if(isel){ ctx.shadowColor='#7cc0ff'; ctx.shadowBlur=14; }
-    const g=ctx.createLinearGradient(0,0,0,hb.s); if(isel){g.addColorStop(0,'#4b9bff');g.addColorStop(1,'#2563d6');} else {g.addColorStop(0,'#2c3d78');g.addColorStop(1,'#141c42');}
+    if(isel){ ctx.shadowColor='#ffd27d'; ctx.shadowBlur=14; }
+    const g=ctx.createLinearGradient(0,0,0,hb.s); if(isel){g.addColorStop(0,'#f6c25a');g.addColorStop(1,'#c27a14');} else {g.addColorStop(0,'#24506e');g.addColorStop(1,'#0e2538');}
     rr(0,0,hb.s,hb.s,10); ctx.fillStyle=g; ctx.fill(); ctx.shadowBlur=0;
-    ctx.strokeStyle=isel?'#fff':'rgba(190,215,255,.3)'; ctx.lineWidth=2; ctx.stroke();
+    ctx.strokeStyle=isel?'#fff':'rgba(255,214,120,.35)'; ctx.lineWidth=2; ctx.stroke();
     ctx.save(); rr(0,0,hb.s,hb.s,10); ctx.clip();
     ctx.fillStyle=s.col; ctx.globalAlpha=.9; ctx.fillRect(0,hb.s-4,hb.s,4); ctx.globalAlpha=1;
     const cdv=cdFrac(e,s.id); const reloading=GUNS[s.id]&&wst(e,s.id).r>0;
@@ -319,12 +334,12 @@ function drawHud(){
   ctx.textAlign='center'; const tip=TIPS[selId]||''; ctx.font='12px '+FONT; const tw=Math.max(ctx.measureText(tip).width,130)+30; panel(VW/2-tw/2,hb.y-88,tw,42,12);
   ctx.fillStyle='#fff'; ctx.font='bold 15px '+FONT; ctx.fillText(label,VW/2,hb.y-70); ctx.fillStyle='#a9c2f0'; ctx.font='12px '+FONT; ctx.fillText(tip,VW/2,hb.y-54);
   if(nearBase(e)&&!shopOpen&&e.alive){ const w=300,pp=1+.03*Math.sin(game.t*5); ctx.save(); ctx.translate(VW/2,hb.y-114); ctx.scale(pp,pp); panel(-w/2,-15,w,30,15,'#fde68a'); ctx.fillStyle='#fde68a'; ctx.font='bold 15px '+FONT; ctx.fillText('[E]  Ouvrir la boutique',0,5); ctx.restore(); }
-  ctx.textAlign='left'; ctx.fillStyle='rgba(20,40,90,.8)'; ctx.font='13px '+FONT; ctx.lineWidth=3; ctx.strokeStyle='rgba(255,255,255,.7)'; const hint='Espace : sauter · R : recharger · C : changer de bloc · M : son'; ctx.strokeText(hint,12,VH-12); ctx.fillText(hint,12,VH-12);
+  ctx.textAlign='left'; ctx.fillStyle='rgba(20,40,90,.8)'; ctx.font='13px '+FONT; ctx.lineWidth=3; ctx.strokeStyle='rgba(255,255,255,.7)'; const hint='Espace : sauter · R : recharger · C : changer de bloc · M : son · G : graphismes'; ctx.strokeText(hint,12,VH-12); ctx.fillText(hint,12,VH-12);
   drawMini();
   if(banner.t>0){
     const p=1-banner.t/banner.max, s=p<.12?1.6-p/.12*.6:1, a=Math.min(1,banner.t*1.5,p*8);
     ctx.save(); ctx.translate(VW/2,VH*.2); ctx.scale(s,s); ctx.globalAlpha=a; ctx.textAlign='center';
-    ctx.font='bold 42px '+FONT; const bwid=ctx.measureText(banner.txt).width+70;
+    ctx.font='bold 46px '+PFONT; const bwid=ctx.measureText(banner.txt).width+70;
     const bg=ctx.createLinearGradient(-bwid/2,0,bwid/2,0); bg.addColorStop(0,'rgba(10,20,60,0)'); bg.addColorStop(.2,'rgba(10,20,60,.6)'); bg.addColorStop(.8,'rgba(10,20,60,.6)'); bg.addColorStop(1,'rgba(10,20,60,0)');
     ctx.fillStyle=bg; ctx.fillRect(-bwid/2,-42,bwid,64);
     ctx.lineWidth=7; ctx.strokeStyle='rgba(10,20,60,.9)'; ctx.strokeText(banner.txt,0,0); ctx.fillStyle=banner.col; ctx.fillText(banner.txt,0,0); ctx.restore();
@@ -337,9 +352,9 @@ function drawHud(){
   }
   if(game.state==='over'){
     ctx.fillStyle='rgba(10,20,60,.75)';ctx.fillRect(0,0,VW,VH);
-    ctx.fillStyle=game.win?'#fde68a':'#ff8a8a';ctx.font='bold 64px '+FONT;ctx.fillText(game.win?'VICTOIRE !':'DÉFAITE',VW/2,VH/2-10);
+    ctx.fillStyle=game.win?'#fde68a':'#ff8a8a';ctx.font='bold 72px '+PFONT;ctx.fillText(game.win?'VICTOIRE !':'DÉFAITE',VW/2,VH/2-10);
     ctx.fillStyle='#fff';ctx.font='20px '+FONT;
-    ctx.fillText(game.win?'Tous les moutons ennemis sont éliminés.':'Ton équipe est éliminée.',VW/2,VH/2+26);
+    ctx.fillText(game.win?'Tous les équipages ennemis sont coulés.':'Ton équipe est éliminée.',VW/2,VH/2+26);
     ctx.fillText(`Éliminations : ${player.kills} · Durée : ${Math.floor(game.t/60)} min ${Math.floor(game.t%60)} s`,VW/2,VH/2+56);
     ctx.fillText('Clique ou appuie sur Entrée pour rejouer',VW/2,VH/2+90);
   }
