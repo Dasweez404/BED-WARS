@@ -87,8 +87,8 @@ function updateSea(t,force){
   for(let i=0;i<pos.count;i++){
     const x=b[i*3]+ox, z=b[i*3+2]+oz;
     const h=Math.sin(x*.32+t*1.3)*.16+Math.cos(z*.27+t*1.0)*.13+Math.sin((x+z)*.2+t*.7)*.1;
-    a[i*3+1]=h; const k=.5+h*1.4;
-    col.array[i*3]=.04+k*.07; col.array[i*3+1]=.26+k*.16; col.array[i*3+2]=.46+k*.14;
+    a[i*3+1]=h; const k=.5+h*1.4, cr=Math.max(0,h-.2)*2.2;
+    col.array[i*3]=.04+k*.07+cr; col.array[i*3+1]=.26+k*.16+cr; col.array[i*3+2]=.46+k*.14+cr*.8;
   }
   pos.needsUpdate=true; col.needsUpdate=true;
 }
@@ -163,7 +163,7 @@ function buildWorldMeshes(){
       if(fl(x+dx,y+dy)!==0) continue; edge=true;
       if(reg!==4&&np<CAP-3){ const px=x+.5+dx*.52, pz=y+.5+dy*.52, r=.24+rn()*.1; setI(iPuff,np++,px,-.05,pz,r,r*.6,r,colT.set('#f3e5b0').clone()); }
     }
-    if(edge&&nf<CAP-2){ let fx=x+.5,fz=y+.5; const e=[[0,-1],[0,1],[-1,0],[1,0]].filter(([dx,dy])=>fl(x+dx,y+dy)===0); for(const [dx,dy] of e){ fx+=dx*.35; fz+=dy*.35; } setI(iFoam,nf++,fx,-1.08,fz,1.5,.04,1.5,colT.set('#ffffff').clone()); }
+    if(edge&&reg!==4&&nf<CAP-2){ let fx=x+.5,fz=y+.5; const e=[[0,-1],[0,1],[-1,0],[1,0]].filter(([dx,dy])=>fl(x+dx,y+dy)===0); for(const [dx,dy] of e){ fx+=dx*.35; fz+=dy*.35; } setI(iFoam,nf++,fx,-1.08,fz,1.5,.04,1.5,colT.set('#ffffff').clone()); }
     if(reg!==4&&hash(x,y)%2===0&&nu<CAP-3){ const r=.6+rn()*.55; setI(iUnder,nu++,x+.5+(rn()-.5)*.5,-.55-rn()*.5,y+.5+(rn()-.5)*.5,r,r*.75,r,colT.set(rn()<.5?'#7a6552':'#6b5847').clone()); }
     if(reg!==4&&!edge){ const tc=groundColor(reg,x,y,new THREE.Color());
       if(tc.g>tc.r+.03){ if(hash(x,y)%2===0&&nt<880){ for(let k=0;k<2;k++){ const a=rn()*6.28, hh=.16+rn()*.1; setI(iTuft,nt++,x+.5+Math.cos(a)*.3,hh/2,y+.5+Math.sin(a)*.3,.05,hh,.05,colT.set(rn()<.5?'#5fae3f':'#78c24d').clone()); } } }
