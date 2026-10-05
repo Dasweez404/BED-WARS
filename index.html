@@ -666,7 +666,7 @@ function updateSpawners(dt){
     const R=(sp.kind==='base'?6:2.3)*T, cx=(sp.x+.5)*T, cy=(sp.y+.5)*T;
     for(const e of ents){
       if(!e.alive) continue;
-      if(sp.kind==='base'&&e.team!==sp.team) continue;
+      if(sp.kind==='base'&&e.team!==sp.team&&!TD[sp.team].ent.elim) continue; // base éliminée : ouverte à tous
       if(Math.hypot(e.x-cx,e.y-cy)>R) continue;
       // il faut être posé sur l'île du générateur (pas sur un pont, pas dans le vide)
       const et=idx(clamp(Math.floor(e.x/T),0,W-1),clamp(Math.floor(e.y/T),0,H-1));
