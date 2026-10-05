@@ -30,6 +30,18 @@
   .obtn:hover{border-color:#e2b14f}
   .obtn.on{background:#e2b14f;color:#3a2000;border-color:#ffe08a}
   #optDesc{font-size:13px;color:#d9c49a;min-height:18px;margin:2px 0 12px}
+  #char{display:flex;gap:14px;align-items:flex-start;margin:4px 0 8px}
+  #pvc{position:static;width:150px;height:190px;border-radius:12px;border:3px solid #7a5230;flex:none;background:#2f6f95}
+  #charui{flex:1;min-width:0}
+  .cls{display:flex;flex-wrap:wrap;gap:5px;margin:2px 0 4px}
+  .cbtn{font-family:inherit;font-size:13px;font-weight:600;padding:4px 8px;border-radius:9px;border:2px solid #7a5230;background:#4a2f1b;color:#f4e4c4;cursor:pointer}
+  .cbtn:hover{border-color:#e2b14f}.cbtn.on{background:#e2b14f;color:#3a2000;border-color:#ffe08a}
+  #clsInfo{font-size:13px;line-height:1.35;color:#f4e4c4;min-height:52px}
+  #clsInfo .p{color:#9af2b8}#clsInfo .c{color:#fca5a5}
+  .sw{width:24px;height:24px;border-radius:50%;border:3px solid #7a5230;cursor:pointer;padding:0}
+  .sw.on{border-color:#fff;box-shadow:0 0 8px #e2b14f}
+  #pname{font-family:inherit;font-size:14px;padding:4px 8px;border-radius:8px;border:2px solid #7a5230;background:#2e1c10;color:#fff6e0;width:130px}
+  .sticky{position:sticky;bottom:-28px;padding:10px 0 0;background:linear-gradient(0deg,#2e1c10 70%,transparent)}
   #diffDesc{font-size:14px;color:#f4e4c4;min-height:20px;margin:0 0 14px}
   button.big{font-family:'Pirata One','Lilita One',serif;background:#e2b14f;color:#3a2000;border:0;border-radius:12px;padding:10px 38px;font-size:28px;cursor:pointer;box-shadow:0 6px 0 #9a6b14,0 12px 24px #0008;transition:transform .1s}
   button.big:hover{transform:translateY(-2px)}
@@ -71,12 +83,14 @@
       <li>Blocs : sur la mer = passerelle, sur le sol = palissade. Onglet <b>Défense</b> : canons, matelots gardiens, filets, pavillon noir, bouée…</li>
       <li>Bronze/argent sur ton île, <b>or</b> sur le galion, <b>diamants</b> sur les îlots. Tomber à la mer = mort (sauf bouée de sauvetage).</li>
     </ul>
+    <div style="font-weight:700;color:#ffe9b0;margin-top:6px">Ton pirate</div>
+    <div id="char"><canvas id="pvc" width="300" height="380"></canvas><div id="charui"></div></div>
     <div style="font-weight:700;color:#ffe9b0;margin-top:6px">Difficulté des bots</div>
     <div id="diff"><button class="dbtn" data-d="easy">Facile</button><button class="dbtn" data-d="normal">Normal</button><button class="dbtn" data-d="hard">Difficile</button></div>
     <div id="diffDesc"></div>
     <div style="font-weight:700;color:#ffe9b0">Options de partie</div>
     <div id="opts"></div><div id="optDesc"></div>
-    <button class="big" id="playBtn">À l'abordage !</button>
+    <div class="sticky"><button class="big" id="playBtn">À l'abordage !</button></div>
   </div>
 </div>
 <script src="js/three.min.js"></script>

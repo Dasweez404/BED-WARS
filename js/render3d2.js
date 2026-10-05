@@ -396,7 +396,7 @@ function onNewGame(){
 }
 function syncEnts(dt){
   for(const e of ents){
-    let m=entM.get(e); if(!m){ m=createPirate(TEAMS[e.team]); scene.add(m); entM.set(e,m); }
+    let m=entM.get(e); if(!m){ m=createPirate(TEAMS[e.team],{look:e.look}); scene.add(m); entM.set(e,m); }
     m.visible=e.alive&&!(e.inv>0&&Math.floor(game.t*10)%2); if(!e.alive) continue;
     const u=m.userData; let sc=1,dy=0; if(e.voidT>0){ sc=Math.max(.2,1-e.voidT/.4*.7); dy=-e.voidT*6; }
     m.position.set(e.x*U,e.z*U+dy,e.y*U); m.rotation.y=-e.ang;

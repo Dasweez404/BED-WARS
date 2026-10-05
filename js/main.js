@@ -56,6 +56,19 @@ const OPTDEF=[
   {k:'start',t:'Départ',list:()=>OPT_START.map((o,i)=>({v:i,n:o.n,d:'Ressources de départ de chaque pirate.'}))},
   {k:'core',t:'Coffres',list:()=>OPT_CORE.map((o,i)=>({v:i,n:o.n,d:'Résistance des coffres au trésor.'}))}
 ];
+function saveChar(){ try{localStorage.setItem('pirates_char',JSON.stringify({cls:game.cls,look:game.look,pname:game.pname}));}catch(e){} }
+function renderChar(){
+  const L=game.look, el=document.getElementById('charui'), ci=CLASSES[game.cls], sw=(arr,k)=>arr.map((c,i)=>`<button class="sw ${L[k]===i?'on':''}" data-lk="${k}" data-v="${i}" style="background:${c}"></button>`).join(''), bt=(arr,k)=>arr.map((n,i)=>`<button class="obtn ${L[k]===i?'on':''}" data-lk="${k}" data-v="${i}">${n}</button>`).join('');
+  el.innerHTML=`<div class="orow"><span class="olab">Nom</span><input id="pname" maxlength="14" value="${(game.pname||'').replace(/"/g,'')}"></div>
+  <div class="cls">${CLS_IDS.map(id=>`<button class="cbtn ${game.cls===id?'on':''}" data-cls="${id}">${CLASSES[id].ico} ${CLASSES[id].n}</button>`).join('')}</div>
+  <div id="clsInfo"><b>${ci.n}</b> — ${ci.d}<br>${ci.pros.map(x=>`<span class="p">＋ ${x}</span>`).join(' · ')}${ci.cons.length?'<br>':''}${ci.cons.map(x=>`<span class="c">－ ${x}</span>`).join(' · ')}</div>
+  <div class="orow"><span class="olab">Peau</span>${sw(SKINS,'skin')}<span class="olab" style="width:auto;margin-left:10px">Cheveux</span>${sw(HAIRS,'hair')}</div>
+  <div class="orow"><span class="olab">Chapeau</span>${bt(HATS,'hat')}</div>
+  <div class="orow"><span class="olab">Visage</span>${bt(FACES,'face')}<button class="obtn ${L.patch?'on':''}" data-lk="patch" data-v="${L.patch?0:1}">Cache-œil</button></div>`;
+  el.querySelector('#pname').oninput=ev=>{ game.pname=ev.target.value; saveChar(); };
+  el.querySelectorAll('[data-cls]').forEach(b=>b.onclick=()=>{ game.cls=b.dataset.cls; saveChar(); renderChar(); });
+  el.querySelectorAll('[data-lk]').forEach(b=>b.onclick=()=>{ game.look[b.dataset.lk]=+b.dataset.v; saveChar(); renderChar(); });
+}
 function saveOpts(){ try{localStorage.setItem('pirates_opts',JSON.stringify(game.opts));}catch(e){} }
 function renderOpts(){
   const box=document.getElementById('opts'); let desc='';
@@ -73,6 +86,7 @@ function frame(now){
     update(dt); mouse.clicked=false;
     shopT+=dt; if(shopOpen&&shopT>.4){shopT=0;renderShop();}
   } else { game.t+=dt; updateFx(dt); }
+  if(game.state==='menu') renderPreview(game.t);
   render3d(dt); hudN=(hudN+1)|0; if(Q.level>=2||(hudN&1)) drawHud();
   requestAnimationFrame(frame);
 }
@@ -81,6 +95,8 @@ function boot(){
   document.querySelectorAll('#diff .dbtn').forEach(b=>b.onclick=()=>selectDiff(b.dataset.d));
   try{ const o=JSON.parse(localStorage.getItem('pirates_opts')||'null'); if(o) for(const k in game.opts) if(o[k]!==undefined) game.opts[k]=o[k]; }catch(e){}
   if(!MAPS[game.opts.map]) game.opts.map='classic'; if(!MODES[game.opts.mode]) game.opts.mode='solo'; renderOpts();
+  try{ const c=JSON.parse(localStorage.getItem('pirates_char')||'null'); if(c){ if(CLASSES[c.cls]) game.cls=c.cls; if(c.look) game.look=lookOf(c.look); if(typeof c.pname==='string') game.pname=c.pname; } }catch(e){}
+  renderChar(); initPreview();
   let d0='normal'; try{ d0=localStorage.getItem('pirates_diff')||'normal'; }catch(e){} selectDiff(DIFFS[d0]?d0:'normal');
   document.getElementById('playBtn').onclick=()=>{audioInit();document.getElementById('start').classList.add('hidden');newGame();};
   newGame(); game.state='menu';

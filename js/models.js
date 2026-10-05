@@ -56,38 +56,59 @@ function buildModels(){
 }
 /* ---------- pirate chibi ---------- */
 const PG={}; // cache par variante
-function pirateVariant(td,neutral){
-  const key=(neutral?'n':'t')+td.col; if(PG[key]) return PG[key];
+const SKINS=['#ffd9b5','#f5c08f','#d9a066','#a8693a','#6b4226'], HAIRS=['#6b4a2a','#1b1512','#d9a441','#c2410c','#e5e7eb'];
+const HATS=['Tricorne','Bicorne','Bandana','Tête nue'], FACES=['Rasé','Barbe','Moustache'];
+const DEF_LOOK={skin:0,hat:0,hair:0,face:0,patch:1};
+const lookOf=l=>Object.assign({},DEF_LOOK,l||{});
+const lookKey=l=>l.skin+'.'+l.hat+'.'+l.hair+'.'+l.face+'.'+l.patch;
+function randomLook(){ const r=n=>Math.floor(Math.random()*n); return {skin:r(SKINS.length),hat:r(HATS.length),hair:r(HAIRS.length),face:r(3),patch:Math.random()<.5?1:0}; }
+function headGeo(l){
+  const key='h'+lookKey(l); if(PG[key]) return PG[key];
+  const S=GEO.sphere, Cy=GEO.cyl, skin=SKINS[l.skin], hair=HAIRS[l.hair], smile=new THREE.TorusGeometry(.085,.017,5,10,Math.PI);
+  const P=[{geo:S,pos:[0,0,0],scale:[.42,.38,.42],color:skin},
+    {geo:S,pos:[.37,-.12,.25],scale:[.05,.045,.09],color:'#ff98ae'},{geo:S,pos:[.37,-.12,-.25],scale:[.05,.045,.09],color:'#ff98ae'},
+    {geo:S,pos:[.43,-.03,0],scale:[.05,.05,.05],color:'#ffab94'},
+    {geo:smile,pos:[.41,-.12,0],rot:[0,Math.PI/2,Math.PI],color:'#7a2a1a'},
+    {geo:S,pos:[.18,.36,.1],scale:[.1,.07,.1],color:'#e8b04a'},{geo:S,pos:[-.3,-.1,0],scale:[.08,.12,.08],color:hair}];
+  if(l.patch){ P.push({geo:S,pos:[.37,.06,-.17],scale:[.045,.12,.12],color:'#15121a'},{geo:Cy,pos:[0,.1,0],scale:[.41,.014,.41],rot:[0,0,.35],color:'#15121a'}); }
+  if(l.face===1) P.push({geo:S,pos:[.3,-.27,0],scale:[.26,.17,.3],color:hair},{geo:S,pos:[.43,-.2,0],scale:[.06,.07,.1],color:hair});
+  if(l.face===2) P.push({geo:S,pos:[.43,-.065,.07],scale:[.045,.03,.09],color:hair},{geo:S,pos:[.43,-.065,-.07],scale:[.045,.03,.09],color:hair});
+  return PG[key]=mergeParts(P);
+}
+function hatParts(kind,hatc,trim,light,hair){
+  const B=GEO.box,S=GEO.sphere,Cy=GEO.cyl;
+  if(kind===1) return [{geo:B,pos:[0,.1,0],scale:[.36,.17,.82],color:hatc},{geo:B,pos:[0,.2,0],scale:[.38,.04,.84],color:trim},{geo:B,pos:[0,.02,0],scale:[.4,.03,.86],color:'#1c1722'},
+    {geo:GEO.cone,pos:[0,.08,.86],scale:[.12,.2,.12],rot:[Math.PI/2,0,0],color:hatc},{geo:GEO.cone,pos:[0,.08,-.86],scale:[.12,.2,.12],rot:[-Math.PI/2,0,0],color:hatc},
+    {geo:S,pos:[-.1,.28,.1],scale:[.07,.1,.07],color:'#ffffff'},{geo:S,pos:[-.16,.34,.18],scale:[.06,.09,.06],color:light}];
+  if(kind===2) return [{geo:S,pos:[-.04,-.2,0],scale:[.45,.3,.45],color:hatc},{geo:Cy,pos:[0,-.2,0],scale:[.43,.03,.43],rot:[0,0,.3],color:trim},{geo:S,pos:[-.42,-.18,.04],scale:[.1,.08,.1],color:hatc},{geo:GEO.cone,pos:[-.55,-.28,.12],scale:[.05,.2,.05],rot:[0,0,1.9],color:hatc},{geo:GEO.cone,pos:[-.55,-.28,-.04],scale:[.05,.2,.05],rot:[0,0,2.4],color:hatc}];
+  if(kind===3) return [{geo:S,pos:[-.04,-.2,0],scale:[.45,.3,.45],color:hair},{geo:S,pos:[.1,-.06,0],scale:[.3,.14,.4],color:hair},{geo:GEO.cone,pos:[0,.1,0],scale:[.1,.2,.1],color:hair},{geo:GEO.cone,pos:[-.1,.06,.12],scale:[.08,.17,.08],rot:[0,0,.7],color:hair}];
+  return [{geo:GEO.cyl3,pos:[0,0,0],scale:[.64,.06,.64],rot:[0,Math.PI/2,0],color:'#1c1722'},{geo:GEO.cyl3,pos:[0,.035,0],scale:[.6,.04,.6],rot:[0,Math.PI/2,0],color:hatc},
+    {geo:Cy,pos:[0,.17,0],scale:[.3,.26,.3],color:hatc},{geo:Cy,pos:[0,.1,0],scale:[.315,.06,.315],color:trim},{geo:S,pos:[.3,.14,0],scale:[.055,.055,.03],color:'#ffffff'},{geo:GEO.cone,pos:[0,.34,0],scale:[.06,.08,.06],color:light}];
+}
+function pirateVariant(td,neutral,look){
+  const l=lookOf(look), key=(neutral?'n':'t')+td.col+'|'+lookKey(l); if(PG[key]) return PG[key];
   const B=GEO.box, S=GEO.sphere, Cy=GEO.cyl, shirt=neutral?'#f1ece0':td.col, trim=neutral?td.col:'#ffffff', hatc=td.col, light=td.light;
   const v={};
   v.body=mergeParts([{geo:B,pos:[0,.5,0],scale:[.46,.38,.5],color:shirt},{geo:B,pos:[0,.42,0],scale:[.475,.06,.525],color:trim},{geo:B,pos:[0,.56,0],scale:[.475,.06,.525],color:trim},
     {geo:B,pos:[0,.33,0],scale:[.5,.06,.54],color:'#3b2a1c'},{geo:B,pos:[.26,.33,0],scale:[.03,.07,.1],color:'#fbbf24'},{geo:S,pos:[-.27,.5,0],scale:[.16,.16,.2],color:shirt}]);
-  v.hat=mergeParts([{geo:GEO.cyl3,pos:[0,0,0],scale:[.64,.06,.64],rot:[0,Math.PI/2,0],color:'#1c1722'},{geo:GEO.cyl3,pos:[0,.035,0],scale:[.6,.04,.6],rot:[0,Math.PI/2,0],color:hatc},
-    {geo:Cy,pos:[0,.17,0],scale:[.3,.26,.3],color:hatc},{geo:Cy,pos:[0,.1,0],scale:[.315,.06,.315],color:trim},{geo:S,pos:[.3,.14,0],scale:[.055,.055,.03],color:'#ffffff'},{geo:GEO.cone,pos:[0,.34,0],scale:[.06,.08,.06],color:light}]);
-  const arm=[{geo:Cy,pos:[0,-.09,0],scale:[.075,.2,.075],color:shirt},{geo:Cy,pos:[0,-.2,0],scale:[.08,.03,.08],color:trim},{geo:S,pos:[0,-.26,0],scale:[.075,.075,.075],color:'#ffd9b5'}];
+  v.hat=mergeParts(hatParts(l.hat,hatc,trim,light,HAIRS[l.hair]));
+  const arm=[{geo:Cy,pos:[0,-.09,0],scale:[.075,.2,.075],color:shirt},{geo:Cy,pos:[0,-.2,0],scale:[.08,.03,.08],color:trim},{geo:S,pos:[0,-.26,0],scale:[.075,.075,.075],color:SKINS[l.skin]}];
   v.arm=mergeParts(arm);
   return PG[key]=v;
 }
 function buildPirateGeos(){
   const S=GEO.sphere, Cy=GEO.cyl, B=GEO.box;
   const smile=new THREE.TorusGeometry(.085,.017,5,10,Math.PI);
-  PG.head=mergeParts([{geo:S,pos:[0,0,0],scale:[.42,.38,.42],color:'#ffd9b5'},
-    {geo:S,pos:[.37,-.12,.25],scale:[.05,.045,.09],color:'#ff98ae'},{geo:S,pos:[.37,-.12,-.25],scale:[.05,.045,.09],color:'#ff98ae'},
-    {geo:S,pos:[.43,-.03,0],scale:[.05,.05,.05],color:'#ffab94'},
-    {geo:smile,pos:[.41,-.12,0],rot:[0,Math.PI/2,Math.PI],color:'#7a2a1a'},
-    {geo:S,pos:[.37,.06,-.17],scale:[.045,.12,.12],color:'#15121a'},
-    {geo:Cy,pos:[0,.1,0],scale:[.41,.014,.41],rot:[0,0,.35],color:'#15121a'},
-    {geo:S,pos:[.18,.36,.1],scale:[.1,.07,.1],color:'#e8b04a'},{geo:S,pos:[-.3,-.1,0],scale:[.08,.12,.08],color:'#6b4a2a'}]);
   PG.eye=mergeParts([{geo:S,pos:[0,0,0],scale:[.1,.125,.115],color:'#ffffff'},{geo:S,pos:[.06,-.01,0],scale:[.065,.08,.075],color:'#1a1620'},{geo:S,pos:[.105,.04,.03],scale:[.028,.028,.028],color:'#ffffff'}]);
   PG.leg=mergeParts([{geo:Cy,pos:[0,-.07,0],scale:[.085,.16,.085],color:'#5b4630'},{geo:B,pos:[.03,-.17,0],scale:[.2,.09,.15],color:'#1f1812'},{geo:B,pos:[.03,-.12,0],scale:[.19,.025,.155],color:'#4a3320'}]);
 }
 function createPirate(td,opts){
-  opts=opts||{}; const v=pirateVariant(td,opts.neutral), g=new THREE.Group();
+  opts=opts||{}; const lk=lookOf(opts.look), v=pirateVariant(td,opts.neutral,lk), g=new THREE.Group();
   const mat=new THREE.MeshStandardMaterial({vertexColors:true,flatShading:true,roughness:.75}); const u={mats:{shirt:mat,skin:mat,dark:mat,hat:mat,band:mat},mat,legs:[],eyes:[]};
   const mesh=(geo,par,x,y,z)=>{ const m=new THREE.Mesh(geo,mat); m.position.set(x,y,z); m.castShadow=true; par.add(m); return m; };
   const body=new THREE.Group(); body.position.y=.07; g.add(body); u.body=body; mesh(v.body,body,0,0,0);
-  const head=new THREE.Group(); head.position.set(.03,.84,0); body.add(head); u.head=head; mesh(PG.head,head,0,0,0);
-  u.eyes=[mesh(PG.eye,head,.37,.06,.17)]; u.eyes[0].castShadow=false;
+  const head=new THREE.Group(); head.position.set(.03,.84,0); body.add(head); u.head=head; mesh(headGeo(lk),head,0,0,0);
+  u.eyes=[mesh(PG.eye,head,.37,.06,.17)]; if(!lk.patch) u.eyes.push(mesh(PG.eye,head,.37,.06,-.17)); u.eyes.forEach(q=>q.castShadow=false);
   const hat=mesh(v.hat,head,0,.36,0); hat.rotation.z=-.1; hat.position.x=-.02; u.hat=hat;
   for(const z of [-1,1]){ const piv=new THREE.Group(); piv.position.set(0,.6,z*.31); body.add(piv); mesh(v.arm,piv,0,0,0); if(z>0){ u.armR=piv; const an=new THREE.Group(); an.position.set(.0,-.26,0); an.scale.setScalar(1.6); piv.add(an); u.anchor=an; } else u.armL=piv; }
   for(const z of [-.13,.13]){ const piv=new THREE.Group(); piv.position.set(0,.3,z); body.add(piv); mesh(PG.leg,piv,0,0,0); u.legs.push(piv); }
@@ -112,7 +133,7 @@ function animatePirate(e,m,dt){
   u.head.rotation.z=Math.sin(t*2.2)*.05+(moving?Math.sin(e.stepPh*1.15)*.06:0)+(e.slip>0?Math.sin(game.t*20)*.35:0); u.head.rotation.x=e.slip>0?Math.sin(game.t*17)*.2:0;
   u.hat.rotation.z=-.1+Math.sin(t*3)*.03;
   const blink=((game.t+u.blink)%3.6)<.13, big=e.flash>0||e.hp<maxhp(e)*.3;
-  const es=blink?[1,.12,1]:big?[1.3,1.3,1.3]:[1,1,1]; u.eyes[0].scale.set(es[0],es[1],es[2]);
+  const es=blink?[1,.12,1]:big?[1.3,1.3,1.3]:[1,1,1]; for(const q of u.eyes) q.scale.set(es[0],es[1],es[2]);
   u.bubble.visible=e.bubble>0; u.ice.visible=e.frozen>0;
   if(e.bubble>0) u.bubble.scale.setScalar(1.15+Math.sin(game.t*8)*.04);
 }
@@ -131,7 +152,7 @@ function heldAnim(e,m){
   const u=m.userData, id=e.held||'sword', t=game.t+e.team, R=u.armR, L=u.armL, B=u.body, A=u.anchor;
   B.rotation.set(0,0,0); A.rotation.set(0,0,0); A.position.set(0,-.26,0); A.scale.setScalar(1.6); R.rotation.x=0; L.rotation.x=0;
   const sw=e.swingMax?Math.max(0,e.swing/e.swingMax):0, p=1-sw, sp=Math.sin(p*Math.PI);
-  const gp=e.cd.gad>0?1-e.cd.gad/.5:1, used=e.cd.gad>0;
+  const gmax=.5*cv(e,'gcd'), gp=e.cd.gad>0?Math.max(0,1-e.cd.gad/gmax):1, used=e.cd.gad>0;
   const gd=H_GUN[id];
   if(gd){
     const s=e.ws[id]||{a:1,r:0,last:-9}, kick=Math.min(1,(e.muzzle||0)/.08), firing=game.t-s.last<.16, rl=s.r>0;
@@ -170,4 +191,27 @@ function heldAnim(e,m){
         else { R.rotation.z=1.0; A.rotation.z=Math.sin(t*2.6)*.1; if(id==='dash'&&e.grace>.1){ B.rotation.z=.4; R.rotation.z=-.4; L.rotation.z=-.4; } }
       } else if(sw<=0){ R.rotation.z=1.0+Math.sin(t*2)*.05; A.rotation.z=Math.sin(t*2.3)*.1; if(id==='sword') A.rotation.x=Math.sin(t*1.7)*.15; }
   }
+}
+
+/* ---------- aperçu 3D du pirate dans le menu (rendu hors écran -> canvas 2D) ---------- */
+let PV=null;
+const _LUT=(()=>{ const a=new Uint8Array(256); for(let i=0;i<256;i++) a[i]=Math.round(255*Math.pow(i/255,1/2.2)); return a; })();
+function initPreview(){
+  const cv=document.getElementById('pvc'); if(!cv||!renderer) return;
+  const W=cv.width, H=cv.height, sc=new THREE.Scene(); sc.background=new THREE.Color(0x2f6f95);
+  sc.add(new THREE.HemisphereLight(0xffffff,0x6a8fa8,1.0)); const dl=new THREE.DirectionalLight(0xffffff,1.1); dl.position.set(2,4,3); sc.add(dl);
+  const cam=new THREE.PerspectiveCamera(30,W/H,.1,20); cam.position.set(1.15,.62,1.75); cam.lookAt(0,.36,0);
+  PV={W,H,cv,ctx:cv.getContext('2d'),sc,cam,rt:new THREE.WebGLRenderTarget(W,H),buf:new Uint8Array(W*H*4),img:null,g:null,key:'',n:0};
+  PV.img=PV.ctx.createImageData(W,H);
+}
+function renderPreview(t){
+  if(!PV) return; PV.n++; if(PV.n%3) return;
+  const look=lookOf(game.look), key=lookKey(look)+'|'+game.cls;
+  if(key!==PV.key){ if(PV.g) PV.sc.remove(PV.g); PV.g=createPirate(TEAMS[0],{look}); PV.g.userData.heldMesh=null; PV.sc.add(PV.g); PV.key=key; }
+  const g=PV.g, u=g.userData; g.rotation.y=-.5+Math.sin(t*.8)*.7; u.body.position.y=.07+Math.abs(Math.sin(t*2.4))*.03; u.head.rotation.z=Math.sin(t*2.2)*.06; u.armR.rotation.z=1.0+Math.sin(t*2)*.05;
+  const ca=renderer.getClearAlpha(); renderer.setRenderTarget(PV.rt); renderer.render(PV.sc,PV.cam); renderer.setRenderTarget(null);
+  renderer.readRenderTargetPixels(PV.rt,0,0,PV.W,PV.H,PV.buf);
+  const W=PV.W,H=PV.H,src=PV.buf,dst=PV.img.data;
+  for(let y=0;y<H;y++){ let si=(H-1-y)*W*4, di=y*W*4; for(let x=0;x<W;x++,si+=4,di+=4){ dst[di]=_LUT[src[si]]; dst[di+1]=_LUT[src[si+1]]; dst[di+2]=_LUT[src[si+2]]; dst[di+3]=255; } }
+  PV.ctx.putImageData(PV.img,0,0);
 }

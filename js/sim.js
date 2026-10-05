@@ -81,11 +81,29 @@ const MAPS={
   wide:{n:'Grand large',d:'Îles très éloignées avec de petits îlots relais. Ponts longs !',bases:[[50,84,[0,-1]],[16,50,[1,0]],[50,16,[0,1]],[84,50,[-1,0]]],dia:[[26,26],[74,26],[26,74],[74,74]],relay:[[50,66],[34,50],[50,34],[66,50]]},
   corners:{n:'Les quatre coins',d:'Bases dans les angles, diamants au milieu des côtés.',bases:[[28,72,[1,0]],[28,28,[0,1]],[72,28,[-1,0]],[72,72,[0,-1]]],dia:[[50,14],[14,50],[86,50],[50,86]],relay:[]}
 };
+const CBASE={hp:0,spd:1,melee:1,gun:1,rel:1,def:1,kb:1,jump:1,mine:1,free:0,gcd:1,loot:1};
+const CLASSES={
+  matelot:{n:'Matelot',ico:'⚓',d:'Polyvalent : aucun point fort, aucune faiblesse.',pros:[],cons:[]},
+  corsaire:{n:'Corsaire',ico:'🗡️',d:'Maître du sabre, un peu lourd à manœuvrer.',melee:1.3,spd:.92,hp:2,start:{sword:1},pros:['+30 % dégâts de mêlée','Sabre d\'abordage au départ','+2 PV'],cons:['−8 % vitesse']},
+  canonnier:{n:'Canonnier',ico:'💣',d:'Spécialiste des armes à feu, fragile.',gun:1.25,rel:.8,hp:-4,start:{own:['gun']},pros:['+25 % dégâts à distance','Rechargement −20 %','Pistolet au départ'],cons:['−4 PV']},
+  eclaireur:{n:'Éclaireur',ico:'🧭',d:'Rapide et agile, mais peu résistant.',spd:1.15,jump:1.2,hp:-4,melee:.8,start:{am:{springs:1}},pros:['+15 % vitesse','Sauts +20 %','Bottes de mousse au départ'],cons:['−4 PV','−20 % dégâts de mêlée']},
+  charpentier:{n:'Charpentier',ico:'🔨',d:'Bâtisseur économe, peu combatif à distance.',free:.3,mine:1.5,gun:.85,start:{blocks:16},pros:['30 % de blocs gratuits','Minage +50 %','+16 blocs au départ'],cons:['−15 % dégâts à distance']},
+  brute:{n:'Brute',ico:'🛢️',d:'Une montagne de muscles, lente et peu inventive.',hp:10,def:.9,kb:.6,spd:.92,gcd:1.4,pros:['+10 PV','−10 % dégâts reçus','Repoussé 40 % de moins'],cons:['−8 % vitesse','Gadgets : recharge +40 %']},
+  mystique:{n:'Mystique',ico:'🔮',d:'Un as des gadgets, fragile au corps à corps.',gcd:.5,hp:-6,melee:.85,start:{am:{haste:1,cloak:1}},pros:['Gadgets 2× plus rapides','Rhum et brume au départ'],cons:['−6 PV','−15 % dégâts de mêlée']},
+  pillard:{n:'Pillard',ico:'💰',d:'Il ramasse plus de butin, mais encaisse mal.',loot:1.35,def:1.1,hp:-2,start:{am:{net:1}},pros:['+35 % de ressources ramassées','Filet piégé au départ'],cons:['+10 % dégâts reçus','−2 PV']}
+};
+const CLS_IDS=Object.keys(CLASSES);
+const C=e=>CLASSES[e.cls]||CLASSES.matelot, cv=(e,k)=>C(e)[k]===undefined?CBASE[k]:C(e)[k];
+function applyClass(e){
+  const st=C(e).start; if(!st) return;
+  if(st.sword) e.sword=Math.max(e.sword,st.sword); if(st.blocks) e.blocks[2]+=st.blocks;
+  if(st.own) for(const k of st.own) e.own[k]=true; if(st.am) for(const k in st.am) e.am[k]=(e.am[k]||0)+st.am[k];
+}
 const MODES={solo:{n:'Chacun pour soi',d:'4 équipages, 1 pirate chacun.'},duo:{n:'Équipes de 2',d:'Tu es accompagné d\'un coéquipier bot. 2 pirates par équipage, un coffre partagé.'}};
 const OPT_RES=[{n:'Lentes',v:.7},{n:'Normales',v:1},{n:'Rapides',v:1.5}];
 const OPT_START=[{n:'Aucun',r:{}},{n:'Petit pécule',r:{bronze:40,silver:10}},{n:'Butin de départ',r:{bronze:120,silver:40,gold:6,diamond:3}}];
 const OPT_CORE=[{n:'Fragiles',v:.6},{n:'Normaux',v:1},{n:'Solides',v:1.7}];
-let game={state:'menu',diff:'normal',opts:{mode:'solo',map:'classic',res:1,start:0,core:1},t:0,win:false,hurtFx:0,hitmark:0,flash:0,flashCol:'#fff'};
+let game={state:'menu',diff:'normal',cls:'matelot',look:{skin:0,hat:0,hair:0,face:0,patch:1},pname:'Toi',opts:{mode:'solo',map:'classic',res:1,start:0,core:1},t:0,win:false,hurtFx:0,hitmark:0,flash:0,flashCol:'#fff'};
 let player=null;
 let shake=0, banner={txt:'',col:'#fff',t:0,max:3};
 let selId='block', selAnim=0;
@@ -172,7 +190,7 @@ function makeEnt(team,isBot,name){
     up:{fb:0,fs:0,hp:0,sp:0,ar:0,gold:0,core:0},
     cd:{atk:0,mine:0,place:0,bow:0,gad:0},jetT:0,voidT:0,pull:null,grace:0,swing:0,swingMax:.2,kills:0,deaths:0,
     root:0,flagBuff:0,lastSafe:null,lastSafeT:0,bubble:0,cloak:0,haste:0,springT:0,frozen:0,slip:0,sdx:0,sdy:0,squash:0,muzzle:0,stepPh:0,stepT:0,burn:0,
-    lastBy:null,lastByT:0,sinceHurt:99,ai:null,hook:null,aegis:0,slot:0,bar:[],pack:[]};
+    lastBy:null,lastByT:0,sinceHurt:99,ai:null,hook:null,aegis:0,slot:0,bar:[],pack:[],cls:'matelot',look:null};
 }
 function newGame(){
   floorT=new Uint8Array(W*H); wallT=new Uint8Array(W*H); hpF=new Float32Array(W*H); hpW=new Float32Array(W*H);
@@ -207,8 +225,9 @@ function newGame(){
       gold:{t:0,stock:0,cap:Infinity,int:()=>GOLD_INT[U().gold]}}});
   });
   player=ents[0];
+  for(const e of ents){ if(e===player){ e.cls=CLASSES[game.cls]?game.cls:'matelot'; e.look=Object.assign({},game.look); e.name=(game.pname||'Toi').slice(0,14); } else { e.cls=CLS_IDS[Math.floor(Math.random()*CLS_IDS.length)]; e.look=randomLook(); } }
   const SR=(OPT_START[O.start]||OPT_START[0]).r; for(const e of ents) for(const k in SR) e.res[k]+=SR[k];
-  ents.forEach(spawnEnt); syncBar(player);
+  ents.forEach(e=>{ applyClass(e); spawnEnt(e); }); syncBar(player);
   game.t=0; game.win=false; game.state='play'; game.hurtFx=0;
   announce('C\'EST PARTI !','#fde68a');
   msg('Protège ton coffre au trésor. Espace pour sauter, E pour la boutique.', '#fff');
@@ -224,8 +243,8 @@ function spawnEnt(e){
   burst(e.x,e.y,TEAMS[e.team].light,14,160,.6,3);
   if(e.ai){e.ai.mode='home'; e.ai.leaveAt=e.ai.t+rnd(12,22)*(getD().leave[0]/40);}
 }
-const maxhp=e=>(e.isBot?getD().hp:20)+6*e.up.hp;
-const speedOf=e=>138*(1+.08*e.up.sp)*(e.jetT>0?1.3:1)*(e.isBot?getD().speed:1)*(e.slip>0?1.35:1)*(e.haste>0?1.5:1)*(e.slow>0?.55:1)*(e.flagBuff>0?1.2:1);
+const maxhp=e=>(e.isBot?getD().hp:20)+6*e.up.hp+cv(e,'hp');
+const speedOf=e=>cv(e,'spd')*138*(1+.08*e.up.sp)*(e.jetT>0?1.3:1)*(e.isBot?getD().speed:1)*(e.slip>0?1.35:1)*(e.haste>0?1.5:1)*(e.slow>0?.55:1)*(e.flagBuff>0?1.2:1);
 function msg(txt,col){feed.push({txt,col:col||'#dbe4ff',t:7}); if(feed.length>4)feed.shift();}
 function announce(txt,col){banner.txt=txt;banner.col=col||'#fff';banner.t=banner.max;sfx('fanfare');}
 
@@ -271,7 +290,7 @@ function inShield(x,y,team){
 function hurt(e,amount,by,kx,ky){
   if(!e.alive||e.inv>0||e.aegis>0) return;
   if(by&&by.isBot&&!e.isBot) amount*=getD().dmg;
-  amount*=(1-.12*e.up.ar);
+  amount*=(1-.12*e.up.ar)*cv(e,'def'); kx*=cv(e,'kb'); ky*=cv(e,'kb');
   e.hp-=amount; e.vx+=kx; e.vy+=ky; e.lastBy=by; e.lastByT=5; e.sinceHurt=0;
   if(amount>0){
     e.flash=.15; burst(e.x,e.y-e.z,'#ff6b6b',5,120,.4,3);
@@ -341,7 +360,7 @@ function doPlace(e,tx,ty,type){
   if(floorT[i]===0){ floorT[i]=type; hpF[i]=BHP[type]; ownF[i]=e.team; }
   else { wallT[i]=type; hpW[i]=BHP[type]; ownW[i]=e.team; }
   pop[i]=1;
-  e.blocks[type]--; e.cd.place=e.isBot?.32:.14; e.swing=.12; e.swingMax=.12;
+  if(Math.random()>=cv(e,'free')) e.blocks[type]--; e.cd.place=e.isBot?.32:.14; e.swing=.12; e.swingMax=.12;
   chunks((tx+.5)*T,(ty+.5)*T,col,4); ring((tx+.5)*T,(ty+.5)*T,T*.7,'#ffffff',.22); sfx('place',e.x,e.y);
   return true;
 }
@@ -373,7 +392,7 @@ function doMine(e,hit){
   const [tx,ty,layer]=hit;
   if(protectedTile(tx,ty,e.team)){ if(e===player) floatTxt(e.x,e.y-30,'Champ de force !','#7dd3fc'); e.cd.mine=.4; return; }
   e.cd.mine=e.isBot?.55-getD().use*.05:.28; e.swing=.18; e.swingMax=.18;
-  damageTile(tx,ty,PICKS[e.pick].d,e,layer);
+  damageTile(tx,ty,PICKS[e.pick].d*cv(e,'mine'),e,layer);
 }
 function damageTile(tx,ty,dmg,src,layer){
   const i=idx(tx,ty), cx=(tx+.5)*T, cy=(ty+.5)*T;
@@ -400,7 +419,7 @@ function damageTile(tx,ty,dmg,src,layer){
 }
 function doSword(e){
   if(e.cd.atk>0) return; e.cd.atk=e.isBot?getD().meleeCd:.42; e.swing=.2; e.swingMax=.2; sfx('swing',e.x,e.y);
-  const ax=Math.cos(e.ang),ay=Math.sin(e.ang), dmg=SWORDS[e.sword].d;
+  const ax=Math.cos(e.ang),ay=Math.sin(e.ang), dmg=SWORDS[e.sword].d*cv(e,'melee');
   hitGuards(e,e.x+ax*T,e.y+ay*T,T*1.3,dmg);
   for(const o of ents){
     if(!o.alive||o.team===e.team) continue;
@@ -433,7 +452,7 @@ function doHammer(e){
   }
 }
 function wst(e,id){ return e.ws[id]||(e.ws[id]={a:GUNS[id].mag,r:0,cd:0,b:0,n:0,last:-9}); }
-function startReload(e,id){ const g=GUNS[id],s=wst(e,id); if(s.r>0||s.a>=g.mag) return false; s.r=g.reload*(e.haste>0?.8:1); sfx('reload',e.x,e.y); return true; }
+function startReload(e,id){ const g=GUNS[id],s=wst(e,id); if(s.r>0||s.a>=g.mag) return false; s.r=g.reload*(e.haste>0?.8:1)*cv(e,'rel'); sfx('reload',e.x,e.y); return true; }
 function fireGun(e,id){
   const g=GUNS[id]; if(!g||!e.own[id]) return false;
   const s=wst(e,id);
@@ -445,7 +464,7 @@ function fireGun(e,id){
   sfx(id==='gun'?'shot':id==='rocket'?'whoosh':id==='bow'?'bow':id==='woolgun'?'woof':id,e.x,e.y);
   for(let i=0;i<g.pel;i++){
     const a=e.ang+(g.pel>1?rnd(-spr,spr):(Math.random()*2-1)*spr*.7+Math.sin(s.n*1.7)*s.b*.45);
-    projs.push({x:e.x+Math.cos(e.ang)*14,y:e.y+Math.sin(e.ang)*14,z:12,vx:Math.cos(a)*g.sp,vy:Math.sin(a)*g.sp,team:e.team,owner:e,life:g.life,dmg:g.dmg,kb:g.kb,kind:g.kind||'bullet',col:g.col,pierce:g.pierce,hit:g.pierce?[]:null});
+    projs.push({x:e.x+Math.cos(e.ang)*14,y:e.y+Math.sin(e.ang)*14,z:12,vx:Math.cos(a)*g.sp,vy:Math.sin(a)*g.sp,team:e.team,owner:e,life:g.life,dmg:g.dmg*cv(e,'gun'),kb:g.kb,kind:g.kind||'bullet',col:g.col,pierce:g.pierce,hit:g.pierce?[]:null});
   }
   e.vx-=Math.cos(e.ang)*g.rec; e.vy-=Math.sin(e.ang)*g.rec;
   if(id!=='flame'&&id!=='bow'){ burst(e.x+Math.cos(e.ang)*16,e.y+Math.sin(e.ang)*16,g.col,4,120,.15,3); if(e===player) shake=Math.max(shake,id==='shotgun'||id==='sniper'||id==='rocket'?6:2); }
@@ -494,7 +513,7 @@ function useGrapple(e){
 }
 function jump(e,power){
   if(e.bubble>0||e.root>0||e.z>groundH(e)+1||e.vz>0||e.pull||e.frozen>0) return;
-  sfx('jump',e.x,e.y); e.vz=power||(e.springT>0?540:320); e.squash=-.5; burst(e.x,e.y+6-e.z,'#e5e7eb',6,70,.3,3);
+  sfx('jump',e.x,e.y); e.vz=(power||(e.springT>0?540:320))*cv(e,'jump'); e.squash=-.5; burst(e.x,e.y+6-e.z,'#e5e7eb',6,70,.3,3);
 }
 function useGadget(e,id,wx,wy){
   if(e.cd.gad>0||(e.am[id]||0)<=0) return false;
@@ -612,7 +631,7 @@ function useGadget(e,id,wx,wy){
       break;
     default: return false;
   }
-  e.am[id]--; e.cd.gad=.5; sfx('gadget',e.x,e.y); return true;
+  e.am[id]--; e.cd.gad=.5*cv(e,'gcd'); sfx('gadget',e.x,e.y); return true;
 }
 function blastTiles(cx,cy,R,dmg,src,team){
   for(let ty=Math.floor((cy-R)/T);ty<=Math.floor((cy+R)/T);ty++)for(let tx=Math.floor((cx-R)/T);tx<=Math.floor((cx+R)/T);tx++){
@@ -908,7 +927,7 @@ function updateSpawners(dt){
       for(const r in sp.types){
         const ty=sp.types[r];
         if(ty.stock>0){
-          e.res[r]+=ty.stock;
+          e.res[r]+=Math.round(ty.stock*cv(e,'loot'));
           if(e===player){
             if(sp.kind!=='base'||r!=='bronze') sfx('coin'); if(sp.kind!=='base') { floatTxt(e.x,e.y-34,`+${ty.stock} ${RESNAME[r]}`,RESCOL[r],15); burst(e.x,e.y-8,RESCOL[r],8,110,.5,3); ring(e.x,e.y,T*.9,RESCOL[r],.3); }
             else if(r!=='bronze'||Math.random()<.15) parts.push({x:cx,y:cy,z:12,vz:60,vx:(e.x-cx)*1.6,vy:(e.y-cy)*1.6,life:.6,max:.6,col:RESCOL[r],size:5});
