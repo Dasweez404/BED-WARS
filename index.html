@@ -254,7 +254,9 @@ function die(e,by){
     msg(`${killer.name} a éliminé ${e.name}`,TEAMS[killer.team].light);
     if(killer===player){ announce('ÉLIMINATION !','#fde68a'); flashScreen('#fff',.15); }
   } else msg(`${e.name} est tombé dans le vide`,'#9aa7cf');
-  if(e===player) shake=14;
+  const lost=Object.values(e.res).reduce((a,b)=>a+b,0);
+  for(const k in e.res) e.res[k]=0; // la mort fait perdre toutes les ressources
+  if(e===player){ shake=14; if(lost>0) msg(`Tu as perdu ${lost} ressources !`,'#fca5a5'); }
   const td=TD[e.team];
   if(td.coreAlive) e.resp=3;
   else{ e.elim=true; msg(`${e.name} est éliminé définitivement !`,'#ff9b9b'); announce(`${e.name} ÉLIMINÉ`,'#fca5a5'); checkOver(); }
