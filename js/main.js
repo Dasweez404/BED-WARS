@@ -8,6 +8,7 @@ addEventListener('keydown',ev=>{
   if(game.state==='menu') return;
   if(ev.repeat) return;
   if(game.state==='over'&&(k==='Enter'||k==='r')){newGame();return;}
+  if(game.state==='over'&&k==='Escape'){showMenu();return;}
   if(ev.code==='Space'){ if(player.alive&&game.state==='play') jump(player); return; }
   let d=0;
   if(/^Digit[1-9]$/.test(ev.code)) d=+ev.code.slice(5); else if(/^Numpad[1-9]$/.test(ev.code)) d=+ev.code.slice(6); else if(DIGIT[k]) d=DIGIT[k];
@@ -44,6 +45,8 @@ function bindMouse(c){
 addEventListener('mouseup',()=>{mouse.down=false;});
 addEventListener('pointerdown',audioInit);addEventListener('keydown',audioInit);
 
+function showMenu(){ toggleShop(false); game.state='menu'; document.getElementById('start').classList.remove('hidden'); }
+function selectDiff(d){ game.diff=d; try{localStorage.setItem('pirates_diff',d);}catch(e){} document.querySelectorAll('#diff .dbtn').forEach(b=>b.classList.toggle('on',b.dataset.d===d)); document.getElementById('diffDesc').textContent=DIFFS[d].desc; }
 let last=performance.now(), shopT=0;
 function frame(now){
   const dt=Math.min(.05,(now-last)/1000); last=now;
@@ -56,6 +59,8 @@ function frame(now){
 }
 function boot(){
   initRender(); initUI(); bindMouse(document.getElementById('ui'));
+  document.querySelectorAll('#diff .dbtn').forEach(b=>b.onclick=()=>selectDiff(b.dataset.d));
+  let d0='normal'; try{ d0=localStorage.getItem('pirates_diff')||'normal'; }catch(e){} selectDiff(DIFFS[d0]?d0:'normal');
   document.getElementById('playBtn').onclick=()=>{audioInit();document.getElementById('start').classList.add('hidden');newGame();};
   newGame(); game.state='menu';
   requestAnimationFrame(frame);

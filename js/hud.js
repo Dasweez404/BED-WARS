@@ -219,7 +219,7 @@ function drawCrosshair(){
 function overlayWorld(){
   // barres de vie et noms au-dessus des personnages
   for(const e of ents){
-    if(!e.alive) continue; const td=TEAMS[e.team], s=w2s(e.x,e.y,e.z+46); if(!s[2]) continue;
+    if(!e.alive) continue; const td=TEAMS[e.team], s=w2s(e.x,e.y,e.z+38); if(!s[2]) continue;
     const w=44, hpk=Math.max(0,e.hp/maxhp(e));
     ctx.fillStyle='rgba(10,20,50,.8)'; rr(s[0]-w/2-2,s[1]-2,w+4,9,4); ctx.fill();
     ctx.fillStyle=hpk>.35?'#6ee79a':'#ff7b7b'; rr(s[0]-w/2,s[1],Math.max(4,w*hpk),5,2); ctx.fill();
@@ -291,6 +291,7 @@ function drawHud(){
     else {ctx.fillStyle='#9af2b8';ctx.fillText('♥ '+Math.ceil(en.hp),138,y+28);}
   });
   hud.alertT=Math.max(0,hud.alertT-dt);
+  ctx.font='bold 12px '+FONT; ctx.textAlign='right'; ctx.fillStyle='rgba(255,236,190,.95)'; ctx.lineWidth=3; ctx.strokeStyle='rgba(10,30,50,.8)'; { const dt_='Difficulté : '+getD().n; ctx.strokeText(dt_,VW-14,190); ctx.fillText(dt_,VW-14,190); } ctx.textAlign='left';
   ctx.font='14px '+FONT; let fy=10+4*38+24;
   for(const f of feed){ctx.globalAlpha=Math.min(1,f.t);const w=ctx.measureText(f.txt).width;panel(10,fy-15,w+24,23,9);ctx.fillStyle=f.col;ctx.fillRect(10,fy-12,3,17);ctx.fillText(f.txt,20,fy+2);fy+=27;}
   ctx.globalAlpha=1;
@@ -356,7 +357,7 @@ function drawHud(){
     ctx.fillStyle='#fff';ctx.font='20px '+FONT;
     ctx.fillText(game.win?'Tous les équipages ennemis sont coulés.':'Ton équipe est éliminée.',VW/2,VH/2+26);
     ctx.fillText(`Éliminations : ${player.kills} · Durée : ${Math.floor(game.t/60)} min ${Math.floor(game.t%60)} s`,VW/2,VH/2+56);
-    ctx.fillText('Clique ou appuie sur Entrée pour rejouer',VW/2,VH/2+90);
+    ctx.fillText('Clic ou Entrée : rejouer · Échap : changer la difficulté',VW/2,VH/2+90);
   }
   if(game.hitmark>0&&game.state==='play'){ const k=game.hitmark/.18; ctx.strokeStyle=`rgba(255,255,255,${k})`; ctx.lineWidth=3; const m=11+(1-k)*8; ctx.beginPath(); ctx.moveTo(mouse.x-m,mouse.y-m);ctx.lineTo(mouse.x-4,mouse.y-4);ctx.moveTo(mouse.x+m,mouse.y-m);ctx.lineTo(mouse.x+4,mouse.y-4);ctx.moveTo(mouse.x-m,mouse.y+m);ctx.lineTo(mouse.x-4,mouse.y+4);ctx.moveTo(mouse.x+m,mouse.y+m);ctx.lineTo(mouse.x+4,mouse.y+4);ctx.stroke(); }
   drawCrosshair();

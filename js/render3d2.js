@@ -9,8 +9,51 @@ function clearDynamic(){
   for(const g of padM) scene.remove(g.g); padM=[];
   for(const g of propM) scene.remove(g.m); propM=[];
   if(shipGroup){ scene.remove(shipGroup); shipGroup=null; }
+  if(ambient){ scene.remove(ambient); ambient=null; }
   for(const r of ringPool){ scene.remove(r); scene.remove(r.userData.f); } ringPool=[];
   for(const b of beamPool) scene.remove(b); beamPool=[];
+}
+/* ---------- ambiance : mouettes, épaves, îlots lointains, eaux peu profondes ---------- */
+let ambient=null;
+function buildAmbient(){
+  const g=new THREE.Group(), u={gulls:[],debris:[]}; const rn=prng3(99);
+  // eaux peu profondes sous chaque île
+  for(const il of ISLANDS){ const d=new THREE.Mesh(GEO.disc,new THREE.MeshBasicMaterial({color:il.ship?0x4cc3d8:0x5fdad0,transparent:true,opacity:.34,depthWrite:false})); d.scale.set(il.ship?5.6:il.r*.82+1.4,1,il.ship?8.6:il.r*.82+1.4); d.position.set(il.x+.5,-1.12,il.y+.5); g.add(d); }
+  // îlots lointains (instanciés)
+  const N=10, rock=new THREE.InstancedMesh(GEO.sphere0,new THREE.MeshStandardMaterial({color:0x7a6a58,flatShading:true}),N), sand=new THREE.InstancedMesh(GEO.cyl,new THREE.MeshStandardMaterial({color:0xefdca4,flatShading:true}),N),
+        trunk=new THREE.InstancedMesh(GEO.cyl,new THREE.MeshStandardMaterial({color:0xa8793d,flatShading:true}),N), fr=new THREE.InstancedMesh(GEO.cone,new THREE.MeshStandardMaterial({color:0x44a850,flatShading:true}),N*4);
+  for(let i=0;i<N;i++){
+    const a=i*6.2832/N+rn()*.4, rad=62+rn()*34, x=CX+.5+Math.cos(a)*rad, z=CY+.5+Math.sin(a)*rad, s=2.2+rn()*2;
+    sc3.set(s,s*.55,s); v3.set(x,-.7,z); m4.compose(v3,qd.identity(),sc3); rock.setMatrixAt(i,m4);
+    sc3.set(s*.9,.5,s*.9); v3.set(x,-.15,z); m4.compose(v3,qd.identity(),sc3); sand.setMatrixAt(i,m4);
+    sc3.set(.12,2.2,.12); v3.set(x,1.0,z); m4.compose(v3,qd.identity(),sc3); trunk.setMatrixAt(i,m4);
+    for(let k=0;k<4;k++){ const qa=new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.sin(k*1.57)*1.0,0,-Math.cos(k*1.57)*1.0)); sc3.set(.3,1.3,.1); v3.set(x+Math.cos(k*1.57)*.6,2.1,z+Math.sin(k*1.57)*.6); m4.compose(v3,qa,sc3); fr.setMatrixAt(i*4+k,m4); }
+  }
+  for(const m of [rock,sand,trunk,fr]){ m.frustumCulled=false; g.add(m); }
+  // mouettes
+  for(let i=0;i<6;i++){
+    const b=new THREE.Group(), wm=M('#f4f4f4'); const body=new THREE.Mesh(GEO.sphere0,wm); body.scale.set(.32,.14,.14); b.add(body);
+    const hd=new THREE.Mesh(GEO.sphere0,wm); hd.scale.set(.1,.1,.1); hd.position.x=.3; b.add(hd); const bk=new THREE.Mesh(GEO.cone,M('#f59e0b')); bk.scale.set(.04,.14,.04); bk.rotation.z=-Math.PI/2; bk.position.x=.42; b.add(bk);
+    const wings=[]; for(const z of [-1,1]){ const w=new THREE.Group(); const wb=new THREE.Mesh(GEO.box,wm); wb.scale.set(.2,.025,.6); wb.position.z=z*.3; w.add(wb); b.add(w); wings.push(w); }
+    b.userData={wings,cx:CX+(rn()-.5)*70,cz:CY+(rn()-.5)*70,r:7+rn()*16,sp:.25+rn()*.35,ph:rn()*6.28,h:7+rn()*6,fl:rn()*6}; g.add(b); u.gulls.push(b);
+  }
+  // épaves et bouées qui flottent
+  const isl=ISLANDS.map(il=>[il.x,il.y,il.ship?10:il.r+3]);
+  for(let i=0,n=0;i<200&&n<14;i++){
+    const x=CX-45+rn()*90, z=CY-45+rn()*90; if(isl.some(([ix,iy,r])=>Math.hypot(ix-x,iy-z)<r)) continue; n++;
+    const t=n%3, m=new THREE.Group();
+    if(t===0){ const bm=new THREE.Mesh(GEO.cyl,M('#8a5326')); bm.scale.set(.22,.38,.22); bm.rotation.z=1.2; m.add(bm); }
+    else if(t===1){ const pl=new THREE.Mesh(GEO.box,M('#9a6b3a')); pl.scale.set(1.0,.07,.3); m.add(pl); const p2=new THREE.Mesh(GEO.box,M('#7c4a21')); p2.scale.set(.7,.07,.28); p2.position.set(.2,.0,.35); p2.rotation.y=.4; m.add(p2); }
+    else { const bu=new THREE.Mesh(GEO.torus,M('#e5483a')); bu.scale.set(.3,.3,.3); bu.rotation.x=Math.PI/2; m.add(bu); const bw=new THREE.Mesh(GEO.torus,M('#ffffff')); bw.scale.set(.3,.3,.3); bw.rotation.x=Math.PI/2; bw.rotation.z=.8; bw.position.y=.001; m.add(bw); }
+    m.userData={x,z,ph:rn()*6.28,sp:.04+rn()*.06,rot:rn()*6.28,t}; g.add(m); u.debris.push(m);
+  }
+  g.userData=u; scene.add(g); ambient=g;
+}
+function updateAmbient(dt){
+  if(!ambient) return; const t=game.t, u=ambient.userData;
+  for(const b of u.gulls){ const d=b.userData, a=t*d.sp+d.ph; b.position.set(d.cx+Math.cos(a)*d.r,d.h+Math.sin(t*.8+d.fl)*.4,d.cz+Math.sin(a)*d.r); b.rotation.y=-(a+Math.PI/2); const f=Math.sin(t*7+d.fl)*.6; d.wings[0].rotation.x=f; d.wings[1].rotation.x=-f; }
+  for(const m of u.debris){ const d=m.userData; d.x+=d.sp*dt; if(d.x>CX+50) d.x=CX-50; m.position.set(d.x,-1.12+Math.sin(t*1.4+d.ph)*.07,d.z); m.rotation.y=d.rot+Math.sin(t*.3+d.ph)*.3; m.rotation.x=Math.sin(t*1.1+d.ph)*.08; m.rotation.z=Math.cos(t*.9+d.ph)*.06; }
+  if(game.state!=='menu'&&parts.length<350&&Math.random()<.5){ const a=Math.random()*6.28, r=Math.random()*20*T; parts.push({x:cam3.x+Math.cos(a)*r,y:cam3.y+Math.sin(a)*r,z:-34,vx:0,vy:0,vz:6,life:.9,max:.9,col:'#ffffff',size:2.5}); }
 }
 function sync(map,list,create,update){
   const seen=new Set();
@@ -322,7 +365,7 @@ function w2s(x,y,z){ v3.set(x*U,(z||0)*U,y*U).project(camera3); return [(v3.x*.5
 /* ---------- frame ---------- */
 function onNewGame(){
   if(!renderer) return;
-  clearDynamic(); buildWorldMeshes(); buildShip(); genProps3d(); buildCores(); buildPads(); worldSig=-1;
+  clearDynamic(); buildWorldMeshes(); buildShip(); buildAmbient(); genProps3d(); buildCores(); buildPads(); worldSig=-1;
   if(!playerRing){ playerRing=new THREE.Mesh(GEO.ring,new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,depthWrite:false,side:THREE.DoubleSide})); scene.add(playerRing); }
   cam3.x=player.x; cam3.y=player.y;
 }
@@ -331,7 +374,7 @@ function syncEnts(dt){
   for(const e of ents){
     let m=entM.get(e); if(!m){ m=createPirate(TEAMS[e.team]); scene.add(m); entM.set(e,m); }
     m.visible=e.alive&&!(e.inv>0&&Math.floor(game.t*10)%2); if(!e.alive) continue;
-    const u=m.userData; let sc=1,dy=0; if(e.voidT>0){ sc=Math.max(.2,1-e.voidT/.28*.7); dy=-e.voidT*6; }
+    const u=m.userData; let sc=1,dy=0; if(e.voidT>0){ sc=Math.max(.2,1-e.voidT/.4*.7); dy=-e.voidT*6; }
     m.position.set(e.x*U,e.z*U+dy,e.y*U); m.rotation.y=-e.ang;
     updateHeld(e,m); animatePirate(e,m,dt); setPirateTint(m,e); m.scale.multiplyScalar(sc);
     const ghost=e.cloak>0?(e===player?.4:.12):1; for(const k of TINTK){ const mt=u.mats[k]; const tr=ghost<1; if(mt.transparent!==tr){mt.transparent=tr;mt.needsUpdate=true;} mt.opacity=ghost; }
@@ -344,7 +387,7 @@ function render3d(dt){
   if(!renderer) return;
   qualityTick(dt);
   sigTick++; if(sigTick%3===0||popActive){ const sig=(popActive&&sigTick%2)?worldSig:worldSignature(); if(sig!==worldSig||(popActive&&sigTick%2===0)){ rebuildWorld(); worldSig=sig; } }
-  updateSea(game.t); updateShip(); syncEnts(dt); syncCores(); syncPads(); syncProps();
+  updateSea(game.t); updateShip(); updateAmbient(dt); syncEnts(dt); syncCores(); syncPads(); syncProps();
   sync(guardM,guards,createGuard,updateGuardM); sync(chickM,chickens,createCrab,updateCrabM);
   sync(projM,projs,createProj,updateProjM); sync(bombM,bombs,createBomb,updateBombM); sync(trapM,traps,createTrap,updateTrapM);
   sync(shieldM,shields,createShield,updateShieldM); sync(hookM,hooks,createHook,updateHookM); sync(pearlM,pearls,createPearl,(p,m)=>{ m.position.set(p.x*U,.5,p.y*U); m.rotation.y=game.t*6; });

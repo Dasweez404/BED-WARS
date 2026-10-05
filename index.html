@@ -19,6 +19,11 @@
   #start p,#start li{font-size:15px;line-height:1.5;color:#f4e4c4}
   #start ul{padding-left:20px;margin:8px 0 16px}
   #start b{color:#fff}
+  #diff{display:flex;gap:10px;margin:6px 0 4px}
+  .dbtn{flex:1;font-family:'Pirata One','Lilita One',serif;font-size:24px;padding:8px 6px;border-radius:12px;border:3px solid #7a5230;background:#4a2f1b;color:#f4e4c4;cursor:pointer;transition:transform .08s}
+  .dbtn:hover{transform:translateY(-2px);border-color:#e2b14f}
+  .dbtn.on{background:#e2b14f;color:#3a2000;border-color:#ffe08a;box-shadow:0 0 14px #e2b14f99}
+  #diffDesc{font-size:14px;color:#f4e4c4;min-height:20px;margin:0 0 14px}
   button.big{font-family:'Pirata One','Lilita One',serif;background:#e2b14f;color:#3a2000;border:0;border-radius:12px;padding:10px 38px;font-size:28px;cursor:pointer;box-shadow:0 6px 0 #9a6b14,0 12px 24px #0008;transition:transform .1s}
   button.big:hover{transform:translateY(-2px)}
   button.big:active{transform:translateY(4px);box-shadow:0 2px 0 #9a6b14}
@@ -59,6 +64,9 @@
       <li>Blocs : sur la mer = passerelle, sur le sol = palissade. Onglet <b>Défense</b> : canons, matelots gardiens, filets, pavillon noir, bouée…</li>
       <li>Bronze/argent sur ton île, <b>or</b> sur le galion, <b>diamants</b> sur les îlots. Tomber à la mer = mort (sauf bouée de sauvetage).</li>
     </ul>
+    <div style="font-weight:700;color:#ffe9b0;margin-top:6px">Difficulté des bots</div>
+    <div id="diff"><button class="dbtn" data-d="easy">Facile</button><button class="dbtn" data-d="normal">Normal</button><button class="dbtn" data-d="hard">Difficile</button></div>
+    <div id="diffDesc"></div>
     <button class="big" id="playBtn">À l'abordage !</button>
   </div>
 </div>

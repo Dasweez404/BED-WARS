@@ -79,6 +79,7 @@ function buildSea(){
 let seaFrame=0;
 function updateSea(t,force){
   if(!sea) return; seaFrame++;
+  if(iFoam) iFoam.material.opacity=.3+.13*Math.sin(t*1.5);
   sea.position.x=Math.round(cam3.x*U/6.5)*6.5; sea.position.z=Math.round(cam3.y*U/6.5)*6.5;
   if(!force&&(Q.level<1||seaFrame%2)) return;
   const pos=sea.geometry.attributes.position, col=sea.geometry.attributes.color, a=pos.array, b=seaBase, ox=sea.position.x, oz=sea.position.z;
@@ -123,7 +124,7 @@ function fillParticles(){
 }
 
 /* ---------- monde : îles, ponts, murs ---------- */
-let iGround,iPlat,iWall,iBand,iPuff,iUnder,iFoam, worldSig=-1, popActive=false, sigTick=0, rebuildTick=0;
+let iGround,iPlat,iWall,iBand,iPuff,iUnder,iFoam,iTuft,iShell, worldSig=-1, popActive=false, sigTick=0, rebuildTick=0;
 const CAP=3000;
 function instMesh(geo,mat,cap,shadow,receive){
   const m=new THREE.InstancedMesh(geo,mat,cap); m.count=0; m.frustumCulled=false; m.castShadow=!!shadow; m.receiveShadow=!!receive;
@@ -142,7 +143,7 @@ function groundColor(reg,tx,ty,out){
   out.set(b?'#e3d3a2':'#d8c793').lerp(new THREE.Color('#8fd0cf'),.15); return out;
 }
 function buildWorldMeshes(){
-  for(const m of [iGround,iPlat,iWall,iBand,iPuff,iUnder,iFoam]) if(m){ scene.remove(m); m.dispose&&m.dispose(); }
+  for(const m of [iGround,iPlat,iWall,iBand,iPuff,iUnder,iFoam,iTuft,iShell]) if(m){ scene.remove(m); m.dispose&&m.dispose(); }
   iGround=instMesh(GEO.box,new THREE.MeshStandardMaterial({flatShading:true,roughness:1}),CAP,false,true);
   iPlat=instMesh(GEO.box,new THREE.MeshStandardMaterial({flatShading:true,roughness:.9}),CAP,true,true);
   iWall=instMesh(GEO.box,new THREE.MeshStandardMaterial({flatShading:true,roughness:.85}),CAP,true,true);
@@ -150,7 +151,9 @@ function buildWorldMeshes(){
   iPuff=instMesh(GEO.sphere0,new THREE.MeshStandardMaterial({flatShading:true,roughness:1}),CAP,false,false);
   iUnder=instMesh(GEO.sphere0,new THREE.MeshStandardMaterial({flatShading:true,roughness:1}),CAP,false,false);
   iFoam=instMesh(GEO.box,new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.42,depthWrite:false}),CAP,false,false);
-  let np=0,nu=0,nf=0; const rn=prng3(5);
+  iTuft=instMesh(GEO.cone,new THREE.MeshStandardMaterial({flatShading:true,roughness:1}),900,false,false);
+  iShell=instMesh(GEO.sphere0,new THREE.MeshStandardMaterial({flatShading:true,roughness:.6}),600,false,false);
+  let np=0,nu=0,nf=0,nt=0,ns=0; const rn=prng3(5);
   const setI=(mesh,i,x,y,z,sx,sy,sz,c)=>{ sc3.set(sx,sy,sz); v3.set(x,y,z); m4.compose(v3,qd.identity(),sc3); mesh.setMatrixAt(i,m4); mesh.setColorAt(i,c); };
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){
     if(floorT[idx(x,y)]!==1) continue;
@@ -161,7 +164,11 @@ function buildWorldMeshes(){
     }
     if(edge&&nf<CAP-2){ let fx=x+.5,fz=y+.5; const e=[[0,-1],[0,1],[-1,0],[1,0]].filter(([dx,dy])=>fl(x+dx,y+dy)===0); for(const [dx,dy] of e){ fx+=dx*.35; fz+=dy*.35; } setI(iFoam,nf++,fx,-1.08,fz,1.5,.04,1.5,colT.set('#ffffff').clone()); }
     if(reg!==4&&hash(x,y)%2===0&&nu<CAP-3){ const r=.6+rn()*.55; setI(iUnder,nu++,x+.5+(rn()-.5)*.5,-.55-rn()*.5,y+.5+(rn()-.5)*.5,r,r*.75,r,colT.set(rn()<.5?'#7a6552':'#6b5847').clone()); }
+    if(reg!==4&&!edge){ const tc=groundColor(reg,x,y,new THREE.Color());
+      if(tc.g>tc.r+.03){ if(hash(x,y)%2===0&&nt<880){ for(let k=0;k<2;k++){ const a=rn()*6.28, hh=.16+rn()*.1; setI(iTuft,nt++,x+.5+Math.cos(a)*.3,hh/2,y+.5+Math.sin(a)*.3,.05,hh,.05,colT.set(rn()<.5?'#5fae3f':'#78c24d').clone()); } } }
+      else if(hash(x,y)%6===0&&ns<580){ const a=rn()*6.28; setI(iShell,ns++,x+.5+Math.cos(a)*.3,.04,y+.5+Math.sin(a)*.3,.07,.045,.07,colT.set(rn()<.5?'#fbd5e0':'#fff4e0').clone()); } }
   }
+  iTuft.count=nt; iTuft.instanceMatrix.needsUpdate=true; iTuft.instanceColor.needsUpdate=true; iShell.count=ns; iShell.instanceMatrix.needsUpdate=true; iShell.instanceColor.needsUpdate=true;
   for(const [m,n] of [[iPuff,np],[iUnder,nu],[iFoam,nf]]){ m.count=n; m.instanceMatrix.needsUpdate=true; m.instanceColor.needsUpdate=true; }
   worldSig=-1;
 }
@@ -225,7 +232,7 @@ function createPirate(td,opts){
   for(const z of [-.12,.12]){ const piv=new THREE.Group(); piv.position.set(0,.02,z); body.add(piv); add(piv,GEO.box,M('#5b4630'),0,-.12,0,.15,.26,.15); add(piv,GEO.box,M('#1f1812'),.03,-.28,0,.2,.1,.17); u.legs.push(piv); }
   const bub=new THREE.Mesh(GEO.sphere,new THREE.MeshStandardMaterial({color:0xbfe3ff,transparent:true,opacity:.35,roughness:.1})); bub.scale.setScalar(.85); bub.position.y=.65; bub.visible=false; g.add(bub); u.bubble=bub;
   const ice=new THREE.Mesh(GEO.box,new THREE.MeshStandardMaterial({color:0xbfeaff,transparent:true,opacity:.45,roughness:.2})); ice.scale.set(.85,1.3,.85); ice.position.y=.65; ice.visible=false; g.add(ice); u.ice=ice;
-  g.userData=u; g.scale.setScalar(opts.scale||1);
+  u.base=opts.scale||.74; g.userData=u; g.scale.setScalar(u.base);
   return g;
 }
 function setPirateTint(g,e){
@@ -275,7 +282,7 @@ function animatePirate(e,m,dt){
   u.legs[0].rotation.z=sw; u.legs[1].rotation.z=-sw; u.armL.rotation.z=-sw*.8;
   if(air>2){ u.legs[0].rotation.z=.5; u.legs[1].rotation.z=-.4; u.armL.rotation.z=-.8; }
   u.body.position.y=.5+(moving?Math.abs(Math.sin(e.stepPh*1.15))*.05:0); const sq=e.squash;
-  m.scale.set(1+sq*.25,1-sq*.3,1+sq*.25);
+  const bs=u.base; m.scale.set(bs*(1+sq*.25),bs*(1-sq*.3),bs*(1+sq*.25));
   u.head.rotation.z=Math.sin(game.t*2+e.team)*.03+(e.slip>0?Math.sin(game.t*20)*.3:0); u.hat.rotation.z=Math.sin(game.t*3+e.team)*.03;
   u.bubble.visible=e.bubble>0; u.ice.visible=e.frozen>0;
   if(e.bubble>0) u.bubble.scale.setScalar(.85+Math.sin(game.t*8)*.03);
