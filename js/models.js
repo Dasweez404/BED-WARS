@@ -116,3 +116,58 @@ function animatePirate(e,m,dt){
   u.bubble.visible=e.bubble>0; u.ice.visible=e.frozen>0;
   if(e.bubble>0) u.bubble.scale.setScalar(1.15+Math.sin(game.t*8)*.04);
 }
+
+/* ---------- animations propres à chaque objet tenu (bras, corps, objet) ---------- */
+const H_THROW=['bomb','repel','coco','anchor','cluster','barrage','storm','chicken','kraken','tp','vortex'];
+const H_PLACE=['mine','banana','net','turret','turret2','trampo','wallgad','guard','decoy','flag','repair','buoy','bridge'];
+const H_BUFF=['springs','cloak','haste','aegis','frostnova','siren','quake','swap','dash','shield','jet'];
+const H_GUN={ // z = élévation du bras, two = 2e main en appui, spin = rotation de l'objet en tirant, pump = va-et-vient, shake = tremblement, lean = penché en avant
+  gun:{z:1.5},smg:{z:1.45,shake:.07,two:true},shotgun:{z:1.5,pump:true,two:true},sniper:{z:1.55,two:true},rocket:{z:2.25,two:true},woolgun:{z:1.45,pump:true},
+  boomerang:{z:2.5,spinIdle:5},bubble:{z:1.4,pump:true},ice:{z:1.5},flame:{z:1.45,shake:.05,lean:.14,two:true},bow:{z:1.5,two:true,draw:true},flarebow:{z:1.5,two:true,draw:true},
+  trident:{z:1.5,stab:true},gatling:{z:1.4,spin:34,two:true,shake:.03},javelin:{z:2.6,throw:true}
+};
+const _sm=x=>x*x*(3-2*x);
+function heldAnim(e,m){
+  const u=m.userData, id=e.held||'sword', t=game.t+e.team, R=u.armR, L=u.armL, B=u.body, A=u.anchor;
+  B.rotation.set(0,0,0); A.rotation.set(0,0,0); A.position.set(0,-.26,0); A.scale.setScalar(1.6); R.rotation.x=0; L.rotation.x=0;
+  const sw=e.swingMax?Math.max(0,e.swing/e.swingMax):0, p=1-sw, sp=Math.sin(p*Math.PI);
+  const gp=e.cd.gad>0?1-e.cd.gad/.5:1, used=e.cd.gad>0;
+  const gd=H_GUN[id];
+  if(gd){
+    const s=e.ws[id]||{a:1,r:0,last:-9}, kick=Math.min(1,(e.muzzle||0)/.08), firing=game.t-s.last<.16, rl=s.r>0;
+    R.rotation.z=gd.z-kick*.45; R.rotation.y=0; A.position.y=-.26+kick*.14+(gd.stab?-kick*.3:0);
+    B.rotation.z=-kick*.16+(gd.lean||0); if(gd.two){ L.rotation.z=1.35; }
+    if(gd.shake&&firing) R.rotation.x=Math.sin(game.t*70)*gd.shake;
+    if(gd.spin&&firing) A.rotation.y=game.t*gd.spin; else if(gd.spinIdle) A.rotation.y=game.t*gd.spinIdle;
+    if(gd.pump&&s.cd>0) A.position.y+=Math.sin(Math.min(1,s.cd*3)*Math.PI*2)*.07;
+    if(gd.draw&&s.cd>0) { R.rotation.z-=.15; L.rotation.z=1.5+Math.sin(game.t*20)*.05; }
+    if(gd.throw&&kick>0) R.rotation.z=2.6-kick*1.4;
+    if(rl){ R.rotation.z=.5; A.rotation.z=Math.sin(game.t*17)*.45; B.rotation.z=.13; L.rotation.z=1.0+Math.sin(game.t*13)*.45; }
+    else if(!firing) A.rotation.z=Math.sin(t*2.4)*.05;
+    return;
+  }
+  switch(id){
+    case 'glove': if(sw>0){ R.rotation.z=1.5; A.position.y=-.26-.38*sp; B.rotation.y=-.35*sp; L.rotation.z=-.4; } else { R.rotation.z=.95+Math.sin(t*6)*.07; L.rotation.z=.9-Math.sin(t*6)*.07; B.position.y+=Math.abs(Math.sin(t*6))*.015; } break;
+    case 'hammer': if(sw>0){ const q=_sm(p); R.rotation.z=3.0-3.1*q; B.rotation.z=-.1+.4*(q<.6?q:1.2-q); B.position.y-=.1*sp; } else { R.rotation.z=2.35+Math.sin(t*2)*.05; A.rotation.z=.4; } break;
+    case 'baa': R.rotation.z=2.75; A.rotation.z=-.5; if(sw>0){ A.scale.setScalar(1.6*(1+.28*sp)); B.rotation.z=-.22*sp; B.position.y+=.05*sp; } else A.scale.setScalar(1.6*(1+.03*Math.sin(t*3))); break;
+    case 'block': if(e.cd.place>0){ R.rotation.z=1.0+.75*Math.sin(Math.min(1,e.cd.place*7)*Math.PI); B.rotation.z=.08; } else R.rotation.z=1.0+Math.sin(t*2)*.04; break;
+    case 'pick': if(e.cd.mine>0||sw>0){ const c=Math.sin(game.t*17); R.rotation.z=1.75+c*1.05; B.rotation.y=c*.12; B.rotation.z=.07; } else { R.rotation.z=2.2; A.rotation.z=.3; } break;
+    case 'grap': R.rotation.z=1.5; A.rotation.y=Math.sin(t*2)*.5; if(e.hook||e.pull) { R.rotation.z=1.8; B.rotation.z=-.15; } break;
+    case 'heal': if(used){ const q=Math.sin(Math.min(1,gp*1.4)*Math.PI); R.rotation.z=1.0+2.1*q; u.head.rotation.z=-.4*q; B.rotation.z=-.1*q; } else { R.rotation.z=1.1; A.rotation.z=Math.sin(t*3)*.12; } break;
+    default:
+      if(H_THROW.includes(id)){
+        if(used){ if(gp<.35){ const q=_sm(gp/.35); R.rotation.z=1.0+1.9*q; B.rotation.y=-.3*q; B.rotation.z=-.1*q; } else { const q=_sm((gp-.35)/.65); R.rotation.z=2.9-2.2*q; B.rotation.y=-.3+.6*q; B.rotation.z=.15*(1-q); } }
+        else { R.rotation.z=1.1+Math.sin(t*2.2)*.06; A.rotation.z=Math.sin(t*4)*.15; }
+      } else if(H_PLACE.includes(id)){
+        if(used){ const q=Math.sin(gp*Math.PI); B.rotation.z=.4*q; B.position.y-=.08*q; R.rotation.z=.6; L.rotation.z=.5*q; } else { R.rotation.z=1.0; A.rotation.z=Math.sin(t*2.6)*.1; }
+      } else if(H_BUFF.includes(id)){
+        if(id==='jet'&&e.jetT>0){ const f=Math.sin(game.t*22)*.45; R.rotation.z=2.7+f; L.rotation.z=2.7-f; B.position.y+=.05; }
+        else if(used){ const q=Math.sin(Math.min(1,gp*1.3)*Math.PI);
+          if(id==='quake'){ R.rotation.z=2.8*q; L.rotation.z=2.8*q; B.position.y-=.12*q; B.rotation.z=.2*q; }
+          else if(id==='siren'){ R.rotation.z=2.2*q; L.rotation.z=2.2*q; B.rotation.y=Math.sin(game.t*14)*.4*q; }
+          else if(id==='dash'){ B.rotation.z=.45; R.rotation.z=-.4; L.rotation.z=-.4; }
+          else { R.rotation.z=1.0+2.0*q; L.rotation.z=2.8*q; } }
+        else { R.rotation.z=1.0; A.rotation.z=Math.sin(t*2.6)*.1; if(id==='dash'&&e.grace>.1){ B.rotation.z=.4; R.rotation.z=-.4; L.rotation.z=-.4; } }
+      } else if(sw<=0){ R.rotation.z=1.0+Math.sin(t*2)*.05; A.rotation.z=Math.sin(t*2.3)*.1; if(id==='sword') A.rotation.x=Math.sin(t*1.7)*.15; }
+  }
+}

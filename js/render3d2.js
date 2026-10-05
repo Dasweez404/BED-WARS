@@ -400,7 +400,7 @@ function syncEnts(dt){
     m.visible=e.alive&&!(e.inv>0&&Math.floor(game.t*10)%2); if(!e.alive) continue;
     const u=m.userData; let sc=1,dy=0; if(e.voidT>0){ sc=Math.max(.2,1-e.voidT/.4*.7); dy=-e.voidT*6; }
     m.position.set(e.x*U,e.z*U+dy,e.y*U); m.rotation.y=-e.ang;
-    updateHeld(e,m); animatePirate(e,m,dt); setPirateTint(m,e); m.scale.multiplyScalar(sc);
+    updateHeld(e,m); animatePirate(e,m,dt); heldAnim(e,m); setPirateTint(m,e); m.scale.multiplyScalar(sc);
     const ghost=e.cloak>0?(e===player?.4:.12):1, mt=u.mat, tr=ghost<1; if(mt.transparent!==tr){mt.transparent=tr;mt.needsUpdate=true;} mt.opacity=ghost;
     if(e.pull){ let pm=pullM.get(e); if(!pm){ pm=new THREE.Mesh(GEO.cyl,M('#c9a24a')); scene.add(pm); pullM.set(e,pm); } beamBetween(pm,e.x*U,e.z*U+.4,e.y*U,e.pull.x*U,.4,e.pull.y*U,.02); }
   }
@@ -417,6 +417,6 @@ function render3d(dt){
   sync(shieldM,shields,createShield,updateShieldM); sync(hookM,hooks,createHook,updateHookM); sync(pearlM,pearls,createPearl,(p,m)=>{ m.position.set(p.x*U,.5,p.y*U); m.rotation.y=game.t*6; });
   syncRings(); fillParticles();
   updateCamera(dt); updateAim();
-  if(Q.level>=2&&(frameN&1)===0) renderer.shadowMap.needsUpdate=true;
+  if(Q.level>=2&&frameN%3===0) renderer.shadowMap.needsUpdate=true;
   renderer.render(scene,camera3);
 }

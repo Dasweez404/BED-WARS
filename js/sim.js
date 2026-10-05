@@ -33,7 +33,10 @@ const ITEMS=[
   {id:'vortex',n:'Maelström',ico:'🌀',col:'#7c3aed'},{id:'kraken',n:'Tentacule du kraken',ico:'🐙',col:'#34d399'},{id:'anchor',n:'Ancre',ico:'⚓',col:'#9ca3af'},{id:'chicken',n:'Crabe kamikaze',ico:'🦀',col:'#ef4444'},{id:'heal',n:'Ration de bord',ico:'🍖',col:'#ef4444'},
   {id:'turret',n:'Canon de pont',ico:'🗼',col:'#94a3b8'},{id:'turret2',n:'Canon givrant',ico:'🧊',col:'#7dd3fc'},{id:'wallgad',n:'Palissade',ico:'🚧',col:'#b98a52'},
   {id:'mine',n:'Mine marine',ico:'🧿',col:'#9ca3af'},{id:'banana',n:'Peau de banane',ico:'🍌',col:'#fde047'},{id:'net',n:'Filet piégé',ico:'🥅',col:'#d6dde6'},{id:'guard',n:'Matelots gardiens',ico:'💀',col:'#fff'},
-  {id:'repair',n:'Réparation du coffre',ico:'🔧',col:'#86efac'},{id:'flag',n:'Pavillon noir',ico:'🏴',col:'#111827'},{id:'buoy',n:'Bouée de sauvetage',ico:'🛟',col:'#fb923c'},{id:'shield',n:'Bouclier de brume',ico:'🛡️',col:'#60a5fa'}
+  {id:'repair',n:'Réparation du coffre',ico:'🔧',col:'#86efac'},{id:'flag',n:'Pavillon noir',ico:'🏴',col:'#111827'},{id:'buoy',n:'Bouée de sauvetage',ico:'🛟',col:'#fb923c'},{id:'shield',n:'Bouclier de brume',ico:'🛡️',col:'#60a5fa'},
+  {id:'trident',n:'Trident de Poséidon',ico:'🔱',col:'#38bdf8'},{id:'gatling',n:'Poivrière rotative',ico:'🌶️',col:'#f87171'},{id:'javelin',n:'Javelot de chasse',ico:'🗡',col:'#e5e7eb'},{id:'flarebow',n:'Arc incendiaire',ico:'🏹',col:'#fb923c'},
+  {id:'swap',n:'Perroquet farceur',ico:'🦜',col:'#f472b6'},{id:'frostnova',n:'Souffle du spectre',ico:'👻',col:'#7dd3fc'},{id:'decoy',n:'Matelot mercenaire',ico:'🧟',col:'#a3e635'},
+  {id:'siren',n:'Chant des sirènes',ico:'🧜',col:'#c084fc'},{id:'quake',n:'Séisme',ico:'🌋',col:'#f97316'},{id:'aegis',n:'Médaillon doré',ico:'🏅',col:'#fde047'},{id:'coco',n:'Noix de coco explosive',ico:'🥥',col:'#a16207'}
 ];
 const ITEMMAP={}; ITEMS.forEach(i=>ITEMMAP[i.id]=i);
 const GUNS={
@@ -48,6 +51,10 @@ const GUNS={
   boomerang:{n:'Hache de lancer',mag:1,cd:.1,reload:1.1,sp:560,life:1.3,dmg:4,kb:200,col:'#fbbf24',pel:1,spread:0,bloom:0,bmax:0,kind:'boomerang',pierce:true,rec:0},
   bubble:{n:'Lance-écume',mag:3,cd:.45,reload:2.4,sp:360,life:1.2,dmg:0,kb:0,col:'#bfdbfe',pel:1,spread:0,bloom:0,bmax:0,kind:'bubble',rec:30},
   ice:{n:'Harpon givré',mag:5,cd:.4,reload:2,sp:600,life:.9,dmg:1,kb:0,col:'#7dd3fc',pel:1,spread:.02,bloom:0,bmax:0,kind:'ice',rec:40},
+  trident:{n:'Trident de Poséidon',mag:6,cd:.5,reload:1.8,sp:760,life:.55,dmg:2.2,kb:150,col:'#38bdf8',pel:3,spread:.11,bloom:0,bmax:0,pierce:true,rec:90},
+  gatling:{n:'Poivrière rotative',mag:90,cd:.05,reload:3.2,sp:820,life:.55,dmg:.9,kb:30,col:'#fca5a5',pel:1,spread:.05,bloom:.012,bmax:.32,rec:14},
+  javelin:{n:'Javelot de chasse',mag:2,cd:.3,reload:1.5,sp:1150,life:.7,dmg:7,kb:380,col:'#f1f5f9',pel:1,spread:0,bloom:0,bmax:0,pierce:true,rec:120},
+  flarebow:{n:'Arc incendiaire',mag:3,cd:.35,reload:1.9,sp:640,life:1,dmg:2,kb:60,col:'#fb923c',pel:1,spread:.02,bloom:0,bmax:0,kind:'flame',rec:30},
   flame:{n:'Torche cracheuse',mag:70,cd:.07,reload:2.6,sp:390,life:.32,dmg:1.1,kb:25,col:'#fb923c',pel:1,spread:.17,bloom:0,bmax:0,kind:'flame',rec:6}
 };
 const isGun=id=>!!GUNS[id];
@@ -68,7 +75,17 @@ function blockColor(t,team){return t===WOOL?[TEAMS[Math.max(0,team)].light,TEAMS
 /* =====================  ÉTAT  ===================== */
 let floorT,wallT,hpF,hpW,ownF,ownW,region,pop;
 let TD=[],ents=[],spawners=[],projs=[],bombs=[],shields=[],hooks=[],parts=[],rings=[],floats=[],feed=[],traps=[],chickens=[],pearls=[],beams=[],guards=[];
-let game={state:'menu',diff:'normal',t:0,win:false,hurtFx:0,hitmark:0,flash:0,flashCol:'#fff'};
+const MAPS={
+  classic:{n:'Archipel',d:'La carte originale : 4 îles en croix, galion au centre.',bases:[[50,76,[0,-1]],[24,50,[1,0]],[50,24,[0,1]],[76,50,[-1,0]]],dia:[[30,30],[70,30],[30,70],[70,70]],relay:[]},
+  close:{n:'Récif serré',d:'Îles rapprochées : les combats éclatent tout de suite.',bases:[[50,70,[0,-1]],[30,50,[1,0]],[50,30,[0,1]],[70,50,[-1,0]]],dia:[[36,36],[64,36],[36,64],[64,64]],relay:[]},
+  wide:{n:'Grand large',d:'Îles très éloignées avec de petits îlots relais. Ponts longs !',bases:[[50,84,[0,-1]],[16,50,[1,0]],[50,16,[0,1]],[84,50,[-1,0]]],dia:[[26,26],[74,26],[26,74],[74,74]],relay:[[50,66],[34,50],[50,34],[66,50]]},
+  corners:{n:'Les quatre coins',d:'Bases dans les angles, diamants au milieu des côtés.',bases:[[28,72,[1,0]],[28,28,[0,1]],[72,28,[-1,0]],[72,72,[0,-1]]],dia:[[50,14],[14,50],[86,50],[50,86]],relay:[]}
+};
+const MODES={solo:{n:'Chacun pour soi',d:'4 équipages, 1 pirate chacun.'},duo:{n:'Équipes de 2',d:'Tu es accompagné d\'un coéquipier bot. 2 pirates par équipage, un coffre partagé.'}};
+const OPT_RES=[{n:'Lentes',v:.7},{n:'Normales',v:1},{n:'Rapides',v:1.5}];
+const OPT_START=[{n:'Aucun',r:{}},{n:'Petit pécule',r:{bronze:40,silver:10}},{n:'Butin de départ',r:{bronze:120,silver:40,gold:6,diamond:3}}];
+const OPT_CORE=[{n:'Fragiles',v:.6},{n:'Normaux',v:1},{n:'Solides',v:1.7}];
+let game={state:'menu',diff:'normal',opts:{mode:'solo',map:'classic',res:1,start:0,core:1},t:0,win:false,hurtFx:0,hitmark:0,flash:0,flashCol:'#fff'};
 let player=null;
 let shake=0, banner={txt:'',col:'#fff',t:0,max:3};
 let selId='block', selAnim=0;
@@ -155,16 +172,20 @@ function makeEnt(team,isBot,name){
     up:{fb:0,fs:0,hp:0,sp:0,ar:0,gold:0,core:0},
     cd:{atk:0,mine:0,place:0,bow:0,gad:0},jetT:0,voidT:0,pull:null,grace:0,swing:0,swingMax:.2,kills:0,deaths:0,
     root:0,flagBuff:0,lastSafe:null,lastSafeT:0,bubble:0,cloak:0,haste:0,springT:0,frozen:0,slip:0,sdx:0,sdy:0,squash:0,muzzle:0,stepPh:0,stepT:0,burn:0,
-    lastBy:null,lastByT:0,sinceHurt:99,ai:null,hook:null};
+    lastBy:null,lastByT:0,sinceHurt:99,ai:null,hook:null,aegis:0,slot:0,bar:[],pack:[]};
 }
 function newGame(){
   floorT=new Uint8Array(W*H); wallT=new Uint8Array(W*H); hpF=new Float32Array(W*H); hpW=new Float32Array(W*H);
   ownF=new Int8Array(W*H).fill(-1); ownW=new Int8Array(W*H).fill(-1); region=new Int8Array(W*H).fill(-1); pop=new Float32Array(W*H);
   TD=[];ents=[];spawners=[];projs=[];bombs=[];shields=[];hooks=[];parts=[];rings=[];floats=[];feed=[];traps=[];chickens=[];pearls=[];beams=[];guards=[];
   selId='block'; banner.t=0; ISLANDS=[];
+  const O=game.opts, MAP=MAPS[O.map]||MAPS.classic, DUO=O.mode==='duo';
+  BHP[CORE]=Math.round(30*(OPT_CORE[O.core]||OPT_CORE[1]).v);
+  MAP.bases.forEach(([bx,by,dir],i)=>{ const t=TEAMS[i]; t.bx=bx; t.by=by; t.dir=dir; });
   ship(CX,CY);
-  for(const [sx,sy] of [[-1,-1],[1,-1],[-1,1],[1,1]]){
-    const dx=CX+sx*20, dy=CY+sy*20; island(dx,dy,2,3,5);
+  for(const [rx,ry] of MAP.relay) island(rx,ry,2,3,5);
+  for(const [dx,dy] of MAP.dia){
+    island(dx,dy,2,3,5);
     spawners.push({x:dx,y:dy,kind:'dia',team:-1,types:{diamond:{t:0,stock:0,cap:Infinity,int:()=>32}}});
   }
   for(const [ox,oy] of [[-2,0],[2,0],[0,-2],[0,2]])
@@ -175,8 +196,10 @@ function newGame(){
     const td={id:i,...t,coreAlive:true,spawnTile:[t.bx+d[0]*3,t.by+d[1]*3],padTile:[t.bx+p[0]*3,t.by+p[1]*3],ent:null};
     TD.push(td);
     const ci=idx(t.bx,t.by); wallT[ci]=CORE; hpW[ci]=BHP[CORE]; ownW[ci]=i;
-    const ent=makeEnt(i,i!==0,i===0?'Toi':'Cap. '+['','Rouge','Vert','Jaune'][i]); td.ent=ent; ents.push(ent);
-    if(ent.isBot) ent.ai={mode:'home',t:0,leaveAt:rnd(getD().leave[0],getD().leave[1]),buyT:rnd(0,1),goal:null,wait:0,target:-1,lastX:0,lastY:0,stuckT:0,jig:0,jx:0,jy:0,react:0,foe:null,likes:new Set(BOT_OPTIONAL.filter(()=>Math.random()<getD().likeP))};
+    const col=['','Rouge','Vert','Jaune'][i];
+    const ent=makeEnt(i,i!==0,i===0?'Toi':'Cap. '+col); td.ent=ent; td.members=[ent]; ents.push(ent);
+    if(DUO){ const m=makeEnt(i,true,i===0?'Matelot':'Second '+col); m.slot=1; m.up=ent.up; td.members.push(m); ents.push(m); }
+    for(const m of td.members){ if(m.isBot) m.ai={mode:'home',t:0,leaveAt:rnd(getD().leave[0],getD().leave[1]),buyT:rnd(0,1),goal:null,wait:0,target:-1,lastX:0,lastY:0,stuckT:0,jig:0,jx:0,jy:0,react:0,foe:null,likes:new Set(BOT_OPTIONAL.filter(()=>Math.random()<getD().likeP))}; }
     const U=()=>td.ent.up;
     spawners.push({x:td.padTile[0],y:td.padTile[1],kind:'base',team:i,types:{
       bronze:{t:0,stock:0,cap:Infinity,int:()=>FB_INT[U().fb]*(td.ent.isBot?getD().income:1)},
@@ -184,14 +207,15 @@ function newGame(){
       gold:{t:0,stock:0,cap:Infinity,int:()=>GOLD_INT[U().gold]}}});
   });
   player=ents[0];
-  ents.forEach(spawnEnt);
+  const SR=(OPT_START[O.start]||OPT_START[0]).r; for(const e of ents) for(const k in SR) e.res[k]+=SR[k];
+  ents.forEach(spawnEnt); syncBar(player);
   game.t=0; game.win=false; game.state='play'; game.hurtFx=0;
   announce('C\'EST PARTI !','#fde68a');
   msg('Protège ton coffre au trésor. Espace pour sauter, E pour la boutique.', '#fff');
   if(typeof onNewGame==='function') onNewGame();
 }
 function spawnEnt(e){
-  const td=TD[e.team]; e.x=(td.spawnTile[0]+.5)*T; e.y=(td.spawnTile[1]+.5)*T;
+  const td=TD[e.team]; let ox=0,oy=0; if(game.opts.mode==='duo'){ const k=(e.slot?1:-1)*11; ox=-td.dir[1]*k; oy=td.dir[0]*k; } e.x=(td.spawnTile[0]+.5)*T+ox; e.y=(td.spawnTile[1]+.5)*T+oy;
   const i=idx(td.spawnTile[0],td.spawnTile[1]); if(wallT[i]){wallT[i]=0;}
   if(floorT[i]===0){floorT[i]=1;}
   e.hp=maxhp(e); e.alive=true; e.inv=2; e.vx=e.vy=0; e.z=60; e.vz=0; e.voidT=0; e.jetT=0; e.pull=null; e.grace=0; e.hook=null;
@@ -202,7 +226,7 @@ function spawnEnt(e){
 }
 const maxhp=e=>(e.isBot?getD().hp:20)+6*e.up.hp;
 const speedOf=e=>138*(1+.08*e.up.sp)*(e.jetT>0?1.3:1)*(e.isBot?getD().speed:1)*(e.slip>0?1.35:1)*(e.haste>0?1.5:1)*(e.slow>0?.55:1)*(e.flagBuff>0?1.2:1);
-function msg(txt,col){feed.push({txt,col:col||'#dbe4ff',t:7}); if(feed.length>7)feed.shift();}
+function msg(txt,col){feed.push({txt,col:col||'#dbe4ff',t:7}); if(feed.length>4)feed.shift();}
 function announce(txt,col){banner.txt=txt;banner.col=col||'#fff';banner.t=banner.max;sfx('fanfare');}
 
 /* =====================  EFFETS  ===================== */
@@ -245,7 +269,7 @@ function inShield(x,y,team){
   return false;
 }
 function hurt(e,amount,by,kx,ky){
-  if(!e.alive||e.inv>0) return;
+  if(!e.alive||e.inv>0||e.aegis>0) return;
   if(by&&by.isBot&&!e.isBot) amount*=getD().dmg;
   amount*=(1-.12*e.up.ar);
   e.hp-=amount; e.vx+=kx; e.vy+=ky; e.lastBy=by; e.lastByT=5; e.sinceHurt=0;
@@ -284,10 +308,11 @@ function die(e,by,sea){
   if(td.coreAlive) e.resp=3;
   else{ e.elim=true; msg(`${e.name} est éliminé définitivement !`,'#ff9b9b'); announce(`${e.name} ÉLIMINÉ`,'#fca5a5'); checkOver(); }
 }
+const teamElim=t=>TD[t].members.every(m=>m.elim);
 function checkOver(){
   if(game.state!=='play') return;
-  if(player.elim){game.state='over';game.win=false;return;}
-  if(ents.every(e=>e===player||e.elim)){game.state='over';game.win=true;}
+  if(teamElim(player.team)){game.state='over';game.win=false;return;}
+  if(TD.every(t=>t.id===player.team||teamElim(t.id))){game.state='over';game.win=true;}
 }
 function wallBlockedByEnt(cx,cy){
   for(const o of ents) if(o.alive&&Math.abs(o.x-cx)<T/2+ER&&Math.abs(o.y-cy)<T/2+ER) return true;
@@ -555,6 +580,30 @@ function useGadget(e,id,wx,wy){
       const tx=Math.floor(wx/T),ty=Math.floor(wy/T);
       if(fl(tx,ty)===0||wl(tx,ty)>0||Math.hypot((tx+.5)*T-e.x,(ty+.5)*T-e.y)>3.7*T) return false;
       traps.push({kind:'net',x:(tx+.5)*T,y:(ty+.5)*T,t:40,age:0,team:e.team,owner:e}); break;}
+    case 'swap':{
+      let best=null,bd=3.2*T; for(const o of ents){ if(!o.alive||o.team===e.team) continue; const d=Math.hypot(o.x-wx,o.y-wy); if(d<bd&&Math.hypot(o.x-e.x,o.y-e.y)<11*T){bd=d;best=o;} }
+      if(!best) return false;
+      const ox=best.x,oy=best.y,oz=best.z; ring(ox,oy,T*1.4,'#f472b6',.5,true); ring(e.x,e.y,T*1.4,'#f472b6',.5,true); burst(ox,oy,'#f9a8d4',14,160,.5,3); burst(e.x,e.y,'#f9a8d4',14,160,.5,3);
+      best.x=e.x;best.y=e.y;best.z=e.z; e.x=ox;e.y=oy;e.z=oz; e.vx=e.vy=best.vx=best.vy=0; floatTxt(best.x,best.y-40,'ÉCHANGÉ !','#f9a8d4',16); best.lastSafe=null; e.lastSafe=null; break;}
+    case 'frostnova':{
+      ring(e.x,e.y,T*3.6,'#7dd3fc',.6,true); ring(e.x,e.y,T*2,'#fff',.4); burst(e.x,e.y,'#e0f2fe',26,230,.7,4);
+      for(const o of ents){ if(!o.alive||o.team===e.team||Math.hypot(o.x-e.x,o.y-e.y)>3.6*T) continue; o.frozen=1.8; floatTxt(o.x,o.y-36,'GELÉ !','#7dd3fc',16); }
+      break;}
+    case 'decoy':
+      guards.push({x:e.x+ax*20,y:e.y+ay*20,team:e.team,owner:e,hp:32,t:30,cd:.5,vx:0,vy:0,ph:rnd(0,6),ang:e.ang}); ring(e.x,e.y,T*1.4,'#a3e635',.4,true); burst(e.x,e.y,'#bef264',14,160,.5,4); break;
+    case 'siren':{
+      ring(e.x,e.y,T*6,'#c084fc',.8,true); ring(e.x,e.y,T*3,'#fff',.6); burst(e.x,e.y,'#e9d5ff',24,200,.8,4);
+      for(const o of ents){ if(!o.alive||o.team===e.team) continue; const d=Math.hypot(o.x-e.x,o.y-e.y); if(d>6*T) continue; o.slow=3.5; o.vx+=(e.x-o.x)/(d||1)*380; o.vy+=(e.y-o.y)/(d||1)*380; floatTxt(o.x,o.y-36,'ENVOÛTÉ','#e9d5ff',15); }
+      break;}
+    case 'quake':{
+      ring(e.x,e.y,T*3.4,'#f97316',.5,true); ring(e.x,e.y,T*2,'#fde68a',.4); chunks(e.x,e.y,'#a16207',14); smoke(e.x,e.y,8,8,.9); shake=Math.max(shake,12);
+      blastTiles(e.x,e.y,3.2*T,8,e,e.team);
+      for(const o of ents){ if(!o.alive||o.team===e.team||Math.hypot(o.x-e.x,o.y-e.y)>3.4*T) continue; hurt(o,3,e,(o.x-e.x)*2.2,(o.y-e.y)*2.2); o.vz=380; }
+      break;}
+    case 'aegis': e.aegis=3.5; floatTxt(e.x,e.y-36,'INVULNÉRABLE','#fde047',15); ring(e.x,e.y,T*1.6,'#fde047',.5,true); burst(e.x,e.y,'#fde047',16,170,.6,3); break;
+    case 'coco':{
+      const dx=wx-e.x,dy=wy-e.y,d=Math.hypot(dx,dy)||1,m=Math.min(d,8*T);
+      bombs.push({x:e.x,y:e.y,tx:e.x+dx/d*m,ty:e.y+dy/d*m,fuse:.95,team:e.team,owner:e,kind:'bomb',R:1.35*T,dm:6,bd:.7,shell:true,h:12}); break;}
     case 'buoy': floatTxt(e.x,e.y-40,'Passif : te repêche en mer','#fb923c',14); return false;
     case 'heal':
       if(e.hp>=maxhp(e)-.5) return false;
@@ -712,6 +761,17 @@ const SHOP=[
   gadItem('mine','Mine marine','Se pose à tes pieds, explose au passage d\'un ennemi.',{silver:6},2,'Défense'),
   gadItem('banana','Peau de banane','Fait déraper et tourner l\'ennemi qui marche dessus.',{bronze:20},2,'Défense'),
   gadItem('chicken','Crabe kamikaze','Un crabe court vers l\'ennemi le plus proche et explose.',{silver:9},1),
+  gunItem('trident','Trident de Poséidon','Trois dents perçantes en éventail, redoutable de près.',{silver:18}),
+  gunItem('gatling','Poivrière rotative','Chargeur de 90, rafale folle, le spray s\'ouvre vite.',{gold:4}),
+  gunItem('javelin','Javelot de chasse','Deux lancers perçants très puissants.',{silver:16}),
+  gunItem('flarebow','Arc incendiaire','Flèches de feu : l\'ennemi brûle plusieurs secondes.',{gold:3}),
+  gadItem('swap','Perroquet farceur','Échange ta place avec l\'ennemi visé (11 cases). Idéal au bord du vide !',{gold:2},1),
+  gadItem('frostnova','Souffle du spectre','Gèle tous les ennemis autour de toi pendant 1,8 s.',{gold:2},1),
+  gadItem('decoy','Matelot mercenaire','Un costaud (32 PV) se bat pour toi pendant 30 s.',{silver:12},1,'Défense'),
+  gadItem('siren','Chant des sirènes','Attire et ralentit les ennemis dans un grand rayon.',{silver:14},1),
+  gadItem('quake','Séisme','Secoue le sol : blocs brisés, ennemis projetés en l\'air.',{gold:2},1),
+  gadItem('aegis','Médaillon doré','Invulnérable pendant 3,5 s.',{gold:3},1,'Défense'),
+  gadItem('coco','Noix de coco explosive','Lancer en cloche, petite explosion.',{bronze:30},3),
   mk('shield','Défense',e=>({name:'Bouclier de brume ×1',desc:'Dôme 12 s : bloque ennemis, flèches et bombes.',cost:{gold:2}}),e=>e.shield+=1),
   upItem('fb','Forge de bronze',3,[3,5,8],['Bronze toutes les 0,7 s','Bronze toutes les 0,5 s','Bronze toutes les 0,35 s']),
   upItem('fs','Forge d\'argent',3,[3,5,8],['Argent toutes les 3,8 s','Argent toutes les 2,8 s','Argent toutes les 2 s']),
@@ -784,7 +844,7 @@ function updateEnt(e,dt){
     return;
   }
   for(const k in e.cd) e.cd[k]=Math.max(0,e.cd[k]-dt);
-  e.inv=Math.max(0,e.inv-dt); e.flash=Math.max(0,e.flash-dt); e.jetT=Math.max(0,e.jetT-dt);
+  e.inv=Math.max(0,e.inv-dt); if(e.aegis>0){ e.aegis-=dt; if(Math.random()<dt*10) burst(e.x,e.y-e.z,'#fde047',2,70,.4,3); } e.flash=Math.max(0,e.flash-dt); e.jetT=Math.max(0,e.jetT-dt);
   e.grace=Math.max(0,e.grace-dt); e.swing=Math.max(0,e.swing-dt); e.lastByT-=dt; e.sinceHurt+=dt;
   if(e.bubble>0){ e.bubble-=dt; e.vx+=rnd(-1,1)*260*dt; e.vy+=rnd(-1,1)*260*dt-30*dt; if(e.bubble<=0){ ring(e.x,e.y-e.z,T*1.3,'#bfdbfe',.35,true); burst(e.x,e.y-e.z,'#e0f2fe',16,180,.5,3); } }
   e.slow=Math.max(0,e.slow-dt); e.root=Math.max(0,e.root-dt); e.flagBuff=Math.max(0,e.flagBuff-dt); e.cloak=Math.max(0,e.cloak-dt); e.haste=Math.max(0,e.haste-dt); e.springT=Math.max(0,e.springT-dt);
@@ -834,13 +894,13 @@ function updateSpawners(dt){
     for(const r in sp.types){
       const ty=sp.types[r], iv=ty.int();
       if(iv===Infinity) continue;
-      ty.t+=dt;
+      ty.t+=dt*(game.opts.res||1);
       while(ty.t>=iv){ty.t-=iv; ty.stock++;}
     }
     const R=(sp.kind==='base'?6:2.3)*T, cx=(sp.x+.5)*T, cy=(sp.y+.5)*T;
     for(const e of ents){
       if(!e.alive) continue;
-      if(sp.kind==='base'&&e.team!==sp.team&&!TD[sp.team].ent.elim) continue; // base éliminée : ouverte à tous
+      if(sp.kind==='base'&&e.team!==sp.team&&!teamElim(sp.team)) continue; // base éliminée : ouverte à tous
       if(Math.hypot(e.x-cx,e.y-cy)>R) continue;
       // il faut être posé sur l'île du générateur (pas sur un pont, pas dans le vide)
       const et=idx(clamp(Math.floor(e.x/T),0,W-1),clamp(Math.floor(e.y/T),0,H-1));
@@ -1074,7 +1134,7 @@ function update(dt){
     updateSpawners(dt); updateProj(dt); updateBombs(dt); updateShields(dt); updateHooks(dt); updateTraps(dt); updateChickens(dt); updatePearls(dt); updateGuards(dt);
   }
   updateFx(dt);
-  if(!owned(player,selId)) selId='sword';
+  syncBar(player); if(!player.bar.includes(selId)) selId='sword';
   if(shopOpen&&(!player.alive||!nearBase(player))) toggleShop(false);
 }
 
@@ -1097,7 +1157,20 @@ function owned(e,id){
     default: if(GUNS[id]) return !!e.own[id]; return cnt(e,id)>0;
   }
 }
-const hotList=e=>ITEMS.filter(i=>owned(e,i.id));
+const BAR_MAX=10, PROTECT=['block','pick','sword'];
+function syncBar(e){
+  const has=id=>owned(e,id);
+  e.bar=e.bar.filter(has); e.pack=e.pack.filter(has);
+  for(const it of ITEMS){ if(!has(it.id)||e.bar.includes(it.id)||e.pack.includes(it.id)) continue;
+    if(e.bar.length<BAR_MAX) e.bar.push(it.id); else { e.pack.push(it.id); if(e===player) msg(`Barre pleine ! ${it.n} est en réserve (Tab : échanger)`,'#fde68a'); } }
+  while(e.bar.length<BAR_MAX&&e.pack.length) e.bar.push(e.pack.shift());
+}
+function swapPack(e){
+  if(!e.pack.length){ floatTxt(e.x,e.y-40,'Rien en réserve','#cbd5e1',13); return; }
+  const i=e.bar.indexOf(selId); if(i<0||PROTECT.includes(selId)){ floatTxt(e.x,e.y-40,'Sélectionne l\'objet à remplacer','#fde68a',13); return; }
+  const nid=e.pack.shift(); e.pack.push(selId); e.bar[i]=nid; setSel(nid); sfx('tick');
+}
+const hotList=e=>e.bar.map(id=>ITEMMAP[id]);
 function curWorld(){return [aim.x,aim.y];}
 function setSel(id){ if(id!==selId){selId=id;selAnim=1;} }
 function playerControl(e,dt){
@@ -1145,12 +1218,13 @@ const BOT_BUY=[
     ['chicken',b=>(b.am.chicken||0)<1],['cluster',b=>(b.am.cluster||0)<1],['haste',b=>(b.am.haste||0)<1],['springs',b=>(b.am.springs||0)<1],
     ['cloak',b=>(b.am.cloak||0)<1],['dash',b=>(b.am.dash||0)<2],['bridge',b=>(b.am.bridge||0)<1],
     ['sniper',b=>!b.own.sniper],['rocket',b=>!b.own.rocket],
+    ['trident',b=>!b.own.trident],['gatling',b=>!b.own.gatling],['javelin',b=>!b.own.javelin],['flarebow',b=>!b.own.flarebow],['frostnova',b=>(b.am.frostnova||0)<1],['quake',b=>(b.am.quake||0)<1],['aegis',b=>(b.am.aegis||0)<1],['siren',b=>(b.am.siren||0)<1],['coco',b=>(b.am.coco||0)<2],['decoy',b=>(b.am.decoy||0)<1],['swap',b=>(b.am.swap||0)<1],
     ['storm',b=>(b.am.storm||0)<1],['vortex',b=>(b.am.vortex||0)<1],['flame',b=>!b.own.flame],['ammo_flame',b=>b.own.flame&&(b.am.flame||0)<80]
   ].map(([id,c])=>[id,b=>b.ai.likes.has(id)&&c(b)]),
   ['wool',b=>b.blocks[2]<60],['wood',b=>b.blocks[3]<20]
 ];
-const BOT_RANGED=[['sniper',5,10],['rocket',3.5,9],['shotgun',0,3.8],['smg',1.5,7],['gun',1.5,8],['boomerang',2.5,7],['bubble',2,7],['ice',2,6],['flame',0,3.2],['woolgun',2,7]];
-const BOT_OPTIONAL=['jet','grap','tp','flag','anchor','kraken','barrage','net','buoy','woolgun','baa','turret2','guard','repair','gun','glove','hammer','bubble','shotgun','smg','boomerang','ice','turret','wallgad','mine','banana','chicken','cluster','haste','springs','cloak','dash','bridge','sniper','rocket','storm','vortex','flame','heal'];
+const BOT_RANGED=[['sniper',5,10],['rocket',3.5,9],['shotgun',0,3.8],['smg',1.5,7],['gun',1.5,8],['boomerang',2.5,7],['bubble',2,7],['ice',2,6],['flame',0,3.2],['woolgun',2,7],['trident',.8,4.5],['gatling',1.5,8],['javelin',3,9],['flarebow',2,8]];
+const BOT_OPTIONAL=['jet','grap','tp','flag','anchor','kraken','barrage','net','buoy','woolgun','baa','turret2','guard','repair','gun','glove','hammer','bubble','shotgun','smg','boomerang','ice','turret','wallgad','mine','banana','chicken','cluster','haste','springs','cloak','dash','bridge','sniper','rocket','storm','vortex','flame','heal','trident','gatling','javelin','flarebow','frostnova','quake','aegis','siren','coco','decoy','swap'];
 function voidNear(o,ang){ return fl(Math.floor((o.x+Math.cos(ang)*T*1.7)/T),Math.floor((o.y+Math.sin(ang)*T*1.7)/T))===0; }
 function botMelee(b,foe,fd){
   const edge=voidNear(foe,b.ang);
@@ -1189,6 +1263,13 @@ function botGadgets(b,foe,fd,dt,nearCore){
   else if((am.guard||0)>0&&nearCore&&guards.filter(g=>g.team===b.team).length<2&&r<dt*.8) useGadget(b,'guard',b.x,b.y);
   else if((am.turret2||0)>0&&nearCore&&r<dt*.6) useGadget(b,'turret2',b.x+Math.cos(b.ang-1.57)*1.5*T,b.y+Math.sin(b.ang-1.57)*1.5*T);
   else if((am.wallgad||0)>0&&nearCore&&r<dt*.5) useGadget(b,'wallgad',b.x+Math.cos(b.ang)*2.2*T,b.y+Math.sin(b.ang)*2.2*T);
+  else if((am.frostnova||0)>0&&fd<3.2*T&&r<dt*.6) useGadget(b,'frostnova',b.x,b.y);
+  else if((am.quake||0)>0&&fd<3*T&&r<dt*.5) useGadget(b,'quake',b.x,b.y);
+  else if((am.aegis||0)>0&&b.hp<maxhp(b)*.45&&r<dt*1.2) useGadget(b,'aegis',b.x,b.y);
+  else if((am.siren||0)>0&&fd<5.5*T&&r<dt*.5) useGadget(b,'siren',b.x,b.y);
+  else if((am.coco||0)>0&&fd>2*T&&fd<8*T&&r<dt*.6) useGadget(b,'coco',fx,fy);
+  else if((am.decoy||0)>0&&fd<9*T&&guards.filter(g=>g.team===b.team).length<2&&r<dt*.5) useGadget(b,'decoy',b.x,b.y);
+  else if((am.swap||0)>0&&fd>3*T&&fd<9*T&&b.hp<maxhp(b)*.5&&r<dt*.8) useGadget(b,'swap',fx,fy);
 }
 function botDefend(b,dt){
   const ai=b.ai; ai.defT=(ai.defT||0)-dt; if(ai.defT>0||b.cd.gad>0) return; ai.defT=rnd(2,4);
@@ -1283,6 +1364,7 @@ function pickGoal(b){
 function botThink(b,dt){
   const ai=b.ai,tm=TD[b.team]; ai.t+=dt; ai.buyT-=dt; ai.react-=dt; b.ix=0;b.iy=0; b.held='sword';
   const D=getD();
+  if(!tm.coreAlive){ ai.supplyT=(ai.supplyT||0)-dt; if(ai.supplyT<=0){ ai.supplyT=3; if(totalBlocks(b)<16) b.blocks[2]+=6; if(b.sword<1) b.sword=1; } }
   if(ai.buyT<=0){ai.buyT=D.buyT;botBuy(b);}
   if(b.voidT>.1&&b.jet>0&&b.jetT<=0) useJet(b);
   if(b.hp<maxhp(b)*.5&&(b.am.heal||0)>0&&b.cd.gad<=0&&Math.random()<dt*2) useGadget(b,'heal',b.x,b.y);
@@ -1323,8 +1405,8 @@ function botThink(b,dt){
   if(ai.mode==='home'){
     r=navTo(b,tm.spawnTile[0],tm.spawnTile[1]);
     if(r==='arrived'||r==='blocked'){
-      botRing(b); botDefend(b,dt);
-      if(ai.t>=ai.leaveAt&&totalBlocks(b)>=18) pickGoal(b);
+      if(tm.coreAlive){ botRing(b); botDefend(b,dt); }
+      if(!tm.coreAlive||(ai.t>=ai.leaveAt&&totalBlocks(b)>=18)) pickGoal(b);
     }
   } else if(ai.mode==='res'){
     r=navTo(b,ai.goal[0],ai.goal[1]);

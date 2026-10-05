@@ -70,28 +70,11 @@ function resize3d(){
 /* ---------- la mer (plan low-poly animé, léger) ---------- */
 let sea=null, seaBase=null;
 function buildSea(){
-  const geo=new THREE.PlaneGeometry(260,260,40,40); geo.rotateX(-Math.PI/2);
-  const n=geo.attributes.position.count; geo.setAttribute('color',new THREE.BufferAttribute(new Float32Array(n*3),3));
-  seaBase=geo.attributes.position.array.slice();
-  sea=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({vertexColors:true,flatShading:true,roughness:.4,metalness:.05}));
-  sea.position.y=-1.15; sea.receiveShadow=true; sea.frustumCulled=false; scene.add(sea);
-  updateSea(0,true);
+  const geo=new THREE.PlaneGeometry(420,420); geo.rotateX(-Math.PI/2);
+  sea=new THREE.Mesh(geo,new THREE.MeshLambertMaterial({color:0x3aa6cf}));
+  sea.position.set(CX+.5,-1.15,CY+.5); sea.frustumCulled=false; scene.add(sea);
 }
-let seaFrame=0;
-function updateSea(t,force){
-  if(!sea) return; seaFrame++;
-  if(iFoam) iFoam.material.opacity=.3+.13*Math.sin(t*1.5);
-  sea.position.x=Math.round(cam3.x*U/6.5)*6.5; sea.position.z=Math.round(cam3.y*U/6.5)*6.5;
-  if(!force&&(Q.level<1||seaFrame%2)) return;
-  const pos=sea.geometry.attributes.position, col=sea.geometry.attributes.color, a=pos.array, b=seaBase, ox=sea.position.x, oz=sea.position.z;
-  for(let i=0;i<pos.count;i++){
-    const x=b[i*3]+ox, z=b[i*3+2]+oz;
-    const h=Math.sin(x*.32+t*1.3)*.16+Math.cos(z*.27+t*1.0)*.13+Math.sin((x+z)*.2+t*.7)*.1;
-    a[i*3+1]=h; const k=.5+h*1.4, cr=Math.max(0,h-.2)*2.2;
-    col.array[i*3]=.04+k*.07+cr; col.array[i*3+1]=.26+k*.16+cr; col.array[i*3+2]=.46+k*.14+cr*.8;
-  }
-  pos.needsUpdate=true; col.needsUpdate=true;
-}
+function updateSea(t){ if(iFoam) iFoam.material.opacity=.3+.13*Math.sin(t*1.5); }
 
 /* ---------- particules (points avec taille variable) ---------- */
 const PS={n:null,a:null};
@@ -224,6 +207,10 @@ function makeHeld(id,e){
     case 'flame': add(GEO.cyl,wd,.3,0,0,.06,.6,.06).rotation.z=Math.PI/2; add(GEO.octa,new THREE.MeshBasicMaterial({color:0xff9a2a}),.64,0,0,.12,.18,.12); break;
     case 'bomb': add(GEO.cyl,M('#92400e'),.3,0,0,.2,.3,.2); add(GEO.cyl,gr,.3,.1,0,.21,.04,.21); add(GEO.cyl,gr,.3,-.1,0,.21,.04,.21); break;
     case 'anchor': add(GEO.box,gr,.3,0,0,.5,.06,.06); add(GEO.box,gr,.5,0,0,.06,.06,.4); break;
+    case 'trident': add(GEO.box,wd,.3,0,0,.75,.05,.05); for(const z of [-.1,0,.1]) add(GEO.cone,M('#38bdf8',{metalness:.4}),.74,0,z,.05,.2,.05).rotation.z=-Math.PI/2; add(GEO.box,M('#38bdf8'),.66,0,0,.04,.04,.24); break;
+    case 'gatling': add(GEO.box,wd,.12,-.06,0,.2,.18,.12); for(const [y,z] of [[.04,0],[-.03,.06],[-.03,-.06]]) add(GEO.box,gr,.4,y,z,.5,.045,.045); add(GEO.box,M('#dc2626'),.22,.1,0,.1,.08,.1); break;
+    case 'javelin': add(GEO.box,wd,.32,0,0,.8,.04,.04); add(GEO.cone,steel,.76,0,0,.05,.18,.05).rotation.z=-Math.PI/2; add(GEO.box,M('#f87171'),.0,0,0,.1,.06,.06); break;
+    case 'flarebow': add(GEO.box,M('#7c2d12'),.3,0,0,.08,.08,.7); add(GEO.box,wd,.3,0,0,.5,.06,.06); add(GEO.box,M('#fb923c'),.18,0,0,.01,.01,.68); add(GEO.sphere,new THREE.MeshBasicMaterial({color:0xfb923c}),.5,0,0,.07,.07,.07); break;
     default: { const it=ITEMMAP[id]; add(GEO.sphere,M(it?it.col:'#fff'),.3,0,0,.17,.17,.17); }
   }
   return g;
