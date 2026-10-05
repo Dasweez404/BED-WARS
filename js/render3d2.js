@@ -205,7 +205,7 @@ function syncPads(){
   const put=(kind,x,y,z,sx,sy,sz,ry)=>{ const m=padInst[kind], i=cnt[kind]++; if(ry){ qd.setFromAxisAngle(AXY,ry); } else qd.identity(); sc3.set(sx,sy,sz); v3.set(x,y,z); m4.compose(v3,qd,sc3); m.setMatrixAt(i,m4); };
   const stack=(kind,spec,n,px,pz)=>{ let row=0,k=0; for(const c of spec.lay){ for(let j=0;j<c&&k<n;j++,k++) put(kind,px+spec.cx+(j-(c-1)/2)*.26,.1+row*.09,pz+spec.z,.24,.085,.14); row++; } };
   for(const sp of padList){ const T0=sp.types, px=sp.x+.5, pz=sp.y+.5;
-    if(sp.kind==='base'){ stack('bronze',STACKS.base.bronze,Math.min(5,Math.ceil(T0.bronze.stock/8)),px,pz); stack('silver',STACKS.base.silver,Math.min(3,Math.ceil(T0.silver.stock/4)),px,pz); if(T0.gold.int()!==Infinity) stack('gold',STACKS.base.gold,Math.min(3,Math.ceil(T0.gold.stock/2)),px,pz); }
+    if(sp.kind==='base'){ stack('bronze',STACKS.base.bronze,Math.min(7,Math.ceil(T0.bronze.stock/10)),px,pz); stack('silver',STACKS.base.silver,Math.min(3,Math.ceil(T0.silver.stock/4)),px,pz); if(T0.gold.int()!==Infinity) stack('gold',STACKS.base.gold,Math.min(3,Math.ceil(T0.gold.stock/2)),px,pz); }
     else if(sp.kind==='gold') stack('gold',STACKS.gold.gold,Math.min(5,T0.gold.stock),px,pz);
     else { const d=T0.diamond, s=d.stock>0?1:.7; put('gem',px,.6+Math.sin(t*2.5+sp.x)*.08,pz,.2*s,.3*s,.2*s,t*1.6); for(let k=0;k<Math.min(4,d.stock);k++) put('gem',px-.3+k*.2,.14,pz+.3,.09,.13,.09,0); }
   }

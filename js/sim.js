@@ -18,7 +18,7 @@ const SWORDS=[{n:'Coutelas rouillé',d:4,c:'#b98a52'},{n:'Sabre d\'abordage',d:6
 const PICKS=[{n:'Pioche rouillée',d:2},{n:'Pioche de forban',d:4},{n:'Pioche en fer noir',d:7},{n:'Pioche du capitaine',d:12}];
 const SWORD_COST=[null,{bronze:40},{silver:10},{gold:3}];
 const PICK_COST=[null,{bronze:30},{silver:12},{gold:4}];
-const FB_INT=[.8,.55,.4,.3], FS_INT=[4,3,2.3,1.7], GOLD_INT=[Infinity,12,7];
+const FB_INT=[1.3,.95,.7,.52], FS_INT=[6.5,5,3.8,2.9], GOLD_INT=[Infinity,20,12];
 // catalogue de la barre d'objets : seuls les objets possédés apparaissent
 const ITEMS=[
   {id:'block',n:'Blocs',ico:'🧱',col:'#fff'},{id:'pick',n:'Pioche',ico:'⛏️',col:'#fde047'},{id:'sword',n:'Sabre',ico:'🗡️',col:'#e5e7eb'},
@@ -165,10 +165,10 @@ function newGame(){
   ship(CX,CY);
   for(const [sx,sy] of [[-1,-1],[1,-1],[-1,1],[1,1]]){
     const dx=CX+sx*20, dy=CY+sy*20; island(dx,dy,2,3,5);
-    spawners.push({x:dx,y:dy,kind:'dia',team:-1,types:{diamond:{t:0,stock:0,cap:5,int:()=>20}}});
+    spawners.push({x:dx,y:dy,kind:'dia',team:-1,types:{diamond:{t:0,stock:0,cap:Infinity,int:()=>32}}});
   }
   for(const [ox,oy] of [[-2,0],[2,0],[0,-2],[0,2]])
-    spawners.push({x:CX+ox,y:CY+oy,kind:'gold',team:-1,types:{gold:{t:0,stock:0,cap:5,int:()=>16}}});
+    spawners.push({x:CX+ox,y:CY+oy,kind:'gold',team:-1,types:{gold:{t:0,stock:0,cap:Infinity,int:()=>26}}});
   TEAMS.forEach((t,i)=>{
     island(t.bx,t.by,5,8,i);
     const d=t.dir, p=[-d[1],d[0]];
@@ -179,9 +179,9 @@ function newGame(){
     if(ent.isBot) ent.ai={mode:'home',t:0,leaveAt:rnd(getD().leave[0],getD().leave[1]),buyT:rnd(0,1),goal:null,wait:0,target:-1,lastX:0,lastY:0,stuckT:0,jig:0,jx:0,jy:0,react:0,foe:null,likes:new Set(BOT_OPTIONAL.filter(()=>Math.random()<getD().likeP))};
     const U=()=>td.ent.up;
     spawners.push({x:td.padTile[0],y:td.padTile[1],kind:'base',team:i,types:{
-      bronze:{t:0,stock:0,cap:40,int:()=>FB_INT[U().fb]*(td.ent.isBot?getD().income:1)},
-      silver:{t:0,stock:0,cap:12,int:()=>FS_INT[U().fs]*(td.ent.isBot?getD().income:1)},
-      gold:{t:0,stock:0,cap:6,int:()=>GOLD_INT[U().gold]}}});
+      bronze:{t:0,stock:0,cap:Infinity,int:()=>FB_INT[U().fb]*(td.ent.isBot?getD().income:1)},
+      silver:{t:0,stock:0,cap:Infinity,int:()=>FS_INT[U().fs]*(td.ent.isBot?getD().income:1)},
+      gold:{t:0,stock:0,cap:Infinity,int:()=>GOLD_INT[U().gold]}}});
   });
   player=ents[0];
   ents.forEach(spawnEnt);
@@ -835,7 +835,7 @@ function updateSpawners(dt){
       const ty=sp.types[r], iv=ty.int();
       if(iv===Infinity) continue;
       ty.t+=dt;
-      while(ty.t>=iv){ty.t-=iv; if(ty.stock<ty.cap) ty.stock++;}
+      while(ty.t>=iv){ty.t-=iv; ty.stock++;}
     }
     const R=(sp.kind==='base'?6:2.3)*T, cx=(sp.x+.5)*T, cy=(sp.y+.5)*T;
     for(const e of ents){
