@@ -57,7 +57,7 @@ const DIFFS={
   hard:{n:'Difficile',react:.2,noise:.1,dmg:1.1,speed:1.02,hp:24,engage:8,meleeCd:.5,gunCd:1,likeP:1,use:2.2,aggr:1.7,buyT:.4,leave:[18,30],income:.75,strafe:true,dodge:.5,desc:'Bots rapides et précis qui achètent et utilisent toutes les armes et tous les gadgets.'}
 };
 const getD=()=>DIFFS[game.diff||'normal'];
-const ER=7; // rayon du corps d'un personnage (px)
+const ER=6; // rayon du corps d'un personnage (px)
 const hash=(x,y)=>(((x*73856093)^(y*19349663))>>>0);
 function shade(hex,k){
   const n=parseInt(hex.slice(1),16); let r=n>>16,g=(n>>8)&255,b=n&255;

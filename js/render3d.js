@@ -6,6 +6,7 @@ let renderer, scene, camera3, sun, hemi, glCanvas;
 let VW=window.innerWidth, VH=window.innerHeight;
 const cam3={x:0,y:0};
 const v3=new THREE.Vector3(), m4=new THREE.Matrix4(), qd=new THREE.Quaternion(), sc3=new THREE.Vector3(), colT=new THREE.Color();
+const AXY=new THREE.Vector3(0,1,0);
 const GEO={};
 const MATC={};
 function M(color,o){ const k=color+JSON.stringify(o||{}); return MATC[k]||(MATC[k]=new THREE.MeshStandardMaterial(Object.assign({color,flatShading:true,roughness:.85,metalness:0},o||{}))); }
@@ -21,7 +22,7 @@ function mixHex(a,b,t){ const c1=new THREE.Color(a), c2=new THREE.Color(b); retu
 function prng3(seed){let s=seed>>>0||1;return()=>((s=(Math.imul(s,1664525)+1013904223)>>>0)/4294967296);}
 
 /* ---------- qualité (auto-réglée pour rester fluide) ---------- */
-const Q={level:2,auto:true,acc:0,n:0,pr:[.75,1,1.4],partCap:[250,500,800]};
+const Q={level:2,auto:true,acc:0,n:0,pr:[.7,.95,1.25],partCap:[200,420,700]};
 function applyQuality(){
   renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,Q.pr[Q.level]));
   renderer.setSize(VW,VH,false);
@@ -39,7 +40,7 @@ function qualityTick(dt){
 function initRender(){
   glCanvas=document.getElementById('gl');
   renderer=new THREE.WebGLRenderer({canvas:glCanvas,antialias:true,powerPreference:'high-performance'});
-  renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFShadowMap;
+  renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFShadowMap; renderer.shadowMap.autoUpdate=false;
   scene=new THREE.Scene();
   const c=document.createElement('canvas'); c.width=4; c.height=256; const g=c.getContext('2d'); const gr=g.createLinearGradient(0,0,0,256);
   gr.addColorStop(0,'#3f8fe0'); gr.addColorStop(.5,'#8cc8f2'); gr.addColorStop(.78,'#d9eefb'); gr.addColorStop(1,'#f6efe0'); g.fillStyle=gr; g.fillRect(0,0,4,256);
@@ -54,7 +55,7 @@ function initRender(){
   GEO.cyl=new THREE.CylinderGeometry(1,1,1,9); GEO.cyl3=new THREE.CylinderGeometry(1,1,1,3); GEO.cone=new THREE.ConeGeometry(1,1,7); GEO.octa=new THREE.OctahedronGeometry(1,0);
   GEO.ring=new THREE.RingGeometry(.93,1,40); GEO.disc=new THREE.CircleGeometry(1,32); GEO.torus=new THREE.TorusGeometry(1,.16,6,18);
   GEO.ring.rotateX(-Math.PI/2); GEO.disc.rotateX(-Math.PI/2);
-  buildSea(); buildParticles();
+  buildSea(); buildParticles(); buildModels();
   window.addEventListener('resize',resize3d); resize3d(); applyQuality();
 }
 function resize3d(){
@@ -200,47 +201,6 @@ function rebuildWorld(){
   for(const [m,n] of [[iGround,ng],[iPlat,np],[iWall,nw],[iBand,nb]]){ m.count=n; m.instanceMatrix.needsUpdate=true; if(m.instanceColor) m.instanceColor.needsUpdate=true; }
 }
 
-/* ---------- pirate (personnage) ---------- */
-function pirateMats(td,neutral){
-  const shirt=neutral?'#ece6d6':td.col;
-  return {shirt:new THREE.MeshStandardMaterial({color:shirt,flatShading:true,roughness:.85}),skin:new THREE.MeshStandardMaterial({color:'#f0c49a',flatShading:true,roughness:.8}),
-    dark:new THREE.MeshStandardMaterial({color:'#2f2318',flatShading:true,roughness:.8}),hat:new THREE.MeshStandardMaterial({color:'#17141c',flatShading:true,roughness:.7}),
-    band:new THREE.MeshStandardMaterial({color:td.light,flatShading:true,roughness:.6})};
-}
-function createPirate(td,opts){
-  opts=opts||{}; const g=new THREE.Group(), ms=pirateMats(td,opts.neutral), u={mats:ms,legs:[]};
-  const add=(par,geo,mat,x,y,z,sx,sy,sz)=>{ const m=new THREE.Mesh(geo,mat); m.position.set(x,y,z); m.scale.set(sx,sy,sz); m.castShadow=true; par.add(m); return m; };
-  const body=new THREE.Group(); body.position.y=.5; g.add(body); u.body=body;
-  add(body,GEO.box,ms.shirt,0,.28,0,.4,.5,.52);
-  for(const y of [.14,.28,.42]) add(body,GEO.box,M('#f4f1e8'),0,y,0,.415,.05,.535);
-  add(body,GEO.box,M('#3b2a1c'),0,.02,0,.42,.07,.54); add(body,GEO.box,M('#fbbf24',{metalness:.4}),.21,.02,0,.04,.07,.1);
-  const head=new THREE.Group(); head.position.set(.02,.78,0); body.add(head); u.head=head;
-  add(head,GEO.sphere,ms.skin,0,0,0,.25,.24,.24);
-  add(head,GEO.box,ms.skin,.23,-.02,0,.06,.07,.06);
-  for(const z of [-.1,.1]){ add(head,GEO.sphere0,M('#fff'),.19,.05,z,.05,.05,.05); }
-  add(head,GEO.sphere0,M('#111'),.235,.05,.1,.025,.025,.025);
-  add(head,GEO.box,M('#0b0b0f'),.215,.06,-.1,.03,.075,.075); add(head,GEO.box,M('#0b0b0f'),0,.1,0,.5,.025,.025).scale.set(.02,.02,.46);
-  add(head,GEO.box,ms.dark,.14,-.16,0,.1,.16,.28); add(head,GEO.box,ms.dark,.2,-.06,0,.03,.03,.2);
-  const hat=new THREE.Group(); hat.position.set(0,.2,0); head.add(hat);
-  const brim=add(hat,GEO.cyl3,ms.hat,0,0,0,.4,.05,.4); brim.rotation.y=Math.PI/2;
-  add(hat,GEO.cyl,ms.hat,0,.09,0,.19,.16,.19); add(hat,GEO.cyl,ms.band,0,.06,0,.2,.05,.2); add(hat,GEO.sphere0,M('#f4f1e8'),.17,.1,0,.045,.045,.02);
-  u.hat=hat;
-  for(const z of [-1,1]){
-    const piv=new THREE.Group(); piv.position.set(0,.5,z*.3); body.add(piv); add(piv,GEO.box,ms.shirt,0,-.15,0,.13,.36,.13); add(piv,GEO.sphere0,ms.skin,0,-.35,0,.075,.075,.075);
-    if(z>0){ u.armR=piv; const an=new THREE.Group(); an.position.set(.02,-.35,.0); piv.add(an); u.anchor=an; } else u.armL=piv;
-  }
-  for(const z of [-.12,.12]){ const piv=new THREE.Group(); piv.position.set(0,.02,z); body.add(piv); add(piv,GEO.box,M('#5b4630'),0,-.12,0,.15,.26,.15); add(piv,GEO.box,M('#1f1812'),.03,-.28,0,.2,.1,.17); u.legs.push(piv); }
-  const bub=new THREE.Mesh(GEO.sphere,new THREE.MeshStandardMaterial({color:0xbfe3ff,transparent:true,opacity:.35,roughness:.1})); bub.scale.setScalar(.85); bub.position.y=.65; bub.visible=false; g.add(bub); u.bubble=bub;
-  const ice=new THREE.Mesh(GEO.box,new THREE.MeshStandardMaterial({color:0xbfeaff,transparent:true,opacity:.45,roughness:.2})); ice.scale.set(.85,1.3,.85); ice.position.y=.65; ice.visible=false; g.add(ice); u.ice=ice;
-  u.base=opts.scale||.74; g.userData=u; g.scale.setScalar(u.base);
-  return g;
-}
-function setPirateTint(g,e){
-  const ms=g.userData.mats, td=TEAMS[e.team];
-  const c=new THREE.Color(e.isGuard?'#ece6d6':td.col);
-  if(e.frozen>0) c.lerp(new THREE.Color('#9ad8f5'),.7); else if(e.root>0) c.lerp(new THREE.Color('#d6dde6'),.6); else if(e.slow>0) c.lerp(new THREE.Color('#cbd5e1'),.45);
-  ms.shirt.color.copy(c); const f=e.flash>0?1:0; for(const k of ['shirt','skin','dark']) ms[k].emissive.setRGB(f,f*.85,f*.85);
-}
 function makeHeld(id,e){
   const g=new THREE.Group(), add=(geo,mat,px,py,pz,sx,sy,sz)=>{ const m=new THREE.Mesh(geo,mat); m.position.set(px,py,pz); m.scale.set(sx,sy,sz); m.castShadow=true; g.add(m); return m; };
   const dk=M('#2b2f3a'), gr=M('#4b5563',{metalness:.4,roughness:.5}), wd=M('#7c4a21'), steel=M('#cfd6e0',{metalness:.35,roughness:.35});
@@ -275,15 +235,4 @@ function updateHeld(e,m){
   u.armR.rotation.set(0,0,1.0+(sw>0?-Math.sin((1-sw)*Math.PI)*1.5:0));
   u.armR.rotation.y=sw>0?Math.sin((1-sw)*Math.PI)*.7:0;
   u.heldMesh.visible=!(e.cloak>0&&e!==player);
-}
-function animatePirate(e,m,dt){
-  const u=m.userData, gh=groundH(e), air=Math.max(0,e.z-gh), moving=(Math.abs(e.ix)+Math.abs(e.iy)>.05)&&air<2;
-  const sw=Math.sin(e.stepPh*1.15)*(moving?.75:0);
-  u.legs[0].rotation.z=sw; u.legs[1].rotation.z=-sw; u.armL.rotation.z=-sw*.8;
-  if(air>2){ u.legs[0].rotation.z=.5; u.legs[1].rotation.z=-.4; u.armL.rotation.z=-.8; }
-  u.body.position.y=.5+(moving?Math.abs(Math.sin(e.stepPh*1.15))*.05:0); const sq=e.squash;
-  const bs=u.base; m.scale.set(bs*(1+sq*.25),bs*(1-sq*.3),bs*(1+sq*.25));
-  u.head.rotation.z=Math.sin(game.t*2+e.team)*.03+(e.slip>0?Math.sin(game.t*20)*.3:0); u.hat.rotation.z=Math.sin(game.t*3+e.team)*.03;
-  u.bubble.visible=e.bubble>0; u.ice.visible=e.frozen>0;
-  if(e.bubble>0) u.bubble.scale.setScalar(.85+Math.sin(game.t*8)*.03);
 }

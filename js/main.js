@@ -47,14 +47,14 @@ addEventListener('pointerdown',audioInit);addEventListener('keydown',audioInit);
 
 function showMenu(){ toggleShop(false); game.state='menu'; document.getElementById('start').classList.remove('hidden'); }
 function selectDiff(d){ game.diff=d; try{localStorage.setItem('pirates_diff',d);}catch(e){} document.querySelectorAll('#diff .dbtn').forEach(b=>b.classList.toggle('on',b.dataset.d===d)); document.getElementById('diffDesc').textContent=DIFFS[d].desc; }
-let last=performance.now(), shopT=0;
+let hudN=0, last=performance.now(), shopT=0;
 function frame(now){
   const dt=Math.min(.05,(now-last)/1000); last=now;
   if(game.state!=='menu'){
     update(dt); mouse.clicked=false;
     shopT+=dt; if(shopOpen&&shopT>.4){shopT=0;renderShop();}
   } else { game.t+=dt; updateFx(dt); }
-  render3d(dt); drawHud();
+  render3d(dt); hudN=(hudN+1)|0; if(Q.level>=2||(hudN&1)) drawHud();
   requestAnimationFrame(frame);
 }
 function boot(){
