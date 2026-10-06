@@ -149,9 +149,10 @@ function renderOpts(){
 }
 let hudN=0, last=performance.now(), shopT=0;
 function frame(now){
-  const dtr=Math.min(.05,(now-last)/1000); last=now; JUICE.tick(dtr); const dt=dtr*JUICE.ts();
+  const rawDt=Math.min(NETON?.15:.05,(now-last)/1000), dtr=Math.min(.05,rawDt); last=now; JUICE.tick(dtr); const dt=dtr*JUICE.ts();
+  NET.fpsAcc=(NET.fpsAcc||0)+1; if(now-(NET.fpsT||0)>1000){ NET.fps=NET.fpsAcc*1000/(now-(NET.fpsT||now-1000)); NET.fpsAcc=0; NET.fpsT=now; }
   if(game.state!=='menu'){
-    if(game.paused&&!NETON){} else if(NETCLIENT) netClientFrame(dt); else { update(dt); mouse.clicked=false; if(NETON) netHostTick(dt); }
+    if(game.paused&&!NETON){} else if(NETCLIENT) netClientFrame(rawDt); else if(NETON){ const n=Math.max(1,Math.ceil(rawDt/.05)); for(let i=0;i<n;i++){ update(rawDt/n); if(i===0) mouse.clicked=false; } netHostTick(rawDt); } else { update(dt); mouse.clicked=false; }
     shopT+=dt; if(shopOpen&&shopT>.4){shopT=0;renderShop();}
   } else { game.t+=dt; updateFx(dt); }
   if(game.state==='menu') renderPreview(game.t);

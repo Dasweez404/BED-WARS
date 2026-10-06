@@ -237,3 +237,17 @@ function drawMiniPings(){
   drawHud=function(){ _dh(); if(game.state==='menu'||!ctx||!player) return; ctx.save(); ctx.setTransform(DPR,0,0,DPR,0,0);
     drawPingsHud(); drawEmotes(); drawMiniPings(); drawSpecHud(); drawKillCam(); drawWheel(); drawOverButtons(); ctx.restore(); };
 }
+
+/* ---------- diagnostic réseau en jeu ---------- */
+{ const _na=netApplySnap; netApplySnap=function(m){ NET.lastSnapT=performance.now(); NET.snapN=(NET.snapN||0)+1; _na(m); };
+  let sT=0, sN=0, rate=0;
+  const _dh=drawHud;
+  drawHud=function(){ _dh(); if(!NETON||game.state==='menu'||!ctx) return; const now=performance.now();
+    if(now-sT>1000){ rate=(NET.snapN||0)-sN; sN=NET.snapN||0; sT=now; }
+    let txt='', col='#9af2b8';
+    if(NETCLIENT){ const lag=now-(NET.lastSnapT||now); txt='📶 '+rate+' maj/s · '+Math.round(NET.fps||0)+' i/s'; if(rate<8||lag>1500){ col='#fca5a5'; txt+=' · hôte lent ou connexion faible'; } else if(rate<12) col='#fde68a'; }
+    else { const f=Math.round(NET.fps||60); txt='📶 hôte · '+f+' i/s'; if(f<25){ col='#fca5a5'; txt+=' · PC trop lent : baisse les graphismes (G)'; } else if(f<40) col='#fde68a'; }
+    ctx.save(); ctx.setTransform(DPR,0,0,DPR,0,0); ctx.font='bold 11px '+FONT; ctx.textAlign='right'; ctx.lineWidth=3; ctx.strokeStyle='rgba(10,30,50,.85)'; ctx.fillStyle=col; ctx.strokeText(txt,VW-14,224); ctx.fillText(txt,VW-14,224);
+    if(NETCLIENT&&game.state==='play'&&NET.snapped&&now-(NET.lastSnapT||now)>3000){ ctx.textAlign='center'; ctx.font='bold 22px '+FONT; ctx.fillStyle='#fecaca'; ctx.strokeStyle='rgba(60,0,0,.9)'; ctx.lineWidth=5; const t='⚠ Plus de nouvelles de l\'hôte…'; ctx.strokeText(t,VW/2,VH*.32); ctx.fillText(t,VW/2,VH*.32); }
+    ctx.restore(); };
+}
