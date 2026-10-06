@@ -151,7 +151,7 @@ function frame(now){
 function boot(){
   initRender(); initUI(); bindMouse(document.getElementById('ui'));
   document.querySelectorAll('#diff .dbtn').forEach(b=>b.onclick=()=>selectDiff(b.dataset.d));
-  try{ const o=JSON.parse(localStorage.getItem('pirates_opts')||'null'); if(o){ for(const k in game.opts) if(o[k]!==undefined) game.opts[k]=o[k]; if(!(o.rv>=2)){ game.opts.roster=40; } if(!(o.rv>=3)){ game.opts.style='3d'; } game.opts.rv=3; } }catch(e){}
+  try{ const o=JSON.parse(localStorage.getItem('pirates_opts')||'null'); if(o){ for(const k in game.opts) if(o[k]!==undefined) game.opts[k]=o[k]; if(!(o.rv>=2)){ game.opts.roster=40; } if(!(o.rv>=3)){ game.opts.style='3d'; } if(!(o.rv>=4)){ game.opts.res=1.25; } game.opts.rv=4; } }catch(e){}
   for(const k of Object.keys(EVENTS)) if(game.opts.ev[k]===undefined) game.opts.ev[k]=1;
   if(!MAPS[game.opts.map]) game.opts.map='classic'; if(!MODES[game.opts.mode]) game.opts.mode='solo'; renderOpts();
   try{ const c=JSON.parse(localStorage.getItem('pirates_char')||'null'); if(c){ if(CLASSES[c.cls]) game.cls=c.cls; if(c.look) game.look=lookOf(c.look); if(typeof c.pname==='string') game.pname=c.pname; } }catch(e){}
