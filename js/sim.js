@@ -172,7 +172,11 @@ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const MAXH=()=>Math.max(1,Math.min(4,(game.opts&&game.opts.stack)|0||3));
 const wallLayers=i=>{ const w=wallT[i]; return w===0?0:w===CORE?1:Math.max(1,Math.ceil(hpW[i]/BHP[w]-1e-6)); };
 const wallTop=(tx,ty)=>{ if(!inb(tx,ty)||wallT[idx(tx,ty)]===0) return 0; return WH*wallLayers(idx(tx,ty)); };
-const groundH=e=>wallTop(Math.floor(e.x/T),Math.floor(e.y/T));
+const groundH=e=>{ // hauteur du sol sous le corps : on reste sur un mur tant qu'une partie du corps le surplombe
+  let best=0; const x0=Math.floor((e.x-ER)/T),x1=Math.floor((e.x+ER)/T),y0=Math.floor((e.y-ER)/T),y1=Math.floor((e.y+ER)/T);
+  for(let ty=y0;ty<=y1;ty++)for(let tx=x0;tx<=x1;tx++){ const t=wallTop(tx,ty); if(t>best&&e.z>=t-1) best=t; }
+  return best;
+};
 
 /* =====================  GÉNÉRATION  ===================== */
 function island(cx,cy,r,cut,reg){
@@ -276,6 +280,12 @@ function hitWall(x,y,z){
   const r=ER, x0=Math.floor((x-r)/T),x1=Math.floor((x+r)/T),y0=Math.floor((y-r)/T),y1=Math.floor((y+r)/T);
   for(let ty=y0;ty<=y1;ty++)for(let tx=x0;tx<=x1;tx++) if(wl(tx,ty)>0&&z<wallTop(tx,ty)-1) return true;
   return false;
+}
+function unstick(e){ // si le corps est coincé dans un bloc : on le repousse vers l'espace libre le plus proche (ou on le pose dessus)
+  if(!hitWall(e.x,e.y,e.z)) return;
+  for(let r=3;r<=T*2;r+=3) for(let k=0;k<16;k++){ const a=k*Math.PI/8, nx=e.x+Math.cos(a)*r, ny=e.y+Math.sin(a)*r;
+    if(!hitWall(nx,ny,e.z)&&nx>0&&ny>0&&nx<W*T&&ny<H*T){ e.x=nx; e.y=ny; e.vx=e.vy=0; return; } }
+  e.z=Math.max(e.z,wallTop(Math.floor(e.x/T),Math.floor(e.y/T)));
 }
 function moveEnt(e,dx,dy){
   const n=Math.ceil(Math.max(Math.abs(dx),Math.abs(dy))/6)||1, sx=dx/n, sy=dy/n;
@@ -890,6 +900,7 @@ function updateEnt(e,dt){
   e.frozen=Math.max(0,e.frozen-dt); e.muzzle=Math.max(0,e.muzzle-dt); e.squash*=Math.exp(-9*dt);
   if(e.burn>0){ e.burn-=dt; if(Math.random()<dt*10) parts.push({x:e.x+rnd(-6,6),y:e.y,z:rnd(0,10),vz:rnd(50,120),vx:0,vy:0,life:.4,max:.4,col:'#fb923c',size:4}); if(Math.random()<dt*4) hurt(e,.5,e.burnBy,0,0); }
   if(e.sinceHurt>5&&e.hp<maxhp(e)) e.hp=Math.min(maxhp(e),e.hp+.5*dt);
+  unstick(e);
   // hauteur (saut)
   const gh=groundH(e);
   if(e.bubble>0){ e.vz=0; e.z+=(55-e.z)*Math.min(1,dt*4); }
