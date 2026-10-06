@@ -346,7 +346,7 @@ function drawHud(){
   ctx.textAlign='center'; const tip=TIPS[selId]||''; ctx.font='12px '+FONT; const tw=Math.max(ctx.measureText(tip).width,130)+30; panel(VW/2-tw/2,hb.y-88,tw,42,12);
   ctx.fillStyle='#fff'; ctx.font='bold 15px '+FONT; ctx.fillText(label,VW/2,hb.y-70); ctx.fillStyle='#a9c2f0'; ctx.font='12px '+FONT; ctx.fillText(tip,VW/2,hb.y-54);
   if(nearBase(e)&&!shopOpen&&e.alive){ const w=300,pp=1+.03*Math.sin(game.t*5); ctx.save(); ctx.translate(VW/2,hb.y-114); ctx.scale(pp,pp); panel(-w/2,-15,w,30,15,'#fde68a'); ctx.fillStyle='#fde68a'; ctx.font='bold 15px '+FONT; ctx.fillText('[E]  Ouvrir la boutique',0,5); ctx.restore(); }
-  ctx.textAlign='left'; ctx.fillStyle='rgba(20,40,90,.8)'; ctx.font='13px '+FONT; ctx.lineWidth=3; ctx.strokeStyle='rgba(255,255,255,.7)'; const hint='Espace saut · R recharger · Tab réserve · E boutique'; ctx.globalAlpha=.7; ctx.strokeText(hint,12,VH-12); ctx.fillText(hint,12,VH-12); ctx.globalAlpha=1;
+  ctx.textAlign='left'; ctx.fillStyle='rgba(20,40,90,.8)'; ctx.font='13px '+FONT; ctx.lineWidth=3; ctx.strokeStyle='rgba(255,255,255,.7)'; const hint='Espace saut · R recharger · Tab réserve · E boutique · Échap pause'; ctx.globalAlpha=.7; ctx.strokeText(hint,12,VH-12); ctx.fillText(hint,12,VH-12); ctx.globalAlpha=1;
   if(EV.cur){ const E=EVENTS[EV.cur.id], w=210; panel(VW/2-w/2,52,w,30,12,'rgba(253,230,138,.6)'); ctx.textAlign='left'; ctx.font='bold 14px '+FONT; ctx.fillStyle='#fde68a'; ctx.fillText(E.ico+' '+E.n,VW/2-w/2+12,72); ctx.textAlign='right'; ctx.fillStyle='#fff'; ctx.fillText(Math.ceil(EV.cur.t)+' s',VW/2+w/2-12,72); ctx.fillStyle='rgba(253,230,138,.8)'; ctx.fillRect(VW/2-w/2+10,79,(w-20)*Math.max(0,EV.cur.t/EV.cur.dur),2); ctx.textAlign='center'; }
   drawMini(); drawSpy();
   if(banner.t>0){

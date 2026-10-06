@@ -91,7 +91,7 @@ function pirateVariant(td,neutral,look){
   const v={};
   v.body=mergeParts([{geo:B,pos:[0,.28,0],scale:[.46,.5,.38],color:td.dark},{geo:B,pos:[0,.07,0],scale:[.475,.07,.395],color:td.col},{geo:B,pos:[.2,.4,0],scale:[.08,.08,.2],color:td.light}]);
   v.hat=mergeParts(hatParts(l.hat,td.dark,'#ffffff',light,HAIRS[l.hair]));
-  v.arm=mergeParts([{geo:B,pos:[0,-.2,0],scale:[.2,.2,.2],color:td.light},{geo:B,pos:[0,-.2,0],scale:[.21,.05,.21],color:td.col}]);
+  v.arm=mergeParts([{geo:B,pos:[0,-.2,0],scale:[.2,.2,.2],color:td.col},{geo:B,pos:[0,-.13,0],scale:[.21,.05,.21],color:td.dark}]);
   return PG[key]=v;
 }
 function buildPirateGeos(){

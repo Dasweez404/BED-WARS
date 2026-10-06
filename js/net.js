@@ -100,7 +100,7 @@ function netHostStart(){
   newGame(); NET.fxLog=[]; NET.fxBase=0; NET.seq=0; NET.sendT=0;
   for(const sl of Object.values(NET.slots)){ sl.base=netBaseline(); sl.sstr=[]; sl.ownLast={}; sl.ownT=0; sl.fxPos=0; }
   for(const s of Object.values(NET.slots)) s.conn.send({t:'start',team:s.team,opts:game.opts,diff:game.diff,slots:NETSLOTS,roster:ROSTER?[...ROSTER]:null});
-  document.getElementById('start').classList.add('hidden');
+  screenTransition(()=>document.getElementById('start').classList.add('hidden'));
 }
 function netBaseline(){ return {f:new Uint8Array(floorT.length),w:new Uint8Array(floorT.length),hf:new Float32Array(floorT.length),hw:new Float32Array(floorT.length),of:new Int8Array(floorT.length).fill(-1),ow:new Int8Array(floorT.length).fill(-1)}; }
 
@@ -132,7 +132,7 @@ function netGuestData(m){
     NET.started=true; NETON=true; NETCLIENT=true; NET.myTeam=m.team; { const st=game.opts.style; game.opts=m.opts; game.opts.style=st; } game.diff=m.diff; NETSLOTS=m.slots;
     NET.snapped=false; newGame(); if(m.roster) ROSTER=new Set(m.roster); else ROSTER=null;
     player=ents.find(e=>e.team===m.team&&e.slot===0); NET.base=null; NET.inT=0; NET.hostX=player.x; NET.hostY=player.y; NET.lastHp=player.hp;
-    game.state='play'; document.getElementById('start').classList.add('hidden');
+    game.state='play'; screenTransition(()=>document.getElementById('start').classList.add('hidden'));
   }
   else if(m.t==='s'&&NETCLIENT) netApplySnap(m);
 }
@@ -262,7 +262,7 @@ function netLocalInput(){
 function netClientFrame(dt){
   game.t+=dt; updateFx(dt);
   const me=player; if(!me||game.state==='menu') return;
-  const li=netLocalInput(); const inp=NET.inp; inp.ix=li.ix; inp.iy=li.iy; inp.wx=aim.x; inp.wy=aim.y; inp.down=!!mouse.down; inp.sel=selId; if(mouse.clicked) inp.clk=1;
+  const li=game.paused?{ix:0,iy:0}:netLocalInput(); const inp=NET.inp; inp.ix=li.ix; inp.iy=li.iy; inp.wx=aim.x; inp.wy=aim.y; inp.down=game.paused?false:!!mouse.down; inp.sel=selId; if(mouse.clicked&&!game.paused) inp.clk=1;
   if(game.state==='play'){
     if(!me.bar.includes(selId)) selId='sword'; me.held=selId; if(me.alive&&me.slip<=0) me.ang=Math.atan2(aim.y-me.y,aim.x-me.x);
     if(me.alive&&me.frozen<=0&&me.bubble<=0&&me.root<=0&&!me.pull&&!NET.ff&&!me.riding){ const sp=speedOf(me); moveEnt(me,li.ix*sp*dt,li.iy*sp*dt); }

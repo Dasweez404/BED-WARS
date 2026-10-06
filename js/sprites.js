@@ -9,7 +9,7 @@ function rrp(c,x,y,w,h,r){ c.beginPath(); c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h
 function fillStroke(c,fill,w){ c.fillStyle=fill; c.fill(); c.lineWidth=w||3; c.strokeStyle=OUT; c.lineJoin='round'; c.stroke(); }
 
 function drawPirateFrame(c,ox,pose,td,look,neutral){
-  const l=lookOf(look), skin=SKINS[l.skin], hair=HAIRS[l.hair], shirt=neutral?'#f1ece0':td.col, trim=neutral?td.col:'#ffffff', hatc=td.col;
+  const l=lookOf(look), skin=td.col, hair=HAIRS[l.hair], shirt=neutral?'#f1ece0':td.col, trim=neutral?td.col:'#ffffff', hatc=td.col;
   c.save(); c.translate(ox,0);
   const st=pose.stride, air=pose.air, bob=pose.bob;
   // jambes
@@ -87,7 +87,7 @@ function getArmTex(e,td,neutral,look){
   let t=SPRC.arms.get(key); if(t) return t;
   const cv=document.createElement('canvas'); cv.width=128; cv.height=64; const c=cv.getContext('2d');
   c.beginPath(); rrp(c,8,26,40,13,6); fillStroke(c,neutral?'#f1ece0':td.col,2.5);
-  c.beginPath(); c.arc(48,32,7,0,6.3); fillStroke(c,SKINS[l.skin],2.5);
+  c.beginPath(); c.arc(48,32,7,0,6.3); fillStroke(c,td.col,2.5);
   drawItemIcon(c,id,e);
   t=new THREE.CanvasTexture(cv); t.generateMipmaps=false; t.minFilter=THREE.LinearFilter; if(THREE.SRGBColorSpace) t.colorSpace=THREE.SRGBColorSpace;
   SPRC.arms.set(key,t); return t;

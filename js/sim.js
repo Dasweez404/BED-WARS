@@ -100,7 +100,7 @@ function applyClass(e){
   if(st.sword) e.sword=Math.max(e.sword,st.sword); if(st.blocks) e.blocks[2]+=st.blocks;
   if(st.own) for(const k of st.own) e.own[k]=true; if(st.am) for(const k in st.am) e.am[k]=(e.am[k]||0)+st.am[k];
 }
-const MODES={solo:{n:'Chacun pour soi',d:'4 équipages, 1 pirate chacun.'},duo:{n:'Équipes de 2',d:'Tu es accompagné d\'un coéquipier bot. 2 pirates par équipage, un coffre partagé.'}};
+const MODES={solo:{n:'Chacun pour soi',d:'4 équipages, 1 pirate chacun.'},trio:{n:'Équipes de 3',d:'Toi + 2 coéquipiers bots. 3 pirates par équipage (12 au total), un coffre partagé.'},duo:{n:'Équipes de 2',d:'Tu es accompagné d\'un coéquipier bot. 2 pirates par équipage, un coffre partagé.'}};
 const OPT_RES=[{n:'Lentes',v:.7},{n:'Normales',v:1},{n:'Rapides',v:1.5}];
 const DIA_INT=[Infinity,45,26,15];
 const OPT_START=[{n:'Aucun',r:{}},{n:'Laboratoire (test)',r:{bronze:400,silver:200,gold:40,diamond:80}},{n:'Petit pécule',r:{bronze:40,silver:10}},{n:'Butin de départ',r:{bronze:120,silver:40,gold:6,diamond:3}}];
@@ -113,6 +113,7 @@ let ISLANDS=[];
 let aim={x:0,y:0,ok:false}; // point visé (px de simulation), mis à jour par le rendu 3D
 
 /* =====================  AUDIO (WebAudio, aucun fichier)  ===================== */
+const SET={shake:1,slow:true};
 let AC=null,muted=false,noiseBuf=null; const sfxT={};
 function audioInit(){
   if(!AC){ try{AC=new (window.AudioContext||window.webkitAudioContext)();
@@ -209,7 +210,7 @@ function newGame(){
   ownF=new Int8Array(W*H).fill(-1); ownW=new Int8Array(W*H).fill(-1); region=new Int8Array(W*H).fill(-1); pop=new Float32Array(W*H);
   TD=[];ents=[];spawners=[];projs=[];bombs=[];shields=[];hooks=[];parts=[];rings=[];floats=[];feed=[];traps=[];chickens=[];pearls=[];beams=[];guards=[];
   selId='block'; banner.t=0; ISLANDS=[];
-  const O=game.opts, MAP=MAPS[O.map]||MAPS.classic, DUO=O.mode==='duo';
+  const O=game.opts, MAP=MAPS[O.map]||MAPS.classic, TS=({solo:1,duo:2,trio:3})[O.mode]||1;
   BHP[CORE]=Math.round(30*(OPT_CORE[O.core]||OPT_CORE[1]).v);
   MAP.bases.forEach(([bx,by,dir],i)=>{ const t=TEAMS[i]; t.bx=bx; t.by=by; t.dir=dir; });
   ship(CX,CY);
@@ -228,7 +229,7 @@ function newGame(){
     const ci=idx(t.bx,t.by); wallT[ci]=CORE; hpW[ci]=BHP[CORE]; ownW[ci]=i;
     const col=['','Rouge','Vert','Jaune'][i];
     const ent=makeEnt(i,i!==0,i===0?'Toi':'Cap. '+col); td.ent=ent; td.members=[ent]; ents.push(ent);
-    if(DUO){ const m=makeEnt(i,true,i===0?'Matelot':'Second '+col); m.slot=1; m.up=ent.up; td.members.push(m); ents.push(m); }
+    for(let k=1;k<TS;k++){ const m=makeEnt(i,true,(i===0?['','Matelot','Mousse']:['','Second '+col,'Mousse '+col])[k]); m.slot=k; m.up=ent.up; td.members.push(m); ents.push(m); }
     for(const m of td.members){ if(m.isBot) m.ai=makeBotAI(); }
     const U=()=>td.ent.up;
     spawners.push({x:td.padTile[0],y:td.padTile[1],kind:'base',team:i,types:{
@@ -250,7 +251,7 @@ function newGame(){
   if(typeof onNewGame==='function') onNewGame();
 }
 function spawnEnt(e){
-  const td=TD[e.team]; let ox=0,oy=0; if(game.opts.mode==='duo'){ const k=(e.slot?1:-1)*11; ox=-td.dir[1]*k; oy=td.dir[0]*k; } e.x=(td.spawnTile[0]+.5)*T+ox; e.y=(td.spawnTile[1]+.5)*T+oy;
+  const td=TD[e.team]; let ox=0,oy=0; { const n=({solo:1,duo:2,trio:3})[game.opts.mode]||1; if(n>1){ const k=((e.slot||0)-(n-1)/2)*17; ox=-td.dir[1]*k; oy=td.dir[0]*k; } } e.x=(td.spawnTile[0]+.5)*T+ox; e.y=(td.spawnTile[1]+.5)*T+oy;
   const i=idx(td.spawnTile[0],td.spawnTile[1]); if(wallT[i]){wallT[i]=0;}
   if(floorT[i]===0){floorT[i]=1;}
   e.hp=maxhp(e); e.alive=true; e.inv=2; e.vx=e.vy=0; e.z=60; e.vz=0; e.voidT=0; e.jetT=0; e.pull=null; e.grace=0; e.hook=null; e.riding=null; e.tkH=0; e.glide=0; e.tiny=0; e.giant=0;
@@ -1217,7 +1218,7 @@ function update(dt){
   if(game.state==='play'||game.state==='over'){
     for(const e of ents){
       if(e.alive){
-        if(e===player){ if(game.state==='play') playerControl(e,dt); else {e.ix=e.iy=0;} }
+        if(e===player){ if(game.state==='play'&&!game.paused) playerControl(e,dt); else {e.ix=e.iy=0;} }
         else if(e.remote){ if(game.state==='play'){ syncBar(e); const q=e.inp; if(!e.bar.includes(q.sel)) q.sel='sword'; netFollow(e,dt,q); controlEnt(e,dt,q); q.clicked=false; } else {e.ix=e.iy=0;} }
         else if(e.isBot) botThink(e,dt);
       }

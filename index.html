@@ -50,6 +50,23 @@
   button.big{font-family:'Pirata One','Lilita One',serif;background:#e2b14f;color:#3a2000;border:0;border-radius:12px;padding:10px 38px;font-size:28px;cursor:pointer;box-shadow:0 6px 0 #9a6b14,0 12px 24px #0008;transition:transform .1s}
   button.big:hover{transform:translateY(-2px)}
   button.big:active{transform:translateY(4px);box-shadow:0 2px 0 #9a6b14}
+  #pause{position:fixed;inset:0;background:rgba(6,20,36,.62);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;z-index:9}
+  #pause .pbox{min-width:320px;max-width:92vw;padding:22px 28px;background:linear-gradient(160deg,#5b3a22f2,#2e1c10f2);border:4px solid #e2b14f;border-radius:18px;box-shadow:0 20px 70px #000c;text-align:center}
+  #pause h2{margin:0 0 14px;font-family:'Pirata One','Lilita One',serif;font-weight:400;font-size:42px;color:#ffe9b0}
+  #pause .pbtn{display:block;width:100%;margin:8px 0;font-family:'Pirata One','Lilita One',serif;font-size:26px;padding:8px 10px;border-radius:12px;border:3px solid #7a5230;background:#4a2f1b;color:#f4e4c4;cursor:pointer}
+  #pause .pbtn:hover{border-color:#e2b14f;transform:translateY(-1px)}#pause .pbtn.main{background:#e2b14f;color:#3a2000;border-color:#ffe08a}
+  #pset{text-align:left;margin:6px 0 8px}#pset .orow{margin:7px 0}
+  #pnote{font-size:12px;color:#d9c49a;margin-top:6px}
+  #fade{position:fixed;inset:0;z-index:60;pointer-events:none;background:radial-gradient(circle at 50% 50%,#12507a 0,#06182a 70%);clip-path:circle(0% at 50% 50%);transition:clip-path .46s cubic-bezier(.65,0,.35,1);display:flex;align-items:center;justify-content:center;font-size:70px}
+  #fade.on{clip-path:circle(150% at 50% 50%);pointer-events:all}
+  #fade span{opacity:0;transform:scale(.4) rotate(-40deg);transition:all .4s .1s}#fade.on span{opacity:1;transform:none;animation:spinw 1.6s linear infinite}
+  @keyframes spinw{to{transform:rotate(360deg)}}
+  @keyframes boxIn{from{opacity:0;transform:translateY(24px) scale(.94)}to{opacity:1;transform:none}}
+  #start .box,#pause .pbox{animation:boxIn .38s cubic-bezier(.2,.9,.3,1.2)}
+  #gl{transition:filter .7s ease}
+  body.dead #gl{filter:grayscale(.9) brightness(.62) contrast(1.15) sepia(.25)}
+  body.lost #gl{filter:grayscale(.75) brightness(.55)}
+  body.won #gl{filter:saturate(1.35) brightness(1.08)}
   #shop{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(820px,96vw);max-height:80vh;overflow:auto;background:linear-gradient(170deg,#5a3a22f6,#2a190ef6);border:4px solid #e2b14f;border-radius:18px;padding:16px;z-index:5;box-shadow:0 20px 70px #000c,inset 0 0 40px #00000055;animation:pop .15s ease-out}
   @keyframes pop{from{transform:translate(-50%,-48%) scale(.94);opacity:0}to{transform:translate(-50%,-50%) scale(1);opacity:1}}
   #shop .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px}
@@ -75,7 +92,14 @@
 <body>
 <canvas id="gl"></canvas>
 <canvas id="ui"></canvas>
+<div id="fade"><span>🧭</span></div>
 <div id="shop" class="hidden"></div>
+<div id="pause" class="hidden"><div class="pbox"><h2>Pause</h2>
+  <button class="pbtn main" id="pResume">▶ Reprendre</button>
+  <button class="pbtn" id="pSet">⚙ Paramètres</button>
+  <div id="pset" class="hidden"></div>
+  <button class="pbtn" id="pQuit">⏏ Quitter la partie</button>
+  <div id="pnote"></div></div></div>
 <div id="start">
   <div class="box">
     <h1>PIRATES <span>& TRÉSORS</span></h1>

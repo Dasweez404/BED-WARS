@@ -8,6 +8,8 @@ addEventListener('keydown',ev=>{
   if(ev.code==='Space'||['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(ev.key)) ev.preventDefault();
   if(game.state==='menu') return;
   if(ev.repeat) return;
+  if(k==='Escape'&&game.state==='play'){ if(shopOpen) toggleShop(false); else togglePause(); return; }
+  if(game.paused) return;
   if(game.state==='over'&&(k==='Enter'||k==='r')){showMenu();return;}
   if(game.state==='over'&&k==='Escape'){showMenu();return;}
   if(ev.code==='Space'){ if(player.alive&&game.state==='play') actJump(); return; }
@@ -30,7 +32,7 @@ function bindMouse(c){
   c.addEventListener('mousedown',ev=>{
     mouse.x=ev.clientX;mouse.y=ev.clientY;
     if(game.state==='over'){showMenu();return;}
-    if(game.state!=='play') return;
+    if(game.state!=='play'||game.paused) return;
     if(ev.button===2){actCycle();return;}
     const l=hotList(player), hb=hotbarRect(l.length);
     if(mouse.y>=hb.y-6&&mouse.y<=hb.y+hb.s&&mouse.x>=hb.x&&mouse.x<hb.x+l.length*(hb.s+hb.g)){
@@ -47,7 +49,13 @@ function bindMouse(c){
 addEventListener('mouseup',()=>{mouse.down=false;});
 addEventListener('pointerdown',audioInit);addEventListener('keydown',audioInit);
 
-function showMenu(){ netLeave(false); toggleShop(false); newGame(); game.state='menu'; document.getElementById('start').classList.remove('hidden'); }
+let _trBusy=false;
+function screenTransition(fn){ // volet en iris : on couvre l'écran, on change, on découvre
+  const f=document.getElementById('fade'); if(!f||_trBusy){ fn(); return; } _trBusy=true; f.classList.add('on');
+  setTimeout(()=>{ try{ fn(); }finally{ requestAnimationFrame(()=>{ f.classList.remove('on'); setTimeout(()=>{ _trBusy=false; },480); }); } },480);
+}
+function showMenu(){ if(game.state==='menu') return _showMenu(); screenTransition(_showMenu); }
+function _showMenu(){ setPause(false); netLeave(false); toggleShop(false); newGame(); game.state='menu'; document.getElementById('start').classList.remove('hidden'); }
 function selectDiff(d){ game.diff=d; try{localStorage.setItem('pirates_diff',d);}catch(e){} document.querySelectorAll('#diff .dbtn').forEach(b=>b.classList.toggle('on',b.dataset.d===d)); document.getElementById('diffDesc').textContent=DIFFS[d].desc; }
 const OPTDEF=[
   {k:'mode',t:'Mode',list:()=>Object.entries(MODES).map(([v,m])=>({v,n:m.n,d:m.d})),prev:true},
@@ -92,6 +100,30 @@ function bindMp(){
   el('mpLeave').onclick=()=>{ netLeave(false); renderMp(); };
   renderMp();
 }
+/* ---------- pause & paramètres ---------- */
+const SETTINGS={mute:false,q:'auto',shake:1,slow:true};
+function loadSettings(){ try{ Object.assign(SETTINGS,JSON.parse(localStorage.getItem('pirates_settings')||'{}')); }catch(e){} applySettings(); }
+function saveSettings(){ try{localStorage.setItem('pirates_settings',JSON.stringify(SETTINGS));}catch(e){} }
+function applySettings(){
+  muted=!!SETTINGS.mute; SET.shake=SETTINGS.shake; SET.slow=!!SETTINGS.slow;
+  if(typeof Q!=='undefined'&&renderer){ if(SETTINGS.q==='auto'){ Q.auto=true; } else { Q.auto=false; Q.level=+SETTINGS.q; applyQuality(); } }
+}
+function setPause(on){ game.paused=!!on; const el=document.getElementById('pause'); el.classList.toggle('hidden',!on); if(on){ for(const k in keys) keys[k]=false; mouse.down=false; mouse.clicked=false; document.getElementById('pset').classList.add('hidden'); document.getElementById('pnote').textContent=NETON?'La partie continue en ligne pendant la pause.':''; } }
+function togglePause(){ if(game.state==='play') setPause(!game.paused); }
+function renderSettings(){
+  const el=document.getElementById('pset'), row=(t,key,opts)=>`<div class="orow"><span class="olab">${t}</span>${opts.map(([v,n])=>`<button class="obtn ${String(SETTINGS[key])===String(v)?'on':''}" data-sk="${key}" data-sv="${v}">${n}</button>`).join('')}</div>`;
+  el.innerHTML=row('Son','mute',[[false,'Activé'],[true,'Coupé']])+row('Graphismes','q',[['auto','Auto'],[0,'Bas'],[1,'Moyen'],[2,'Élevé']])+row('Style','style3',[['3d','Cubes 3D'],['2d','Sprites 2D']])+row('Secousses','shake',[[1,'Normales'],[.4,'Réduites'],[0,'Aucune']])+row('Ralentis','slow',[[true,'Oui'],[false,'Non']]);
+  el.querySelectorAll('[data-sk]').forEach(b=>b.onclick=()=>{ const k=b.dataset.sk; let v=b.dataset.sv; if(v==='true') v=true; else if(v==='false') v=false; else if(v!=='auto'&&v!=='3d'&&v!=='2d') v=+v;
+    if(k==='style3'){ game.opts.style=v; saveOpts(); setStyle(); renderOpts(); } else { SETTINGS[k]=v; saveSettings(); applySettings(); }
+    renderSettings(); });
+}
+function bindPause(){
+  const el=id=>document.getElementById(id);
+  el('pResume').onclick=()=>setPause(false);
+  el('pSet').onclick=()=>{ const s=el('pset'); s.classList.toggle('hidden'); if(!s.classList.contains('hidden')) renderSettings(); };
+  el('pQuit').onclick=()=>{ setPause(false); showMenu(); };
+  addEventListener('blur',()=>{ if(game.state==='play'&&!game.paused&&!NETON) setPause(true); });
+}
 function saveOpts(){ try{localStorage.setItem('pirates_opts',JSON.stringify(game.opts));}catch(e){} }
 function renderOpts(){
   const box=document.getElementById('opts'); let desc='';
@@ -109,7 +141,7 @@ let hudN=0, last=performance.now(), shopT=0;
 function frame(now){
   const dtr=Math.min(.05,(now-last)/1000); last=now; JUICE.tick(dtr); const dt=dtr*JUICE.ts();
   if(game.state!=='menu'){
-    if(NETCLIENT) netClientFrame(dt); else { update(dt); mouse.clicked=false; if(NETON) netHostTick(dt); }
+    if(game.paused&&!NETON){} else if(NETCLIENT) netClientFrame(dt); else { update(dt); mouse.clicked=false; if(NETON) netHostTick(dt); }
     shopT+=dt; if(shopOpen&&shopT>.4){shopT=0;renderShop();}
   } else { game.t+=dt; updateFx(dt); }
   if(game.state==='menu') renderPreview(game.t);
@@ -123,9 +155,9 @@ function boot(){
   for(const k of Object.keys(EVENTS)) if(game.opts.ev[k]===undefined) game.opts.ev[k]=1;
   if(!MAPS[game.opts.map]) game.opts.map='classic'; if(!MODES[game.opts.mode]) game.opts.mode='solo'; renderOpts();
   try{ const c=JSON.parse(localStorage.getItem('pirates_char')||'null'); if(c){ if(CLASSES[c.cls]) game.cls=c.cls; if(c.look) game.look=lookOf(c.look); if(typeof c.pname==='string') game.pname=c.pname; } }catch(e){}
-  renderChar(); initPreview(); bindMp();
+  renderChar(); initPreview(); bindMp(); loadSettings(); bindPause();
   let d0='normal'; try{ d0=localStorage.getItem('pirates_diff')||'normal'; }catch(e){} selectDiff(DIFFS[d0]?d0:'normal');
-  document.getElementById('playBtn').onclick=()=>{audioInit();document.getElementById('start').classList.add('hidden');newGame();};
+  document.getElementById('playBtn').onclick=()=>{ audioInit(); screenTransition(()=>{ document.getElementById('start').classList.add('hidden'); newGame(); }); };
   newGame(); game.state='menu';
   requestAnimationFrame(frame);
 }
