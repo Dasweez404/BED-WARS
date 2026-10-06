@@ -87,7 +87,7 @@ function mkPS(max,additive){
   geo.setAttribute('alpha',new THREE.BufferAttribute(alpha,1).setUsage(THREE.DynamicDrawUsage));
   const mat=new THREE.ShaderMaterial({transparent:true,depthWrite:false,blending:additive?THREE.AdditiveBlending:THREE.NormalBlending,uniforms:{scale:{value:600}},
     vertexShader:'attribute vec3 aColor; attribute float size; attribute float alpha; varying vec3 vC; varying float vA; uniform float scale; void main(){ vC=aColor; vA=alpha; vec4 mv=modelViewMatrix*vec4(position,1.0); gl_PointSize=size*scale/max(0.1,-mv.z); gl_Position=projectionMatrix*mv; }',
-    fragmentShader:'varying vec3 vC; varying float vA; void main(){ float d=length(gl_PointCoord-0.5); if(d>0.5) discard; gl_FragColor=vec4(vC,vA*smoothstep(0.5,0.18,d)); }'});
+    fragmentShader:additive?'varying vec3 vC; varying float vA; void main(){ vec2 p=abs(gl_PointCoord-0.5); float d=length(p); float core=smoothstep(0.5,0.12,d); float rays=smoothstep(0.06,0.0,min(p.x,p.y))*smoothstep(0.5,0.05,max(p.x,p.y)); float a=max(core,rays*0.95); if(a<0.02) discard; gl_FragColor=vec4(vC*(1.0+rays),vA*a); }':'varying vec3 vC; varying float vA; void main(){ float d=length(gl_PointCoord-0.5); if(d>0.5) discard; vec3 c=mix(vC*0.55,vC,smoothstep(0.5,0.36,d)); gl_FragColor=vec4(c,vA*smoothstep(0.5,0.45,d)); }'});
   const pts=new THREE.Points(geo,mat); pts.frustumCulled=false; scene.add(pts);
   return {pts,geo,mat,pos,col,size,alpha,max:800,cap:max,n:0};
 }
@@ -135,7 +135,7 @@ function buildWorldMeshes(){
   iPuff=instMesh(GEO.sphere0,new THREE.MeshStandardMaterial({flatShading:true,roughness:1}),CAP,false,false);
   iUnder=instMesh(GEO.sphere0,new THREE.MeshStandardMaterial({flatShading:true,roughness:1}),CAP,false,false);
   iFoam=instMesh(GEO.box,new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.42,depthWrite:false}),CAP,false,false);
-  iTuft=instMesh(GEO.cone,new THREE.MeshStandardMaterial({flatShading:true,roughness:1}),900,false,false);
+  iTuft=SPR2D()?instMesh(grassGeo(),grassMat(),900,false,false):instMesh(GEO.cone,new THREE.MeshStandardMaterial({flatShading:true,roughness:1}),900,false,false);
   iShell=instMesh(GEO.sphere0,new THREE.MeshStandardMaterial({flatShading:true,roughness:.6}),600,false,false);
   let np=0,nu=0,nf=0,nt=0,ns=0; const rn=prng3(5);
   const setI=(mesh,i,x,y,z,sx,sy,sz,c)=>{ sc3.set(sx,sy,sz); v3.set(x,y,z); m4.compose(v3,qd.identity(),sc3); mesh.setMatrixAt(i,m4); mesh.setColorAt(i,c); };
@@ -149,7 +149,7 @@ function buildWorldMeshes(){
     if(edge&&reg!==4&&nf<CAP-2){ let fx=x+.5,fz=y+.5; const e=[[0,-1],[0,1],[-1,0],[1,0]].filter(([dx,dy])=>fl(x+dx,y+dy)===0); for(const [dx,dy] of e){ fx+=dx*.35; fz+=dy*.35; } setI(iFoam,nf++,fx,-1.08,fz,1.5,.04,1.5,colT.set('#ffffff').clone()); }
     if(reg!==4&&hash(x,y)%2===0&&nu<CAP-3){ const r=.6+rn()*.55; setI(iUnder,nu++,x+.5+(rn()-.5)*.5,-.55-rn()*.5,y+.5+(rn()-.5)*.5,r,r*.75,r,colT.set(rn()<.5?'#7a6552':'#6b5847').clone()); }
     if(reg!==4&&!edge){ const tc=groundColor(reg,x,y,new THREE.Color());
-      if(tc.g>tc.r+.03){ if(hash(x,y)%2===0&&nt<880){ for(let k=0;k<2;k++){ const a=rn()*6.28, hh=.16+rn()*.1; setI(iTuft,nt++,x+.5+Math.cos(a)*.3,hh/2,y+.5+Math.sin(a)*.3,.05,hh,.05,colT.set(rn()<.5?'#5fae3f':'#78c24d').clone()); } } }
+      if(tc.g>tc.r+.03){ if(hash(x,y)%2===0&&nt<880){ for(let k=0;k<2;k++){ const a=rn()*6.28, hh=.16+rn()*.1; if(SPR2D()) setI(iTuft,nt++,x+.5+Math.cos(a)*.3,0,y+.5+Math.sin(a)*.3,.4,hh*2.4,1,colT.set(rn()<.5?'#6bc447':'#88d65a').clone()); else setI(iTuft,nt++,x+.5+Math.cos(a)*.3,hh/2,y+.5+Math.sin(a)*.3,.05,hh,.05,colT.set(rn()<.5?'#5fae3f':'#78c24d').clone()); } } }
       else if(hash(x,y)%6===0&&ns<580){ const a=rn()*6.28; setI(iShell,ns++,x+.5+Math.cos(a)*.3,.04,y+.5+Math.sin(a)*.3,.07,.045,.07,colT.set(rn()<.5?'#fbd5e0':'#fff4e0').clone()); } }
   }
   iTuft.count=nt; iTuft.instanceMatrix.needsUpdate=true; iTuft.instanceColor.needsUpdate=true; iShell.count=ns; iShell.instanceMatrix.needsUpdate=true; iShell.instanceColor.needsUpdate=true;

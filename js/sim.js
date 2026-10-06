@@ -64,7 +64,8 @@ const DIFFS={
   hard:{n:'Difficile',react:.2,noise:.1,dmg:1.1,speed:1.02,hp:24,engage:8,meleeCd:.5,gunCd:1,likeP:1,use:2.2,aggr:1.7,buyT:.4,leave:[18,30],income:.75,strafe:true,dodge:.5,desc:'Bots rapides et précis qui achètent et utilisent toutes les armes et tous les gadgets.'}
 };
 const getD=()=>DIFFS[game.diff||'normal'];
-const ER=5; // rayon du corps d'un personnage (px)
+const ER=5;
+const SPR2D=()=>!(game.opts&&game.opts.style==='3d'); // rayon du corps d'un personnage (px)
 const hash=(x,y)=>(((x*73856093)^(y*19349663))>>>0);
 function shade(hex,k){
   const n=parseInt(hex.slice(1),16); let r=n>>16,g=(n>>8)&255,b=n&255;
@@ -103,7 +104,7 @@ const MODES={solo:{n:'Chacun pour soi',d:'4 équipages, 1 pirate chacun.'},duo:{
 const OPT_RES=[{n:'Lentes',v:.7},{n:'Normales',v:1},{n:'Rapides',v:1.5}];
 const OPT_START=[{n:'Aucun',r:{}},{n:'Petit pécule',r:{bronze:40,silver:10}},{n:'Butin de départ',r:{bronze:120,silver:40,gold:6,diamond:3}}];
 const OPT_CORE=[{n:'Fragiles',v:.6},{n:'Normaux',v:1},{n:'Solides',v:1.7}];
-let game={state:'menu',diff:'normal',cls:'matelot',look:{skin:0,hat:0,hair:0,face:0,patch:1},pname:'Toi',opts:{mode:'solo',map:'classic',res:1,start:0,core:1,stack:3,roster:40,evf:2,ev:{coins:1,curse:1,shark:1,storm:1,volcano:1,fog:1,kraken:1,rush:1}},t:0,win:false,hurtFx:0,hitmark:0,flash:0,flashCol:'#fff'};
+let game={state:'menu',diff:'normal',cls:'matelot',look:{skin:0,hat:0,hair:0,face:0,patch:1},pname:'Toi',opts:{style:'2d',mode:'solo',map:'classic',res:1,start:0,core:1,stack:3,roster:40,evf:2,ev:{coins:1,curse:1,shark:1,storm:1,volcano:1,fog:1,kraken:1,rush:1}},t:0,win:false,hurtFx:0,hitmark:0,flash:0,flashCol:'#fff'};
 let player=null;
 let shake=0, banner={txt:'',col:'#fff',t:0,max:3};
 let selId='block', selAnim=0;

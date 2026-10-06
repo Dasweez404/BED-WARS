@@ -56,6 +56,7 @@ const OPTDEF=[
   {k:'start',t:'Départ',list:()=>OPT_START.map((o,i)=>({v:i,n:o.n,d:'Ressources de départ de chaque pirate.'}))},
   {k:'roster',t:'Roster',list:()=>[10,15,20,30,40,50,60,0].map(v=>({v,n:v?v+' objets':'Tous',d:'Objets disponibles en boutique : tirés au hasard à chaque partie ('+(v?v:'tous')+').'}))},
   {k:'evf',t:'Événements',list:()=>EV_FREQ.map((o,i)=>({v:i,n:o.n,d:'Fréquence des événements aléatoires (pluie de pièces, requin, tempête…).'}))},
+  {k:'style',t:'Style',list:()=>[{v:'2d',n:'Sprites 2D',d:'Personnages, objets, herbe et mouettes dessinés en 2D (style cartoon).'},{v:'3d',n:'Modèles 3D',d:'Anciens modèles 3D bas-polygones.'}],apply:true},
   {k:'stack',t:'Hauteur max',list:()=>[1,2,3,4].map(v=>({v,n:v+(v>1?' blocs':' bloc'),d:'Nombre de blocs empilables : empile des blocs identiques sur tes murs (un mur de 2+ ne se saute plus !).'}))},
   {k:'core',t:'Coffres',list:()=>OPT_CORE.map((o,i)=>({v:i,n:o.n,d:'Résistance des coffres au trésor.'}))}
 ];
@@ -99,6 +100,7 @@ function renderOpts(){
   box.querySelectorAll('.obtn[data-k]').forEach(b=>b.onclick=()=>{
     const k=b.dataset.k, def=OPTDEF.find(o=>o.k===k), it=def.list().find(x=>String(x.v)===b.dataset.v);
     game.opts[k]=it.v; saveOpts(); renderOpts(); document.getElementById('optDesc').textContent=it.d;
+    if(def.apply&&typeof setStyle==='function') setStyle();
     if(def.prev){ const st=game.state; newGame(); game.state='menu'; }
   });
 }

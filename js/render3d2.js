@@ -342,11 +342,11 @@ function buildAmbient(){
   const rock=instOf(GEO.sphere0,new THREE.MeshStandardMaterial({color:0x7a6a58,flatShading:true}),items.rock,false), sand=instOf(GEO.cyl,new THREE.MeshStandardMaterial({color:0xefdca4,flatShading:true}),items.sand,false);
   const palm=instOf(MODELS.palm,swayMat(new THREE.MeshStandardMaterial({vertexColors:true,flatShading:true,roughness:.85,side:THREE.DoubleSide})),items.palm,false);
   for(const m of [rock,sand,palm]){ scene.remove(m); g.add(m); }
-  for(let i=0;i<5;i++){
+  for(let i=0;i<7;i++){
     const b=new THREE.Group(), wm=M('#f4f4f4'); const body=new THREE.Mesh(GEO.sphere0,wm); body.scale.set(.32,.14,.14); b.add(body);
     const hd=new THREE.Mesh(GEO.sphere0,wm); hd.scale.set(.1,.1,.1); hd.position.x=.3; b.add(hd); const bk=new THREE.Mesh(GEO.cone,M('#f59e0b')); bk.scale.set(.04,.14,.04); bk.rotation.z=-Math.PI/2; bk.position.x=.42; b.add(bk);
     const wings=[]; for(const z of [-1,1]){ const w=new THREE.Group(); const wb=new THREE.Mesh(GEO.box,wm); wb.scale.set(.2,.025,.6); wb.position.z=z*.3; w.add(wb); b.add(w); wings.push(w); }
-    b.userData={wings,cx:CX+(rn()-.5)*70,cz:CY+(rn()-.5)*70,r:7+rn()*16,sp:.25+rn()*.35,ph:rn()*6.28,h:7+rn()*6,fl:rn()*6}; g.add(b); u.gulls.push(b);
+    b.userData={wings,cx:CX+(rn()-.5)*70,cz:CY+(rn()-.5)*70,r:7+rn()*16,sp:.25+rn()*.35,ph:rn()*6.28,h:7+rn()*6,fl:rn()*6}; g.add(b); u.gulls.push(b); if(typeof addGullSprite==='function') addGullSprite(g,b);
   }
   const isl=ISLANDS.map(il=>[il.x,il.y,il.ship?10:il.r+3]);
   for(let i=0,n=0;i<200&&n<10;i++){
@@ -361,7 +361,9 @@ function buildAmbient(){
 }
 function updateAmbient(dt){
   if(!ambient) return; const t=game.t, u=ambient.userData;
-  for(const b of u.gulls){ const d=b.userData, a=t*d.sp+d.ph; b.position.set(d.cx+Math.cos(a)*d.r,d.h+Math.sin(t*.8+d.fl)*.4,d.cz+Math.sin(a)*d.r); b.rotation.y=-(a+Math.PI/2); const f=Math.sin(t*7+d.fl)*.6; d.wings[0].rotation.x=f; d.wings[1].rotation.x=-f; }
+  const st2=SPR2D();
+  for(const b of u.gulls){ const d=b.userData, a=t*d.sp+d.ph; b.position.set(d.cx+Math.cos(a)*d.r,d.h+Math.sin(t*.8+d.fl)*.4,d.cz+Math.sin(a)*d.r); b.rotation.y=-(a+Math.PI/2); const f=Math.sin(t*7+d.fl)*.6; d.wings[0].rotation.x=f; d.wings[1].rotation.x=-f;
+    b.visible=!st2||!d.spr; if(d.spr){ d.spr.visible=st2; if(st2){ d.spr.position.copy(b.position); const fl=Math.sin(t*8+d.fl)>0, dir=-Math.sin(a)>=0?1:-1, tx=d.spr.material.map; tx.repeat.x=dir*.5; tx.offset.x=(dir>0?(fl?0:.5):(fl?.5:1)); d.spr.scale.set(1.5,.56,1); } } }
   for(const m of u.debris){ const d=m.userData; d.x+=d.sp*dt; if(d.x>CX+50) d.x=CX-50; m.position.set(d.x,-1.12+Math.sin(t*1.4+d.ph)*.07,d.z); m.rotation.y=d.rot+Math.sin(t*.3+d.ph)*.3; m.rotation.x=Math.sin(t*1.1+d.ph)*.08; }
   if(game.state!=='menu'&&parts.length<300&&Math.random()<.4){ const a=Math.random()*6.28, r=Math.random()*20*T; parts.push({x:cam3.x+Math.cos(a)*r,y:cam3.y+Math.sin(a)*r,z:-34,vx:0,vy:0,vz:6,life:.9,max:.9,col:'#ffffff',size:2.5}); }
 }
