@@ -196,3 +196,52 @@ const botPing=(b,k,x,y)=>{ if(!player||b.team!==player.team||game.tut) return; c
   botRetreat=function(b,why){ _nr(b,why); if(why==='def'){ const td=TD[b.team]; botPing(b,'def',(td.bx+.5)*T,(td.by+.5)*T); } };
   const _ng=newGame; newGame=function(){ _ng(); PMEM.melee=PMEM.gun=PMEM.build=PMEM.gad=0; PMEM.style=''; PMEM.said=false; PMEM.t=0; };
 }
+
+/* =====================  BOTS : PLUS D'ARMES, DE GADGETS ET DE RELIQUES  =====================
+   Ils achètent davantage (armes à feu d'abord, puis reliques et gadgets utilisables), engagent de plus loin
+   quand ils ont une arme à distance, et tirent / lancent leurs gadgets bien plus souvent. */
+for(const id in GUNS){ if(BOT_RANGED.some(r=>r[0]===id)||id==='bow'||id==='woolgun') continue; const g=GUNS[id]; BOT_RANGED.push([id,g.pel>1?0:1.2,Math.max(3,Math.min(10,g.sp*g.life/T*.75))]); }
+const BOT_USES=new Set(['heal','anchor','kraken','barrage','flag','storm','cluster','chicken','vortex','haste','cloak','springs','dash','mine','banana','turret','guard','turret2','wallgad','frostnova','quake','aegis','siren','coco','decoy','swap','grog','firecracker','sharkbait','smokebomb','lasso','meteor','hurricane','rod','crabs','hull','rage','blessing','stonewall','battery','raid','laughgas','sneeze','giant','shrink','bananarow','stickybomb','pickpocket','bottlestorm','net','buoy','tp','repair']);
+function botWish(b){
+  if(!nearBase(b)||b.sword<1||totalBlocks(b)<14) return false;
+  const guns=Object.keys(b.own).filter(k=>GUNS[k]&&b.own[k]).length, cands=[];
+  for(const it of SHOP){ const id=it.id; if(!inRoster(id)||!ITEMMAP[id]&&!RELICS[id]) continue; let w=0;
+    if(GUNS[id]){ if(b.own[id]||guns>=4) continue; w=guns<1?6:guns<2?4:1.5; }
+    else if(RELICS[id]){ if(b.relics&&b.relics[id]) continue; if(RELICS[id].lose&&b.res.gold<8) continue; w=2.6; }
+    else if(BOT_USES.has(id)){ if((b.am[id]||0)>=2) continue; w=({heal:2.4,aegis:2,cloak:1.6,rage:1.6,cluster:1.6,kraken:1.5,storm:1.5})[id]||1.2; }
+    else continue;
+    const inf=it.info(b); if(inf.ok===false||!inf.cost||!canAfford(b,inf.cost)) continue;
+    // on ne vide pas toute la bourse d'un coup
+    const tot=Object.entries(inf.cost).reduce((a,[k,v])=>a+v*({bronze:1,silver:3,gold:9,diamond:18})[k],0), wealth=b.res.bronze+b.res.silver*3+b.res.gold*9+b.res.diamond*18; if(tot>wealth*.85) continue;
+    cands.push([it,w]); }
+  if(!cands.length) return false; let sum=cands.reduce((a,c)=>a+c[1],0), r=Math.random()*sum; for(const [it,w] of cands){ r-=w; if(r<=0){ return buy(b,it.id); } } return false;
+}
+{ const _bb=botBuy;
+  botBuy=function(b){ if(b.ai&&!game.tut&&!b.remote){ b.ai.buyT=Math.min(b.ai.buyT||99,getD().buyT*.7); if(Math.random()<.65&&botWish(b)) return; } _bb(b); };
+  const _bt=botThink;
+  botThink=function(b,dt){
+    const ai=b.ai; if(!ai||!b.alive||b.remote||game.tut) return _bt(b,dt);
+    const D=getD(), e0=D.engage, a0=D.aggr, u0=D.use; let rng=0; for(const [id,a,z] of BOT_RANGED) if(b.own[id]) rng=Math.max(rng,z); if(b.own.bow) rng=Math.max(rng,9);
+    const guns=Object.keys(b.own).filter(k=>GUNS[k]&&b.own[k]).length; if(rng>0){ D.engage=Math.max(e0,Math.min(10,rng*.8)); D.aggr=a0*(1+Math.min(.75,guns*.25)); } D.use=u0*1.35;
+    try{ _bt(b,dt); } finally{ D.engage=e0; D.aggr=a0; D.use=u0; }
+    const f=ai.foe; if(f&&f.alive&&!(ai.react>0)&&!(b.frozen>0)&&!(b.bubble>0)&&!(ai.feint>0)){ const fd=dist(b,f);
+      if(guns+(b.own.bow?1:0)+(b.own.woolgun?1:0)>0&&Math.random()<dt*3.2*u0) botRanged(b,fd);
+      if(b.cd.gad<=0&&Math.random()<dt*1.5*u0) botGadgets(b,f,fd,dt,Math.hypot(f.x-(TD[b.team].bx+.5)*T,f.y-(TD[b.team].by+.5)*T)<8*T); }
+  };
+}
+/* ils dépensent leur butin avant de repartir, et rentrent faire du shopping quand ils sont riches */
+const botWealth=b=>b.res.bronze+b.res.silver*3+b.res.gold*9+b.res.diamond*18;
+{ const _pg=pickGoal;
+  pickGoal=function(b){
+    const ai=b.ai;
+    if(!game.tut&&nearBase(b)&&botWealth(b)>=30&&(ai.shopTries||0)<4){ ai.shopTries=(ai.shopTries||0)+1; if(botWish(b)){ ai.mode='home'; ai.leaveAt=ai.t+3.5; floatTxt(b.x,b.y-44,'🛒','#fde68a',16); return; } }
+    ai.shopTries=0; _pg(b);
+  };
+  const _bt=botThink;
+  botThink=function(b,dt){
+    const ai=b.ai;
+    if(ai&&b.alive&&!b.remote&&!game.tut&&TD[b.team].coreAlive&&(ai.mode==='raid'||ai.mode==='hunt'||ai.mode==='res')&&!ai.foe&&!(ai.shopTrip>game.t)&&botWealth(b)>=85&&Math.random()<dt*.25){
+      ai.shopTrip=game.t+60; ai.mode='home'; ai.leaveAt=ai.t+9; ai.buyT=0; ai.bounty=false; floatTxt(b.x,b.y-44,'Je vais faire les boutiques !','#fde68a',13); }
+    _bt(b,dt);
+  };
+}
