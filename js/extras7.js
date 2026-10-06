@@ -1,7 +1,7 @@
 'use strict';
 /* =====================  NOUVELLES CARTES, MUTATEURS, GLACE  =====================
    4 cartes, 7 mutateurs (règles folles activables), banquise glissante. */
-Object.assign(game.opts,{mut:{},dn:1,wth:1,pers:1});
+Object.assign(game.opts,{mut:{},dn:1,wth:1,pers:1,loss:0,rkeep:0,bheal:0});
 /* ---------- cartes ---------- */
 (function(){
   const bases4=[[50,82,[0,-1]],[18,50,[1,0]],[50,18,[0,1]],[82,50,[-1,0]]];
@@ -81,4 +81,10 @@ for(const it of SHOP){ if(it._pm) continue; it._pm=1; const i0=it.info; it.info=
 /* sol de la banquise : teinte glacée */
 { const _g=groundColor, ic=new THREE.Color('#d9f1ff'), jg=new THREE.Color('#3f9a45');
   groundColor=function(reg,tx,ty,out){ _g(reg,tx,ty,out); if(iceOn()) out.lerp(ic,reg===4?.35:.7); else if((MAPS[game.opts.map]||{}).jungle&&reg!==4) out.lerp(jg,.45); return out; };
+}
+
+/* soin à la base (option) */
+{ const _e=updateEvents;
+  updateEvents=function(dt){ _e(dt); const r=[0,1.2,3.5][game.opts.bheal|0]; if(!r||game.state!=='play') return;
+    for(const e of ents){ if(!e.alive||e.hp>=maxhp(e)||!nearBase(e)) continue; e.hp=Math.min(maxhp(e),e.hp+r*dt); if(Math.random()<dt*2) burst(e.x,e.y-e.z-10,'#86efac',1,40,.5,3); } };
 }

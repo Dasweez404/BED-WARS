@@ -336,19 +336,19 @@ function die(e,by,sea){
   const killer=by&&by!==e?by:null;
   if(killer){
     killer.kills++;
-    for(const k in e.res){killer.res[k]+=e.res[k]; if(killer===player&&e.res[k]>0) floatTxt(e.x,e.y-40-k.length*0,'+'+e.res[k]+' '+RESNAME[k],RESCOL[k],15);}
+    if(!(game.opts&&game.opts.rkeep)) for(const k in e.res){killer.res[k]+=e.res[k]; if(killer===player&&e.res[k]>0) floatTxt(e.x,e.y-40-k.length*0,'+'+e.res[k]+' '+RESNAME[k],RESCOL[k],15);}
     msg(`${killer.name} a éliminé ${e.name}`,TEAMS[killer.team].light);
     if(killer===player){ announce('ÉLIMINATION !','#fde68a'); flashScreen('#fff',.15); }
   } else msg(e.fallDeath?`${e.name} s'est écrasé au sol`:`${e.name} est tombé à la mer`,'#9aa7cf');
   if(e.riding){ e.riding.rider=null; e.riding=null; }
   // mort hors de sa base : on perd tout son équipement (les améliorations de base sont conservées)
-  if(!nearBase(e)){
+  if((game.opts.loss|0)===1||((game.opts.loss|0)===0&&!nearBase(e))){
     const had=Object.keys(e.own).length+Object.values(e.am).filter(v=>v>0).length+e.grap+e.jet+e.bomb+e.repel+e.shield+(e.pick>0?1:0)+(e.sword>0?1:0)+totalBlocks(e);
     e.blocks={2:8,3:0,4:0,5:0,7:0,8:0}; e.bsel=2; e.pick=0; e.sword=0; e.grap=e.jet=e.bomb=e.repel=e.shield=0; e.own=keepOwn(e); e.am=keepAm(e); e.ws={};
     if(e===player&&had>8){ msg('Mort hors de ta base : tu perds ton équipement !','#fca5a5'); floatTxt(e.x,e.y-50,'ÉQUIPEMENT PERDU','#fca5a5',16); }
   }
-  const lost=Object.values(e.res).reduce((a,b)=>a+b,0);
-  for(const k in e.res) e.res[k]=0; // la mort fait perdre toutes les ressources
+  const lost=game.opts.rkeep?0:Object.values(e.res).reduce((a,b)=>a+b,0);
+  if(!game.opts.rkeep) for(const k in e.res) e.res[k]=0; // la mort fait perdre toutes les ressources (option)
   if(e===player){ shake=14; if(lost>0) msg(`Tu as perdu ${lost} ressources !`,'#fca5a5'); }
   const td=TD[e.team];
   if(td.coreAlive) e.resp=3;
