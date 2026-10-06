@@ -48,6 +48,7 @@ function touchBuild(){
   B('tbShop','🛒','',{right:'92px',bottom:'18px'},()=>{ if(game.state==='play'&&!actBoat()) toggleShop(); },'');
   B('tbRel','↻','',{right:'92px',bottom:'74px'},()=>{ if(player.alive) actReload(); });
   B('tbSwap','⇄','',{right:'38px',bottom:'92px'},()=>{ if(player.alive) actSwap(); });
+  B('tbRide','🚀','',{right:'148px',bottom:'74px'},()=>{ if(typeof rampRide==='function') rampRide(); },'');
   B('tbBlk','🧱','',{right:'148px',bottom:'18px'},()=>actCycle());
   B('tbPing','📍','',{left:'12px',bottom:'12px'},()=>touchPanel('ping'));
   B('tbEmo','😀','',{left:'66px',bottom:'12px'},()=>touchPanel('emo'));
@@ -137,7 +138,7 @@ function touchBindMenu(){
     b.classList.toggle('tportrait',innerHeight>innerWidth); if(st==='play'&&player){ const l=hotList(player), hb=hotbarRect(l.length), w=l.length*(hb.s+hb.g)-hb.g, h=TEL.hot.style; h.left=(hb.x-8)+'px'; h.width=(w+16)+'px'; h.top=(hb.y-12)+'px'; h.height=(hb.s+22)+'px'; }
     b.classList.toggle('tmenu',st==='menu'); b.classList.toggle('tpause',!!game.paused); b.classList.toggle('tshop',!!shopOpen); b.classList.toggle('tover',st==='over');
     if(st==='play'&&player){ const s=w2s(aim.x,aim.y,0); mouse.x=s[0]; mouse.y=s[1];
-      const spec=isSpec(); for(const id of ['tbSpL','tbSpR','tbSpF']) TEL[id].classList.toggle('hide',!spec); for(const id of ['tbJump','tbShop','tbRel','tbSwap','tbBlk','tbPing','tbEmo']) TEL[id].classList.toggle('hide',spec||!player.alive);
+      const spec=isSpec(); for(const id of ['tbSpL','tbSpR','tbSpF']) TEL[id].classList.toggle('hide',!spec); for(const id of ['tbJump','tbShop','tbRel','tbSwap','tbBlk','tbPing','tbEmo']) TEL[id].classList.toggle('hide',spec||!player.alive); TEL.tbRide.classList.toggle('hide',!(typeof rampOf==='function'&&rampOf(player)));
       TEL.tbShop.classList.toggle('hide',spec||!player.alive||!nearBase(player)&&!(boats&&boats.some(bt=>Math.hypot(bt.x-player.x,bt.y-player.y)<2.5*T)&&true));
       if(typeof TOUCHSPEC!=='undefined') TOUCHSPEC=spec&&SPEC.free&&(TOUCH.ix||TOUCH.iy)?{ix:TOUCH.ix,iy:TOUCH.iy}:null; }
   };
