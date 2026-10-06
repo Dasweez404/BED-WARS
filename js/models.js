@@ -65,39 +65,34 @@ const lookKey=l=>l.skin+'.'+l.hat+'.'+l.hair+'.'+l.face+'.'+l.patch+'.'+l.shape+
 function randomLook(){ const r=n=>Math.floor(Math.random()*n); return {skin:r(SKINS.length),hat:r(HATS.length),hair:r(HAIRS.length),face:r(3),patch:Math.random()<.5?1:0,shape:Math.random()<.7?1:0,brow:r(4)}; }
 function headGeo(l,td){
   const key='h'+lookKey(l)+td.col; if(PG[key]) return PG[key];
-  const B=GEO.box, hair=HAIRS[l.hair], skin=td.col, light=td.light, dk='#15121a';
-  const P=[{geo:B,pos:[0,0,0],scale:[.82,.78,.82],color:skin},
-    {geo:B,pos:[.41,-.08,.27],scale:[.02,.09,.1],color:light},{geo:B,pos:[.41,-.08,-.27],scale:[.02,.09,.1],color:light},
-    {geo:B,pos:[.415,-.2,0],scale:[.02,.035,.15],color:'#3a1f16'}];
-  if(l.brow>0){ const th=.03+.03*l.brow; for(const z of [-1,1]) if(!(l.patch&&z<0)) P.push({geo:B,pos:[.415,.2,z*.2],scale:[.03,th,.24],rot:[z*.1,0,0],color:'#1b1512'}); }
-  if(l.patch){ P.push({geo:B,pos:[.415,.07,-.2],scale:[.03,.2,.21],color:dk},{geo:B,pos:[0,.18,0],scale:[.84,.045,.84],rot:[0,0,.2],color:dk}); }
-  if(l.face===1) P.push({geo:B,pos:[.33,-.31,0],scale:[.2,.2,.7],color:hair},{geo:B,pos:[.435,-.17,0],scale:[.03,.05,.3],color:hair});
-  if(l.face===2) P.push({geo:B,pos:[.425,-.115,.08],scale:[.04,.05,.15],color:hair},{geo:B,pos:[.425,-.115,-.08],scale:[.04,.05,.15],color:hair});
+  const B=GEO.box, hair=HAIRS[l.hair], dk='#15121a';
+  const P=[{geo:B,pos:[0,0,0],scale:[.82,.78,.82],color:td.col}];
+  if(l.brow>0){ const th=.03+.03*l.brow; for(const z of [-1,1]) if(!(l.patch&&z<0)) P.push({geo:B,pos:[.415,.2,z*.2],scale:[.03,th,.24],color:'#1b1512'}); }
+  if(l.patch) P.push({geo:B,pos:[.415,.07,-.2],scale:[.03,.2,.21],color:dk});
+  if(l.face===1) P.push({geo:B,pos:[.36,-.3,0],scale:[.14,.2,.7],color:hair});
+  if(l.face===2) P.push({geo:B,pos:[.425,-.13,0],scale:[.04,.06,.36],color:hair});
   return PG[key]=mergeParts(P);
 }
 function hatParts(kind,hatc,trim,light,hair){
-  const B=GEO.box,S=GEO.sphere,Cy=GEO.cyl;
-  if(kind===1) return [{geo:B,pos:[0,.1,0],scale:[.36,.17,.82],color:hatc},{geo:B,pos:[0,.2,0],scale:[.38,.04,.84],color:trim},{geo:B,pos:[0,.02,0],scale:[.4,.03,.86],color:'#1c1722'},
-    {geo:GEO.cone,pos:[0,.08,.86],scale:[.12,.2,.12],rot:[Math.PI/2,0,0],color:hatc},{geo:GEO.cone,pos:[0,.08,-.86],scale:[.12,.2,.12],rot:[-Math.PI/2,0,0],color:hatc},
-    {geo:S,pos:[-.1,.28,.1],scale:[.07,.1,.07],color:'#ffffff'},{geo:S,pos:[-.16,.34,.18],scale:[.06,.09,.06],color:light}];
-  if(kind===2) return [{geo:S,pos:[-.04,-.2,0],scale:[.45,.3,.45],color:hatc},{geo:Cy,pos:[0,-.2,0],scale:[.43,.03,.43],rot:[0,0,.3],color:trim},{geo:S,pos:[-.42,-.18,.04],scale:[.1,.08,.1],color:hatc},{geo:GEO.cone,pos:[-.55,-.28,.12],scale:[.05,.2,.05],rot:[0,0,1.9],color:hatc},{geo:GEO.cone,pos:[-.55,-.28,-.04],scale:[.05,.2,.05],rot:[0,0,2.4],color:hatc}];
-  if(kind===3) return [{geo:S,pos:[-.04,-.2,0],scale:[.45,.3,.45],color:hair},{geo:S,pos:[.1,-.06,0],scale:[.3,.14,.4],color:hair},{geo:GEO.cone,pos:[0,.1,0],scale:[.1,.2,.1],color:hair},{geo:GEO.cone,pos:[-.1,.06,.12],scale:[.08,.17,.08],rot:[0,0,.7],color:hair}];
-  return [{geo:GEO.cyl3,pos:[0,0,0],scale:[.64,.06,.64],rot:[0,Math.PI/2,0],color:'#1c1722'},{geo:GEO.cyl3,pos:[0,.035,0],scale:[.6,.04,.6],rot:[0,Math.PI/2,0],color:hatc},
-    {geo:Cy,pos:[0,.17,0],scale:[.3,.26,.3],color:hatc},{geo:Cy,pos:[0,.1,0],scale:[.315,.06,.315],color:trim},{geo:S,pos:[.3,.14,0],scale:[.055,.055,.03],color:'#ffffff'},{geo:GEO.cone,pos:[0,.34,0],scale:[.06,.08,.06],color:light}];
+  const B=GEO.box;
+  if(kind===1) return [{geo:B,pos:[0,.1,0],scale:[.38,.2,.92],color:hatc},{geo:B,pos:[0,.2,0],scale:[.4,.04,.94],color:trim}];
+  if(kind===2) return [{geo:B,pos:[0,-.02,0],scale:[.86,.14,.86],color:hatc},{geo:B,pos:[-.46,-.04,0],scale:[.1,.14,.14],color:hatc}];
+  if(kind===3) return [{geo:B,pos:[0,-.04,0],scale:[.86,.14,.86],color:hair},{geo:B,pos:[.2,-.12,0],scale:[.46,.12,.86],color:hair}];
+  return [{geo:B,pos:[0,.02,0],scale:[.72,.06,.72],color:'#1c1722'},{geo:B,pos:[0,.15,0],scale:[.5,.22,.5],color:hatc},{geo:B,pos:[0,.1,0],scale:[.52,.05,.52],color:trim}];
 }
 function pirateVariant(td,neutral,look){
   const l=lookOf(look), key=(neutral?'n':'t')+td.col+'|'+lookKey(l); if(PG[key]) return PG[key];
   const B=GEO.box, S=GEO.sphere, Cy=GEO.cyl, shirt=neutral?'#f1ece0':td.col, trim=neutral?td.col:'#ffffff', hatc=td.col, light=td.light;
   const v={};
-  v.body=mergeParts([{geo:B,pos:[0,.28,0],scale:[.46,.5,.38],color:td.dark},{geo:B,pos:[0,.07,0],scale:[.475,.07,.395],color:td.col},{geo:B,pos:[.2,.4,0],scale:[.08,.08,.2],color:td.light}]);
+  v.body=mergeParts([{geo:B,pos:[0,.28,0],scale:[.46,.5,.38],color:td.dark},{geo:B,pos:[0,.06,0],scale:[.475,.06,.395],color:td.col}]);
   v.hat=mergeParts(hatParts(l.hat,td.dark,'#ffffff',light,HAIRS[l.hair]));
-  v.arm=mergeParts([{geo:B,pos:[0,-.2,0],scale:[.2,.2,.2],color:td.col},{geo:B,pos:[0,-.13,0],scale:[.21,.05,.21],color:td.dark}]);
+  v.arm=mergeParts([{geo:B,pos:[0,-.2,0],scale:[.2,.2,.2],color:td.col}]);
   return PG[key]=v;
 }
 function buildPirateGeos(){
   const S=GEO.sphere, Cy=GEO.cyl, B=GEO.box;
   const smile=new THREE.TorusGeometry(.085,.017,5,10,Math.PI);
-  PG.eye=mergeParts([{geo:S,pos:[0,0,0],scale:[.05,.05,.05],color:'#15121a'}]); const _eyeOld=mergeParts([{geo:S,pos:[0,0,0],scale:[.1,.125,.115],color:'#ffffff'},{geo:S,pos:[.06,-.01,0],scale:[.065,.08,.075],color:'#1a1620'},{geo:S,pos:[.105,.04,.03],scale:[.028,.028,.028],color:'#ffffff'}]);
+  PG.eye=mergeParts([{geo:GEO.box,pos:[0,0,0],scale:[.04,.09,.09],color:'#15121a'}]); const _eyeOld=mergeParts([{geo:S,pos:[0,0,0],scale:[.1,.125,.115],color:'#ffffff'},{geo:S,pos:[.06,-.01,0],scale:[.065,.08,.075],color:'#1a1620'},{geo:S,pos:[.105,.04,.03],scale:[.028,.028,.028],color:'#ffffff'}]);
   PG.leg=mergeParts([{geo:Cy,pos:[0,-.07,0],scale:[.085,.16,.085],color:'#5b4630'},{geo:B,pos:[.03,-.17,0],scale:[.2,.09,.15],color:'#1f1812'},{geo:B,pos:[.03,-.12,0],scale:[.19,.025,.155],color:'#4a3320'}]);
 }
 function createPirate(td,opts){

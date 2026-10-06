@@ -309,8 +309,10 @@ function createShark(){
   g.userData={tail}; g.scale.setScalar(1.15); return g;
 }
 function updateSharkM(s,m){ m.position.set(s.x*U,-1.0,s.y*U); m.rotation.y=-s.ang; m.userData.tail.rotation.y=Math.sin(s.ph*1.4)*.5; m.rotation.z=s.bite>0?-.35:0; m.rotation.x=Math.sin(s.ph*.7)*.05; }
-function createDrop(d){ const col={bronze:'#cd7f32',silver:'#d6dde6',gold:'#fbbf24'}[d.kind]; const m=new THREE.Mesh(GEO.cyl,new THREE.MeshStandardMaterial({color:col,metalness:.6,roughness:.3,emissive:col,emissiveIntensity:.25})); m.scale.set(.26,.05,.26); m.rotation.x=Math.PI/2; const g=new THREE.Group(); g.add(m); g.userData={m}; return g; }
-function updateDropM(d,g){ g.position.set(d.x*U,.3+d.h*U+Math.sin(d.ph)*.05,d.y*U); g.userData.m.rotation.y=0; g.rotation.y=d.ph*1.5; g.visible=d.t>2||Math.floor(game.t*8)%2===0; }
+function createDropOld(d){ const col={bronze:'#cd7f32',silver:'#d6dde6',gold:'#fbbf24'}[d.kind]; const m=new THREE.Mesh(GEO.cyl,new THREE.MeshStandardMaterial({color:col,metalness:.6,roughness:.3,emissive:col,emissiveIntensity:.25})); m.scale.set(.26,.05,.26); m.rotation.x=Math.PI/2; const g=new THREE.Group(); g.add(m); g.userData={m}; return g; }
+function createDrop(d){ const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:flyTex(d.kind),transparent:true,depthWrite:false})); sp.center.set(.5,.2); sp.scale.setScalar(.7); const g=new THREE.Group(); g.add(sp); g.userData={sp}; return g; }
+function updateDropM(d,g){ g.position.set(d.x*U,.25+d.h*U+Math.sin(d.ph)*.06,d.y*U); g.userData.sp.material.rotation=Math.sin(d.ph*.7)*.18; g.visible=d.t>2||Math.floor(game.t*8)%2===0; }
+function updateDropMOld(d,g){ g.position.set(d.x*U,.3+d.h*U+Math.sin(d.ph)*.05,d.y*U); g.userData.m.rotation.y=0; g.rotation.y=d.ph*1.5; g.visible=d.t>2||Math.floor(game.t*8)%2===0; }
 function createGuard(g){ return createPirate({light:TEAMS[g.team].light,col:TEAMS[g.team].col,dark:TEAMS[g.team].dark},{scale:.33,neutral:true}); }
 function updateGuardM(g,m){
   const u=m.userData; m.position.set(g.x*U,0,g.y*U); m.rotation.y=-(g.ang||0);

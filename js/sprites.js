@@ -172,3 +172,25 @@ function setStyle(){ // bascule 2D / 3D en cours de partie
   for(const mp of [entM,guardM]){ for(const [,mm] of mp) scene.remove(mm); mp.clear(); }
   if(typeof buildWorldMeshes==='function'&&scene){ buildWorldMeshes(); worldSig=-1; }
 }
+
+/* ---------- objets en main : toujours en sprites 2D (même avec les pirates cubes 3D) ---------- */
+function getItemTex(e){
+  const id=e.held||'sword', key='i|'+id+'|'+(id==='sword'?e.sword|0:0)+'|'+(id==='block'?e.bsel:0)+'|'+(e.team||0);
+  let t=SPRC.arms.get(key); if(t) return t;
+  const cv=document.createElement('canvas'); cv.width=128; cv.height=64; const c=cv.getContext('2d'); c.translate(-40,0); drawItemIcon(c,id,e);
+  t=new THREE.CanvasTexture(cv); t.generateMipmaps=false; t.minFilter=THREE.LinearFilter; if(THREE.SRGBColorSpace) t.colorSpace=THREE.SRGBColorSpace; SPRC.arms.set(key,t); return t;
+}
+makeHeld=function(){ return new THREE.Group(); }; // plus de modèles 3D d'objets
+function updateItemSprite(e,m){
+  const u=m.userData; let it=u.itemSpr;
+  if(!it){ it=u.itemSpr=new THREE.Sprite(new THREE.SpriteMaterial({map:null,alphaTest:.4,transparent:false})); it.center.set(10/128,.5); it.renderOrder=2; u.anchor.add(it); }
+  const key=(e.held||'sword')+'|'+(e.sword|0)+'|'+(e.bsel|0);
+  if(u.itemKey!==key){ u.itemKey=key; const m2=getItemTex(e).clone(); m2.needsUpdate=true; it.material.map=m2; it.material.needsUpdate=true; }
+  const ang=e.ang||0, sx=Math.cos(ang), sy=Math.sin(ang)*.82, left=sx<0, th=u.armR?u.armR.rotation.z:1;
+  const mp=it.material.map; mp.repeat.x=left?-1:1; mp.offset.x=left?1:0; it.center.set(left?1-10/128:10/128,.5);
+  it.material.rotation=(left?Math.atan2(sy,-sx):Math.atan2(-sy,sx))+(th-1.0)*.7*(left?-1:1);
+  it.scale.set(1.15,.58,1); it.visible=!(e.cloak>0&&e!==player);
+  const cl=e.cloak>0; if(it.material.transparent!==cl){ it.material.transparent=cl; it.material.needsUpdate=true; } it.material.opacity=cl?.4:1;
+}
+const _heldAnim1=heldAnim;
+heldAnim=function(e,m){ _heldAnim1(e,m); if(!m.userData.spr) updateItemSprite(e,m); };
