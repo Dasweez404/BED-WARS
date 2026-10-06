@@ -26,6 +26,13 @@ const isCont=id=>CONT_ITEMS.includes(id)||!!GUNS[id];
   #tpanel button{font-family:inherit;font-size:26px;min-width:54px;height:54px;border-radius:14px;border:2px solid #7a5230;background:#4a2f1b;color:#fff6e0;padding:0 8px}
   #tpanel button small{display:block;font-size:10px;color:#fde68a;margin-top:-4px}
   #tpanel .ttl{text-align:center;color:#ffe9b0;font-weight:700;font-size:14px}
+  #thot{position:absolute;pointer-events:auto;touch-action:none;display:none;border-radius:12px}
+  body.tc #thot{display:block}
+  body.tc.tshop #thot,body.tc.tover #thot{display:none}
+  #trot{position:fixed;inset:0;z-index:50;display:none;flex-direction:column;align-items:center;justify-content:center;background:#0b2238f2;color:#fff6e0;text-align:center;font-size:20px;gap:14px;padding:24px}
+  #trot span{font-size:64px;display:inline-block;animation:rotp 2s ease-in-out infinite}
+  @keyframes rotp{0%,30%{transform:rotate(0)}60%,100%{transform:rotate(-90deg)}}
+  body.tc.tportrait:not(.tmenu) #trot{display:flex}
   #tping{position:absolute;left:50%;top:12px;transform:translateX(-50%);padding:6px 14px;border-radius:14px;background:rgba(12,30,48,.85);border:2px solid #fde68a;color:#fde68a;font-weight:700;font-size:14px;display:none;pointer-events:none}
   `; document.head.appendChild(st);
 })();
@@ -48,6 +55,12 @@ function touchBuild(){
   B('tbSpL','◀','',{left:'12px',bottom:'80px'},()=>specCycle(-1));
   B('tbSpR','▶','',{left:'66px',bottom:'80px'},()=>specCycle(1));
   B('tbSpF','🎥','',{left:'120px',bottom:'80px'},()=>{ SPEC.free=!SPEC.free; SPEC.fx=cam3.x; SPEC.fy=cam3.y; });
+  TEL.hot=tmk('div',null,root); TEL.hot.id='thot'; let hid=null;
+  const pick=ev=>{ const l=hotList(player), hb=hotbarRect(l.length), i=Math.floor((ev.clientX-hb.x)/(hb.s+hb.g)); if(i>=0&&i<l.length&&l[i].id!==selId){ setSel(l[i].id); sfx('tick'); } };
+  TEL.hot.addEventListener('pointerdown',ev=>{ ev.preventDefault(); ev.stopPropagation(); hid=ev.pointerId; try{ TEL.hot.setPointerCapture(hid); }catch(e){} const l=hotList(player), hb=hotbarRect(l.length), i=Math.floor((ev.clientX-hb.x)/(hb.s+hb.g)); if(l[i]&&selId==='block'&&l[i].id==='block') actCycle(); pick(ev); });
+  TEL.hot.addEventListener('pointermove',ev=>{ if(ev.pointerId===hid) pick(ev); });
+  const hup=ev=>{ if(ev.pointerId===hid) hid=null; }; TEL.hot.addEventListener('pointerup',hup); TEL.hot.addEventListener('pointercancel',hup);
+  TEL.rot=tmk('div',null,document.body,'<span>📱</span><div>Tourne ton téléphone en <b>mode paysage</b> pour jouer</div>'); TEL.rot.id='trot';
   TEL.panel=tmk('div',null,root); TEL.panel.id='tpanel'; TEL.pingTip=tmk('div',null,root); TEL.pingTip.id='tping';
   stickZone(TEL.zl,TEL.bl,{move(vx,vy,m){ TOUCH.ix=vx; TOUCH.iy=vy; TOUCH.mag=m; },end(){ TOUCH.ix=TOUCH.iy=TOUCH.mag=0; }});
   stickZone(TEL.zr,TEL.br,{start(){ TOUCH.aimOn=true; TOUCH.t0=performance.now(); TOUCH.am=.6; },
@@ -89,6 +102,8 @@ function touchPanel(kind){
     p.querySelectorAll('[data-k]').forEach(b=>b.addEventListener('pointerdown',ev=>{ ev.preventDefault(); ev.stopPropagation(); TOUCH.pingKind=b.dataset.k||null; TOUCH.pingMode=true; touchPingTip(true); p.style.display='none'; TOUCH.panel=null; })); }
 }
 /* ---------- activation ---------- */
+function touchLock(){ try{ if(TOUCH.on&&screen.orientation&&screen.orientation.lock) screen.orientation.lock('landscape').catch(()=>{}); }catch(e){} }
+addEventListener('pointerdown',ev=>{ if(ev.pointerType==='touch') touchLock(); },true);
 function touchSet(on){ TOUCH.on=!!on; touchBuild(); document.body.classList.toggle('tc',TOUCH.on); if(!TOUCH.on){ TOUCH.ix=TOUCH.iy=TOUCH.mag=0; TOUCH.aimOn=false; } }
 function touchApplyMode(){ const m=TOUCH.mode; touchSet(m==='on'||(m==='auto'&&TOUCH.seen)); document.querySelectorAll('[data-tc]').forEach(b=>b.classList.toggle('on',b.dataset.tc===m)); }
 function touchLoad(){ try{ TOUCH.mode=localStorage.getItem('pirates_touch')||'auto'; }catch(e){} TOUCH.seen=(window.matchMedia&&matchMedia('(pointer:coarse)').matches)||/Android|iPhone|iPad|iPod/i.test(navigator.userAgent); touchApplyMode(); }
@@ -119,6 +134,7 @@ function touchBindMenu(){
   const _r=render3d;
   render3d=function(dt){ _r(dt);
     if(!TOUCH.on||!TEL.root) return; const b=document.body, st=game.state;
+    b.classList.toggle('tportrait',innerHeight>innerWidth); if(st==='play'&&player){ const l=hotList(player), hb=hotbarRect(l.length), w=l.length*(hb.s+hb.g)-hb.g, h=TEL.hot.style; h.left=(hb.x-8)+'px'; h.width=(w+16)+'px'; h.top=(hb.y-12)+'px'; h.height=(hb.s+22)+'px'; }
     b.classList.toggle('tmenu',st==='menu'); b.classList.toggle('tpause',!!game.paused); b.classList.toggle('tshop',!!shopOpen); b.classList.toggle('tover',st==='over');
     if(st==='play'&&player){ const s=w2s(aim.x,aim.y,0); mouse.x=s[0]; mouse.y=s[1];
       const spec=isSpec(); for(const id of ['tbSpL','tbSpR','tbSpF']) TEL[id].classList.toggle('hide',!spec); for(const id of ['tbJump','tbShop','tbRel','tbSwap','tbBlk','tbPing','tbEmo']) TEL[id].classList.toggle('hide',spec||!player.alive);
@@ -127,6 +143,6 @@ function touchBindMenu(){
   };
   /* barre d'objets plus compacte pour laisser la place aux boutons */
   const _hb=hotbarRect;
-  hotbarRect=function(n){ if(!TOUCH.on) return _hb(n); const s=Math.min(42,Math.max(22,(VW*.46)/Math.max(1,n)-5)), g=5; return {s,g,x:(VW-n*(s+g)+g)/2,y:VH-s-8}; };
+  hotbarRect=function(n){ if(!TOUCH.on) return _hb(n); const s=Math.min(46,Math.max(26,(VW*.5)/Math.max(1,n)-5)), g=5; return {s,g,x:(VW-n*(s+g)+g)/2,y:VH-s-8}; };
 }
 touchLoad(); touchBindMenu();
