@@ -392,6 +392,21 @@ function doPlace(e,tx,ty,type){
   chunks((tx+.5)*T,(ty+.5)*T,col,4); ring((tx+.5)*T,(ty+.5)*T,T*.7,'#ffffff',.22); sfx('place',e.x,e.y);
   return true;
 }
+function placeUnder(e){ // en saut : clic = bloc sous les pieds (pont au-dessus de l'eau, sinon mur / couche supplémentaire pour monter)
+  if(e.cd.place>0) return false;
+  const tx=Math.floor(e.x/T), ty=Math.floor(e.y/T); if(!inb(tx,ty)) return false;
+  const type=e.blocks[e.bsel]?e.bsel:[2,3,4,5].find(t=>e.blocks[t]>0); if(!type) return false;
+  if(protectedTile(tx,ty,e.team)||spawnerAt(tx,ty)) return false;
+  const i=idx(tx,ty), w=wallT[i];
+  if(w===CORE) return false;
+  if(w>0){ if(w!==type||ownW[i]!==e.team||wallLayers(i)>=MAXH()||e.z<wallTop(tx,ty)+WH-1) return false; hpW[i]+=BHP[type]; }
+  else if(floorT[i]===0){ floorT[i]=type; hpF[i]=BHP[type]; ownF[i]=e.team; }
+  else { if(e.z<WH-1) return false; wallT[i]=type; hpW[i]=BHP[type]; ownW[i]=e.team; }
+  pop[i]=1; if(e===player&&!e.blocks[e.bsel]) e.bsel=type;
+  if(Math.random()>=cv(e,'free')) e.blocks[type]--; e.cd.place=e.isBot?.32:.14; e.swing=.12; e.swingMax=.12; e.squash=-.2;
+  chunks((tx+.5)*T,(ty+.5)*T,blockColor(type,e.team)[0],4); ring((tx+.5)*T,(ty+.5)*T,T*.7,'#ffffff',.22); sfx('place',e.x,e.y);
+  return true;
+}
 function placeTarget(e,wx,wy){
   const dx=wx-e.x,dy=wy-e.y,d=Math.hypot(dx,dy)||1,ux=dx/d,uy=dy/d;
   const ctx_=Math.floor(wx/T),cty=Math.floor(wy/T);
@@ -1248,7 +1263,7 @@ function controlEnt(e,dt,inp){ // commandes d'un pirate humain (local ou distant
   if(!(inp.down||inp.clicked)||e.frozen>0) return;
   const id=inp.sel, click=inp.clicked;
   switch(id){
-    case 'block':{const t=placeTarget(e,wx,wy); if(t) doPlace(e,t[0],t[1]); break;}
+    case 'block':{ if(e.z>groundH(e)+3&&placeUnder(e)) break; const t=placeTarget(e,wx,wy); if(t) doPlace(e,t[0],t[1]); break;}
     case 'pick':{const h=findMine(e,e.ang,3.1*T,wx,wy); doMine(e,h); break;}
     case 'sword':doSword(e);break;
     case 'glove':doGlove(e);break;

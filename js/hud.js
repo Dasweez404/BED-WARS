@@ -60,7 +60,7 @@ function cdFrac(e,id){
   else if(id==='pick'){c=e.cd.mine;m=.28;} else if(id==='block'){c=e.cd.place;m=.14;} else if(id==='grap'){c=e.cd.gad;m=.9;} else {c=e.cd.gad;m=.5;}
   return clamp(c/m,0,1);
 }
-const TIPS={block:'Clic : poser (pont sur le vide, mur sur le sol) · C / clic droit : changer de bloc',pick:'Maintiens le clic pour casser blocs, ponts et le mouton ultime ennemi',
+const TIPS={block:'Clic : poser (pont sur le vide, mur sur le sol) · C / clic droit : changer de bloc · en saut : bloc sous les pieds',pick:'Maintiens le clic pour casser blocs, ponts et le mouton ultime ennemi',
   sword:'Clic : coup d\'épée',glove:'Clic : coup de poing qui projette très loin',hammer:'Clic : onde de choc qui projette et casse les blocs',baa:'Clic : cri qui repousse les ennemis et dévie les tirs',
   bow:'Clic : tirer une flèche (recharge entre chaque tir)',gun:'Maintiens le clic : la dispersion augmente en rafale · R : recharger',smg:'Rafale très rapide : le spray s\'élargit vite · R : recharger',
   shotgun:'Clic : 8 plombs en éventail · R : recharger',sniper:'Clic : tir perçant, précis à l\'arrêt · R : recharger',rocket:'Clic : roquette explosive',woolgun:'Clic : pelotes qui emmêlent et ralentissent',
