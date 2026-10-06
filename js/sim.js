@@ -169,6 +169,7 @@ const wl=(x,y)=>inb(x,y)?wallT[y*W+x]:0;
 const rnd=(a,b)=>a+Math.random()*(b-a);
 const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const WALL_K=1; // dégâts des projectiles sur les murs = dégâts de l'arme × WALL_K
 const MAXH=()=>Math.max(1,Math.min(4,(game.opts&&game.opts.stack)|0||3));
 const wallLayers=i=>{ const w=wallT[i]; return w===0?0:w===CORE?1:Math.max(1,Math.ceil(hpW[i]/BHP[w]-1e-6)); };
 const wallTop=(tx,ty)=>{ if(!inb(tx,ty)||wallT[idx(tx,ty)]===0) return 0; return WH*wallLayers(idx(tx,ty)); };
@@ -988,6 +989,10 @@ function updateProj(dt){
       p.x+=p.vx*dt/n; p.y+=p.vy*dt/n;
       if(wl(Math.floor(p.x/T),Math.floor(p.y/T))>0){
         burst(p.x,p.y,'#ddd',3,60,.2,2);
+        { // les armes à feu et flèches abîment les blocs murs (pas le coffre, pas les ponts) selon leurs dégâts
+          const wx=Math.floor(p.x/T), wy=Math.floor(p.y/T), wi=idx(wx,wy);
+          if((p.kind==='bullet'||p.kind==='arrow')&&p.dmg>0&&wallT[wi]!==CORE&&ownW[wi]!==p.team&&!protectedTile(wx,wy,p.team)){ chunks(p.x,p.y,blockColor(wallT[wi],Math.max(0,ownW[wi]))[0],2); damageTile(wx,wy,p.dmg*WALL_K,p.owner,0); }
+        }
         if(p.kind==='rocket') explode({x:p.x,y:p.y,team:p.team,owner:p.owner,kind:'bomb',R:2.2*T,dm:9,bd:.8});
         p.life=0;break;
       }
