@@ -75,14 +75,15 @@ function saveChar(){ if(typeof netHello==='function') netHello(); try{localStora
 function renderChar(){
   const L=game.look, el=document.getElementById('charui'), ci=CLASSES[game.cls], sw=(arr,k)=>arr.map((c,i)=>`<button class="sw ${L[k]===i?'on':''}" data-lk="${k}" data-v="${i}" style="background:${c}"></button>`).join(''), bt=(arr,k)=>arr.map((n,i)=>`<button class="obtn ${L[k]===i?'on':''}" data-lk="${k}" data-v="${i}">${n}</button>`).join('');
   el.innerHTML=`<div class="orow"><span class="olab">Nom</span><input id="pname" maxlength="14" value="${(game.pname||'').replace(/"/g,'')}"></div>
-  <div class="cls">${CLS_IDS.map(id=>`<button class="cbtn ${game.cls===id?'on':''}" data-cls="${id}">${CLASSES[id].ico} ${CLASSES[id].n}</button>`).join('')}</div>
-  <div id="clsInfo"><b>${ci.n}</b> — ${ci.d}<br>${ci.pros.map(x=>`<span class="p">＋ ${x}</span>`).join(' · ')}${ci.cons.length?'<br>':''}${ci.cons.map(x=>`<span class="c">－ ${x}</span>`).join(' · ')}</div>
   <div class="orow"><span class="olab">Cheveux</span>${sw(HAIRS,'hair')}<span style="color:#d9c49a;font-size:12px;margin-left:8px">(barbe, moustache) · la peau a la couleur de ton équipe</span></div>
   <div class="orow"><span class="olab">Chapeau</span>${bt(HATS,'hat')}</div>
   <div class="orow"><span class="olab">Sourcils</span>${bt(BROWS,'brow')}</div>
   <div class="orow"><span class="olab">Visage</span>${bt(FACES,'face')}<button class="obtn ${L.patch?'on':''}" data-lk="patch" data-v="${L.patch?0:1}">Cache-œil</button></div>`;
+  const cu=document.getElementById('clsui');
+  cu.innerHTML=`<div class="cls">${CLS_IDS.map(id=>`<button class="cbtn ${game.cls===id?'on':''}" data-cls="${id}">${CLASSES[id].ico} ${CLASSES[id].n}</button>`).join('')}</div>
+  <div id="clsInfo"><b>${ci.n}</b> — ${ci.d}<br>${ci.pros.map(x=>`<span class="p">＋ ${x}</span>`).join(' · ')}${ci.cons.length?'<br>':''}${ci.cons.map(x=>`<span class="c">－ ${x}</span>`).join(' · ')}</div>`;
+  cu.querySelectorAll('[data-cls]').forEach(b=>b.onclick=()=>{ game.cls=b.dataset.cls; saveChar(); renderChar(); });
   el.querySelector('#pname').oninput=ev=>{ game.pname=ev.target.value; saveChar(); };
-  el.querySelectorAll('[data-cls]').forEach(b=>b.onclick=()=>{ game.cls=b.dataset.cls; saveChar(); renderChar(); });
   el.querySelectorAll('[data-lk]').forEach(b=>b.onclick=()=>{ game.look[b.dataset.lk]=+b.dataset.v; saveChar(); renderChar(); });
 }
 function renderMp(){
@@ -92,6 +93,11 @@ function renderMp(){
   el('mpPlayers').textContent=NET.lobby&&NET.lobby.length&&role!=='none'?'Joueurs : '+NET.lobby.map(p=>p.name).join(' · '):'';
   el('mpStart').style.display=role==='host'&&!NET.started?'':'none'; el('mpLeave').style.display=role!=='none'&&!NET.started?'':'none';
   el('playBtn').style.display=role==='none'?'':'none'; if(el('tutBtn')) el('tutBtn').style.display=role==='none'?'':'none'; el('mpHost').disabled=el('mpJoin').disabled=role!=='none';
+}
+function bindTabs(){
+  const tabs=document.querySelectorAll('.mtab');
+  const show=t=>{ tabs.forEach(b=>b.classList.toggle('on',b.dataset.tab===t)); document.querySelectorAll('.tpan').forEach(p=>p.classList.toggle('hidden',p.id!=='tab-'+t)); };
+  tabs.forEach(b=>b.onclick=()=>{ const open=b.classList.contains('on'); if(open){ tabs.forEach(x=>x.classList.remove('on')); document.querySelectorAll('.tpan').forEach(p=>p.classList.add('hidden')); } else show(b.dataset.tab); });
 }
 function bindMp(){
   const el=id=>document.getElementById(id);
@@ -130,7 +136,10 @@ function bindPause(){
 function saveOpts(){ try{localStorage.setItem('pirates_opts',JSON.stringify(game.opts));}catch(e){} }
 function renderOpts(){
   const box=document.getElementById('opts'); let desc='';
-  box.innerHTML=OPTDEF.map(o=>`<div class="orow"><span class="olab">${o.t}</span>${o.list().map(it=>`<button class="obtn ${game.opts[o.k]===it.v?'on':''}" data-k="${o.k}" data-v="${it.v}" title="${it.d}">${it.n}</button>`).join('')}</div>`).join('');
+  const mr=document.getElementById('mapRow'), md=OPTDEF.find(o=>o.k==='map');
+  mr.innerHTML=md.list().map(it=>`<button class="obtn ${game.opts.map===it.v?'on':''}" data-k="map" data-v="${it.v}" title="${it.d}">${it.n}</button>`).join(''); document.getElementById('mapDesc').textContent=(MAPS[game.opts.map]||{}).d||'';
+  mr.querySelectorAll('.obtn').forEach(b=>b.onclick=()=>{ game.opts.map=b.dataset.v; saveOpts(); renderOpts(); newGame(); game.state='menu'; });
+  box.innerHTML=OPTDEF.filter(o=>o.k!=='map').map(o=>`<div class="orow"><span class="olab">${o.t}</span>${o.list().map(it=>`<button class="obtn ${game.opts[o.k]===it.v?'on':''}" data-k="${o.k}" data-v="${it.v}" title="${it.d}">${it.n}</button>`).join('')}</div>`).join('');
   box.insertAdjacentHTML('beforeend',`<div class="orow"><span class="olab">Activés</span>${Object.keys(EVENTS).map(k=>`<button class="obtn ${game.opts.ev[k]?'on':''}" data-ev="${k}" title="${EVENTS[k].d}">${EVENTS[k].ico} ${EVENTS[k].n}</button>`).join('')}</div>`);
   box.insertAdjacentHTML('beforeend',`<div class="orow"><span class="olab">Mutateurs</span>${Object.keys(MUTS).map(k=>`<button class="obtn ${game.opts.mut&&game.opts.mut[k]?'on':''}" data-mut="${k}" title="${MUTS[k].d}">${MUTS[k].ico} ${MUTS[k].n}</button>`).join('')}</div>`);
   box.querySelectorAll('[data-mut]').forEach(b=>b.onclick=()=>{ const k=b.dataset.mut; game.opts.mut=game.opts.mut||{}; game.opts.mut[k]=game.opts.mut[k]?0:1; saveOpts(); renderOpts(); document.getElementById('optDesc').textContent=MUTS[k].ico+' '+MUTS[k].n+' : '+MUTS[k].d+(game.opts.mut[k]?'':' (désactivé)'); });
@@ -160,7 +169,7 @@ function boot(){
   for(const k of Object.keys(EVENTS)) if(game.opts.ev[k]===undefined) game.opts.ev[k]=1;
   if(!MAPS[game.opts.map]) game.opts.map='classic'; if(!MODES[game.opts.mode]) game.opts.mode='solo'; renderOpts();
   try{ const c=JSON.parse(localStorage.getItem('pirates_char')||'null'); if(c){ if(CLASSES[c.cls]) game.cls=c.cls; if(c.look) game.look=lookOf(c.look); if(typeof c.pname==='string') game.pname=c.pname; } }catch(e){}
-  renderChar(); initPreview(); bindMp(); loadSettings(); bindPause();
+  renderChar(); initPreview(); bindTabs(); bindMp(); loadSettings(); bindPause();
   let d0='normal'; try{ d0=localStorage.getItem('pirates_diff')||'normal'; }catch(e){} selectDiff(DIFFS[d0]?d0:'normal');
   document.getElementById('playBtn').onclick=()=>{ audioInit(); screenTransition(()=>{ document.getElementById('start').classList.add('hidden'); newGame(); }); };
   newGame(); game.state='menu';
