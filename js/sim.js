@@ -1466,6 +1466,15 @@ function pickGoal(b){
   }
   ai.mode='hunt';
 }
+function botJumpEnv(b,dt){ // les bots sautent : rattrapage au-dessus de l'eau, murs d'une couche, coincés
+  if(b.riding||b.flight>0) return;
+  const gh=groundH(b), onGround=b.z<=gh+1&&b.vz<=0, sup=floorSupport(b.x,b.y);
+  if(!sup&&b.jetT<=0&&!b.pull&&b.grace<=0){ if(onGround) jump(b); else if(b.z>gh+3&&totalBlocks(b)>0) placeUnder(b); return; }
+  if(!onGround) return;
+  if(b.ix||b.iy){ const tx=Math.floor((b.x+b.ix*T*.85)/T), ty=Math.floor((b.y+b.iy*T*.85)/T);
+    if(inb(tx,ty)&&wallT[idx(tx,ty)]>0&&wallT[idx(tx,ty)]!==CORE&&wallLayers(idx(tx,ty))===1&&(ownW[idx(tx,ty)]===b.team||b.ai.stuckT>.7)) { jump(b); return; } }
+  if(b.ai.stuckT>1.2&&Math.random()<dt*3) jump(b);
+}
 function botThink(b,dt){
   const ai=b.ai,tm=TD[b.team]; ai.t+=dt; ai.buyT-=dt; ai.react-=dt; b.ix=0;b.iy=0; b.held='sword';
   const D=getD();
@@ -1474,6 +1483,7 @@ function botThink(b,dt){
   if(b.voidT>.1&&b.jet>0&&b.jetT<=0) useJet(b);
   if(b.hp<maxhp(b)*.5&&(b.am.heal||0)>0&&b.cd.gad<=0&&Math.random()<dt*2) useGadget(b,'heal',b.x,b.y);
   if(b.frozen>0||b.bubble>0) return;
+  botJumpEnv(b,dt);
   const coreX=(tm.bx+.5)*T,coreY=(tm.by+.5)*T;
   let foe=null,fd=1e9;
   for(const o of ents){ if(!o.alive||o.team===b.team) continue; const d=dist(b,o); if(o.cloak>0&&d>3*T) continue; if(d<fd){fd=d;foe=o;} }
@@ -1490,6 +1500,8 @@ function botThink(b,dt){
     }
     if(D.strafe&&fd<6*T&&fd>T*1.2){ const k=Math.sin(game.t*2.6+b.team*2)*.7, nx=b.ix-Math.sin(b.ang)*k, ny=b.iy+Math.cos(b.ang)*k, m=Math.hypot(nx,ny)||1; if(fl(Math.floor((b.x+nx/m*14)/T),Math.floor((b.y+ny/m*14)/T))>0){ b.ix=nx/m; b.iy=ny/m; } }
     if(D.dodge&&fd<4*T&&Math.random()<dt*D.dodge) jump(b);
+    if(fd>T*1.5&&fd<7*T&&Math.random()<dt*.35*D.aggr) jump(b); // petits bonds en combat
+    if(foe.z>20&&fd<4*T&&Math.random()<dt*2) jump(b);
     if(fd<T*2.4&&Math.random()<dt*2.2*D.aggr) botMelee(b,foe,fd);
     else if(fd>T*1.5&&Math.random()<dt*1.6*D.aggr) botRanged(b,fd);
     botGadgets(b,foe,fd,dt,nearCore);
