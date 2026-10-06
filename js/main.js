@@ -94,11 +94,7 @@ function renderMp(){
   el('mpStart').style.display=role==='host'&&!NET.started?'':'none'; el('mpLeave').style.display=role!=='none'&&!NET.started?'':'none';
   el('playBtn').style.display=role==='none'?'':'none'; if(el('tutBtn')) el('tutBtn').style.display=role==='none'?'':'none'; el('mpHost').disabled=el('mpJoin').disabled=role!=='none';
 }
-function bindTabs(){
-  const tabs=document.querySelectorAll('.mtab');
-  const show=t=>{ tabs.forEach(b=>b.classList.toggle('on',b.dataset.tab===t)); document.querySelectorAll('.tpan').forEach(p=>p.classList.toggle('hidden',p.id!=='tab-'+t)); };
-  tabs.forEach(b=>b.onclick=()=>{ const open=b.classList.contains('on'); if(open){ tabs.forEach(x=>x.classList.remove('on')); document.querySelectorAll('.tpan').forEach(p=>p.classList.add('hidden')); } else show(b.dataset.tab); });
-}
+function bindTabs(){}
 function bindMp(){
   const el=id=>document.getElementById(id);
   NET.onLobby=renderMp; NET.onEnd=txt=>{ showMenu(); NET.status=txt; renderMp(); };
