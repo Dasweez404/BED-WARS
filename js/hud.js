@@ -57,6 +57,7 @@ function cdFrac(e,id){
   if(g){ const s=wst(e,id); if(s.r>0) return clamp(s.r/g.reload,0,1); return clamp(s.cd/Math.max(.12,g.cd),0,1); }
   let c=0,m=1;
   if(id==='sword'){c=e.cd.atk;m=.42;} else if(id==='glove'){c=e.cd.atk;m=.9;} else if(id==='hammer'){c=e.cd.atk;m=1.1;} else if(id==='baa'){c=e.cd.atk;m=1.2;}
+  else if(PERM[id]){ c=e.pcd[id]||0; m=PERM[id].cd; }
   else if(id==='pick'){c=e.cd.mine;m=.28;} else if(id==='block'){c=e.cd.place;m=.14;} else if(id==='grap'){c=e.cd.gad;m=.9;} else {c=e.cd.gad;m=.5;}
   return clamp(c/m,0,1);
 }
@@ -260,7 +261,7 @@ function drawMini(){
   const cx=cam3.x/T/W*S+mx, cy=cam3.y/T/H*S+my; ctx.strokeStyle='rgba(255,255,255,.6)'; ctx.lineWidth=1; ctx.strokeRect(cx-9,cy-7,18,14);
   for(const b of boats){ ctx.fillStyle=TEAMS[Math.max(0,b.team)].col; ctx.fillRect(mx+b.x/T/W*S-2,my+b.y/T/H*S-1.5,4,3); }
   const spy=player.spy>0;
-  for(const e of ents){ if(!e.alive) continue; if(e.team!==player.team&&!spy&&(Math.hypot(e.x-player.x,e.y-player.y)>26*T||e.cloak>0)) continue; ctx.fillStyle=TEAMS[e.team].col; ctx.strokeStyle='#fff'; const px=mx+e.x/T/W*S,py=my+e.y/T/H*S; ctx.beginPath();ctx.arc(px,py,e===player?3.5:2.5,0,6.3);ctx.fill();if(e===player)ctx.stroke(); }
+  for(const e of ents){ if(!e.alive) continue; if(e.team!==player.team&&!spy&&(Math.hypot(e.x-player.x,e.y-player.y)>(player.relics&&player.relics.r_glass?40:26)*T||e.cloak>0)) continue; ctx.fillStyle=TEAMS[e.team].col; ctx.strokeStyle='#fff'; const px=mx+e.x/T/W*S,py=my+e.y/T/H*S; ctx.beginPath();ctx.arc(px,py,e===player?3.5:2.5,0,6.3);ctx.fill();if(e===player)ctx.stroke(); }
 }
 function drawHud(){
   ctx.setTransform(DPR,0,0,DPR,0,0); ctx.clearRect(0,0,VW,VH); ctx.textAlign='left'; ctx.textBaseline='alphabetic';

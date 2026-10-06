@@ -109,7 +109,7 @@ for(const id of NEW_IDS){ const g=GUNS[id]; BOT_BUY.splice(BOT_BUY.length-2,0,[i
 
 /* ---------- roster aléatoire ---------- */
 let ROSTER=null;
-const POOL_CATS=['Armes','Gadgets','Défense','Outils'];
+const POOL_CATS=['Armes','Gadgets','Défense','Outils','Reliques'];
 const POOL_EXTRA=['glove','hammer','baa','heal'];
 const poolIds=()=>SHOP.filter(s=>(POOL_CATS.includes(s.cat)||POOL_EXTRA.includes(s.id))&&s.id!=='core'&&s.id!=='wall'&&s.id!=='pick').map(s=>s.id);
 const inRoster=id=>!ROSTER||!poolIds_set.has(id)||ROSTER.has(id);
@@ -121,9 +121,9 @@ function makeRoster(){
   const shuf=a=>{ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
   const bycat=c=>ids.filter(id=>SHOPMAP[id].cat===c);
   // garanties : au moins 3 armes à distance, 3 objets de défense, 3 gadgets offensifs
-  const mn=Math.max(3,Math.round(n/7)); for(const g of ['boat','trampo','launcher']) if(poolIds_set.has(g)&&!pick.includes(g)) pick.push(g); for(const c of ['Armes','Défense','Gadgets','Outils']) pick.push(...shuf(bycat(c)).filter(x=>!pick.includes(x)).slice(0,mn));
+  const mn=Math.max(3,Math.round(n/7)); for(const g of ['boat','trampo','launcher']) if(poolIds_set.has(g)&&!pick.includes(g)) pick.push(g); for(const c of ['Armes','Défense','Gadgets','Outils','Reliques']) pick.push(...shuf(bycat(c)).filter(x=>!pick.includes(x)).slice(0,mn));
   for(const id of shuf(ids)){ if(pick.length>=n) break; if(!pick.includes(id)) pick.push(id); }
-  ROSTER=new Set(pick.slice(0,Math.max(n,4*mn+1)));
+  ROSTER=new Set(pick.slice(0,Math.max(n,5*mn+1)));
 }
 const rosterCount=()=>ROSTER?ROSTER.size:poolIds_set.size;
 

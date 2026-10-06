@@ -85,6 +85,7 @@ const _updateCamera0=updateCamera;
 updateCamera=function(dt){
   _updateCamera0(dt); if(game.state==='menu') return;
   if(!JUICE.fov0) JUICE.fov0=camera3.fov; const f=JUICE.fov0*(1-JUICE.k*.07); if(Math.abs(camera3.fov-f)>.01){ camera3.fov=f; camera3.updateProjectionMatrix(); }
+  if(player&&player.relics&&player.relics.r_glass){ const tg=new THREE.Vector3(cam3.x*U,.2,cam3.y*U-.2); camera3.position.sub(tg).multiplyScalar(1.16).add(tg); camera3.lookAt(tg); }
   camera3.rotation.z+= (Math.random()-.5)*JUICE.k*.012;
 };
 const _drawHud0=drawHud;
@@ -99,6 +100,8 @@ drawHud=function(){
   const hpk=e.alive?e.hp/maxhp(e):1, low=hpk<.35?(1-hpk/.35):0, pulse=low*(.5+.5*Math.sin(game.t*7));
   const va=Math.max(JUICE.vig*.55,pulse*.55);
   if(va>.01){ const g=ctx.createRadialGradient(VW/2,VH/2,Math.min(VW,VH)*.35,VW/2,VH/2,Math.max(VW,VH)*.75); g.addColorStop(0,'rgba(220,30,30,0)'); g.addColorStop(1,`rgba(220,30,30,${va})`); ctx.fillStyle=g; ctx.fillRect(0,0,VW,VH); }
+  { const rs=Object.keys(e.relics||{}); if(rs.length){ const lb=hotbarRect(hotList(e).length); let x=(VW-(hotList(e).length*(lb.s+lb.g)-lb.g))/2-8, y=lb.y+lb.s/2; ctx.textAlign='right'; ctx.font='22px '+FONT;
+      for(const k of rs){ const r=RELICS[k]; if(!r) continue; ctx.fillStyle=r.lose?'rgba(80,20,20,.55)':'rgba(12,30,48,.7)'; rr(x-30,y-16,30,30,9); ctx.fill(); ctx.fillStyle='#fff'; ctx.textAlign='center'; ctx.fillText(r.ico,x-15,y+7); x-=34; } } }
   // éclat de série
   if(JUICE.comboFlash>0){ ctx.fillStyle=`rgba(251,146,60,${JUICE.comboFlash*.18})`; ctx.fillRect(0,0,VW,VH); }
   // pulsation des emplacements quand on gagne un objet

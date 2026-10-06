@@ -39,6 +39,7 @@ const ITEMS=[
   {id:'siren',n:'Chant des sirènes',ico:'🧜',col:'#c084fc'},{id:'quake',n:'Séisme',ico:'🌋',col:'#f97316'},{id:'aegis',n:'Médaillon doré',ico:'🏅',col:'#fde047'},{id:'coco',n:'Noix de coco explosive',ico:'🥥',col:'#a16207'}
 ];
 const ITEMMAP={}; ITEMS.forEach(i=>ITEMMAP[i.id]=i);
+const PERM={}; // objets permanents (utilisables à volonté, avec recharge)
 const GUNS={
   // mag = chargeur, cd = cadence (s entre deux tirs), reload = rechargement (s), spread = dispersion de base, bloom = dispersion ajoutée à chaque tir, bmax = dispersion max
   bow:{n:'Arbalète',mag:1,cd:.1,reload:.85,sp:620,life:1.4,dmg:5,kb:217,col:'#f1f5f9',pel:1,spread:0,bloom:0,bmax:0,kind:'arrow',rec:0},
@@ -201,7 +202,7 @@ function makeEnt(team,isBot,name){
     up:{fb:0,fs:0,hp:0,sp:0,ar:0,gold:0,core:0,jmp:0,reg:0,vamp:0,rel:0,dmg:0,loot:0,dia:0},
     cd:{atk:0,mine:0,place:0,bow:0,gad:0},jetT:0,voidT:0,pull:null,grace:0,swing:0,swingMax:.2,kills:0,deaths:0,
     root:0,flagBuff:0,lastSafe:null,lastSafeT:0,bubble:0,cloak:0,haste:0,springT:0,frozen:0,slip:0,sdx:0,sdy:0,squash:0,muzzle:0,stepPh:0,stepT:0,burn:0,
-    lastBy:null,lastByT:0,sinceHurt:99,ai:null,hook:null,aegis:0,slot:0,bar:[],pack:[],cls:'matelot',look:null};
+    lastBy:null,lastByT:0,sinceHurt:99,ai:null,hook:null,aegis:0,slot:0,bar:[],pack:[],cls:'matelot',look:null,relics:{},pcd:{}};
 }
 function makeBotAI(){ return {mode:'home',t:0,leaveAt:rnd(getD().leave[0],getD().leave[1]),buyT:rnd(0,1),goal:null,wait:0,target:-1,lastX:0,lastY:0,stuckT:0,jig:0,jx:0,jy:0,react:0,foe:null,likes:new Set(BOT_OPTIONAL.filter(()=>Math.random()<getD().likeP))}; }
 let NETSLOTS=null;
@@ -260,8 +261,8 @@ function spawnEnt(e){
   burst(e.x,e.y,TEAMS[e.team].light,14,160,.6,3);
   if(e.ai){e.ai.mode='home'; e.ai.leaveAt=e.ai.t+rnd(12,22)*(getD().leave[0]/40);}
 }
-const maxhp=e=>(e.isBot?getD().hp:20)+6*e.up.hp+cv(e,'hp');
-const speedOf=e=>(e.tiny>0?1.25:1)*(e.giant>0?.9:1)*(e.rage>0?1.2:1)*(e.curse>0?.75:1)*cv(e,'spd')*138*(1+.08*e.up.sp)*(e.jetT>0?1.3:1)*(e.isBot?getD().speed:1)*(e.slip>0?1.35:1)*(e.haste>0?1.5:1)*(e.slow>0?.55:1)*(e.flagBuff>0?1.2:1);
+const maxhp=e=>(e.isBot?getD().hp:20)+6*e.up.hp+cv(e,'hp')+(e.relics&&e.relics.r_hp?4:0);
+const speedOf=e=>(e.relics&&e.relics.r_speed?1.1:1)*(e.tiny>0?1.25:1)*(e.giant>0?.9:1)*(e.rage>0?1.2:1)*(e.curse>0?.75:1)*cv(e,'spd')*138*(1+.08*e.up.sp)*(e.jetT>0?1.3:1)*(e.isBot?getD().speed:1)*(e.slip>0?1.35:1)*(e.haste>0?1.5:1)*(e.slow>0?.55:1)*(e.flagBuff>0?1.2:1);
 function msg(txt,col){feed.push({txt,col:col||'#dbe4ff',t:7}); if(feed.length>4)feed.shift();}
 function announce(txt,col){banner.txt=txt;banner.col=col||'#fff';banner.t=banner.max;sfx('fanfare');}
 
@@ -313,8 +314,9 @@ function hurt(e,amount,by,kx,ky){
   if(!e.alive||e.inv>0||e.aegis>0) return;
   if(by&&by.isBot&&!e.isBot) amount*=getD().dmg;
   if(by&&by.up&&by.up.dmg) amount*=1+.08*by.up.dmg;
+  if(by&&by.relics&&by.relics.r_skull) amount*=1.2; if(e.relics&&e.relics.r_skull) amount*=1.12; if(e.relics&&e.relics.r_anchor){ kx*=.65; ky*=.65; }
   amount*=(1-.12*e.up.ar)*cv(e,'def')*(e.plate>0?.4:1)*(e.curse>0?1.3:1)*(by&&by.rage>0?1.5:1)*(e.tiny>0?1.3:1)*(e.giant>0?.85:1)*(by&&by.giant>0?1.3:1); kx*=cv(e,'kb'); ky*=cv(e,'kb');
-  e.hp-=amount; if(by&&by!==e&&by.up&&by.up.vamp) by.hp=Math.min(maxhp(by),by.hp+amount*.08*by.up.vamp); e.vx+=kx; e.vy+=ky; e.lastBy=by; e.lastByT=5; e.sinceHurt=0;
+  e.hp-=amount; if(by&&by!==e&&by.up&&(by.up.vamp||(by.relics&&by.relics.r_fang))) by.hp=Math.min(maxhp(by),by.hp+amount*(.08*(by.up.vamp||0)+(by.relics&&by.relics.r_fang?.1:0))); e.vx+=kx; e.vy+=ky; e.lastBy=by; e.lastByT=5; e.sinceHurt=0;
   if(amount>0){
     e.flash=.15; burst(e.x,e.y-e.z,'#ff6b6b',5,120,.4,3);
     if(amount>=.9) floatTxt(e.x+rnd(-8,8),e.y-26-e.z,'-'+Math.round(amount),e===player?'#ff6b6b':'#fff',amount>6?18:14);
@@ -341,7 +343,7 @@ function die(e,by,sea){
   // mort hors de sa base : on perd tout son équipement (les améliorations de base sont conservées)
   if(!nearBase(e)){
     const had=Object.keys(e.own).length+Object.values(e.am).filter(v=>v>0).length+e.grap+e.jet+e.bomb+e.repel+e.shield+(e.pick>0?1:0)+(e.sword>0?1:0)+totalBlocks(e);
-    e.blocks={2:8,3:0,4:0,5:0}; e.bsel=2; e.pick=0; e.sword=0; e.grap=e.jet=e.bomb=e.repel=e.shield=0; e.own={}; e.am={}; e.ws={};
+    e.blocks={2:8,3:0,4:0,5:0}; e.bsel=2; e.pick=0; e.sword=0; e.grap=e.jet=e.bomb=e.repel=e.shield=0; e.own=keepOwn(e); e.am=keepAm(e); e.ws={};
     if(e===player&&had>8){ msg('Mort hors de ta base : tu perds ton équipement !','#fca5a5'); floatTxt(e.x,e.y-50,'ÉQUIPEMENT PERDU','#fca5a5',16); }
   }
   const lost=Object.values(e.res).reduce((a,b)=>a+b,0);
@@ -565,10 +567,13 @@ function jump(e,power){
   if(e.plume>0&&e.z>groundH(e)+3&&e.vz<=140&&!e.pull&&e.bubble<=0&&e.frozen<=0&&!e.riding&&e.alive){ e.plume--; e.vz=320; e.squash=-.3; sfx('jump',e.x,e.y); burst(e.x,e.y+6-e.z,'#bbf7d0',8,90,.5,3); ring(e.x,e.y+8-e.z,T*.7,'#4ade80',.25); floatTxt(e.x,e.y-40,'×'+e.plume,'#4ade80',13); return; }
   if(e.bubble>0||e.root>0||e.z>groundH(e)+1||e.vz>0||e.pull||e.frozen>0||e.riding) return;
   if(fl(Math.floor(e.x/T),Math.floor(e.y/T))===0&&e.jetT<=0){ if(e.waterJumps>=1) return; e.waterJumps=(e.waterJumps||0)+1; } // un seul saut de rattrapage au-dessus de l'eau
-  sfx('jump',e.x,e.y); e.vz=(power||(e.springT>0?540:320))*cv(e,'jump')*(1+.1*(e.up.jmp||0)); e.squash=-.5; burst(e.x,e.y+6-e.z,'#e5e7eb',6,70,.3,3);
+  sfx('jump',e.x,e.y); e.vz=(power||(e.springT>0?540:320))*cv(e,'jump')*(1+.1*(e.up.jmp||0))*(e.relics&&e.relics.r_feather?1.1:1); e.squash=-.5; burst(e.x,e.y+6-e.z,'#e5e7eb',6,70,.3,3);
 }
 function useGadget(e,id,wx,wy){
-  if(e.cd.gad>0||(e.am[id]||0)<=0) return false;
+  if(e.cd.gad>0) return false;
+  const P=PERM[id];
+  if(P){ if(!e.own[id]&&(e.am[id]||0)<=0) return false; if((e.pcd[id]||0)>0){ if(e===player) floatTxt(e.x,e.y-34,'Recharge : '+Math.ceil(e.pcd[id])+' s','#cbd5e1',13); return false; } }
+  else if((e.am[id]||0)<=0) return false;
   const ax=Math.cos(e.ang),ay=Math.sin(e.ang);
   switch(id){
     case 'dash':
@@ -683,7 +688,7 @@ function useGadget(e,id,wx,wy){
       break;
     default: if(!useGadget2(e,id,wx,wy,ax,ay)) return false; break;
   }
-  e.am[id]--; e.cd.gad=.5*cv(e,'gcd'); sfx('gadget',e.x,e.y); return true;
+  if(P){ if(!(id==='recall'&&e.recall)) e.pcd[id]=P.cd; } else e.am[id]--; e.cd.gad=.5*cv(e,'gcd'); sfx('gadget',e.x,e.y); return true;
 }
 function blastTiles(cx,cy,R,dmg,src,team){
   for(let ty=Math.floor((cy-R)/T);ty<=Math.floor((cy+R)/T);ty++)for(let tx=Math.floor((cx-R)/T);tx<=Math.floor((cx+R)/T);tx++){
@@ -937,7 +942,7 @@ function updateEnt(e,dt){
   else if(e.z>gh||e.vz>0){
     e.vz-=1000*dt; { const gcl=e.flight>0?-42:-80; if(e.glide>0&&e.vz<gcl) e.vz=gcl; } e.z+=e.vz*dt;
     if(e.z<=gh&&e.vz<=0){ const imp=-e.vz; e.z=gh; e.vz=0;
-      { const drop=(e.tkH||0)-gh; e.tkH=gh; if(drop>56&&!(e.glide>0)&&!(e.springT>0)&&!e.riding){ const fd=(drop-56)*.12; floatTxt(e.x,e.y-34,'AÏE !','#fca5a5',15); sfx('hit',e.x,e.y); e.fallDeath=true; hurt(e,fd,null,0,0); e.fallDeath=false; } } if(e.springT>0&&imp>380){ ring(e.x,e.y,T*2,'#4ade80',.4,true); shake=Math.max(shake,e===player?7:3); for(const o of ents) if(o.alive&&o.team!==e.team&&Math.hypot(o.x-e.x,o.y-e.y)<T*2) hurt(o,3,e,(o.x-e.x)*6,(o.y-e.y)*6); }
+      { const drop=(e.tkH||0)-gh; e.tkH=gh; if(drop>56&&!(e.glide>0)&&!(e.springT>0)&&!e.riding&&!(e.relics&&e.relics.r_feather)){ const fd=(drop-56)*.12; floatTxt(e.x,e.y-34,'AÏE !','#fca5a5',15); sfx('hit',e.x,e.y); e.fallDeath=true; hurt(e,fd,null,0,0); e.fallDeath=false; } } if(e.springT>0&&imp>380){ ring(e.x,e.y,T*2,'#4ade80',.4,true); shake=Math.max(shake,e===player?7:3); for(const o of ents) if(o.alive&&o.team!==e.team&&Math.hypot(o.x-e.x,o.y-e.y)<T*2) hurt(o,3,e,(o.x-e.x)*6,(o.y-e.y)*6); }
       if(imp>180){e.squash=Math.min(1,imp/550); burst(e.x,e.y+6-gh,'#e5e7eb',8,110,.35,3); ring(e.x,e.y+8-gh,T*.6,'#ffffff',.25);} }
   } else { e.z=gh; e.tkH=gh; }
   // mouvement
@@ -995,7 +1000,7 @@ function updateSpawners(dt){
       for(const r in sp.types){
         const ty=sp.types[r];
         if(ty.stock>0){
-          e.res[r]+=Math.round(ty.stock*cv(e,'loot')*(1+.15*(e.up.loot||0)));
+          e.res[r]+=Math.round(ty.stock*cv(e,'loot')*(1+.15*(e.up.loot||0))*(e.relics&&e.relics.r_coin?1.12:1));
           if(e===player){
             if(sp.kind!=='base'||r!=='bronze') sfx('coin'); if(sp.kind!=='base'||r==='diamond') { floatTxt(e.x,e.y-34,`+${ty.stock} ${RESNAME[r]}`,RESCOL[r],15); burst(e.x,e.y-8,RESCOL[r],8,110,.5,3); ring(e.x,e.y,T*.9,RESCOL[r],.3); }
             else if(r!=='bronze'||Math.random()<.15) parts.push({x:cx,y:cy,z:12,vz:60,vx:(e.x-cx)*1.6,vy:(e.y-cy)*1.6,life:.6,max:.6,col:RESCOL[r],size:5});
@@ -1240,14 +1245,14 @@ function cnt(e,id){
     case 'sword':return 'T'+(e.sword+1);
     case 'glove':case 'hammer':case 'baa':return '';
     case 'grap':case 'jet':case 'bomb':case 'repel':case 'shield':return e[id];
-    default: if(GUNS[id]){ const s=wst(e,id); return s.r>0?'…':s.a; } return e.am[id]||0;
+    default: if(GUNS[id]){ const s=wst(e,id); return s.r>0?'…':s.a; } if(PERM[id]){ const c=e.pcd[id]||0; return c>0?Math.ceil(c)+'s':''; } return e.am[id]||0;
   }
 }
 function owned(e,id){
   switch(id){
     case 'block':case 'pick':case 'sword':return true;
     case 'glove':case 'hammer':case 'baa':return !!e.own[id];
-    default: if(GUNS[id]) return !!e.own[id]; return cnt(e,id)>0;
+    default: if(GUNS[id]||PERM[id]) return !!e.own[id]; return cnt(e,id)>0;
   }
 }
 const BAR_MAX=10, PROTECT=['block','pick','sword'];
