@@ -91,11 +91,11 @@ updateCamera=function(dt){
 const _drawHud0=drawHud;
 drawHud=function(){
   _drawHud0();
-  { const b=document.body, dead=game.state==='play'&&!player.alive, over=game.state==='over'; b.classList.toggle('dead',dead); b.classList.toggle('lost',over&&!game.win); b.classList.toggle('won',over&&!!game.win);
+  { const b=document.body, dead=game.state==='play'&&!player.alive&&!isSpec(), over=game.state==='over'; b.classList.toggle('dead',dead); b.classList.toggle('lost',over&&!game.win); b.classList.toggle('won',over&&!!game.win);
     JUICE.deadT=dead?(JUICE.deadT||0)+.016:0; }
   if(game.state==='menu') return; const e=player, dt=.016;
   if(JUICE.deadT>0){ const k=Math.min(1,JUICE.deadT*1.3), g=ctx.createRadialGradient(VW/2,VH/2,Math.max(0,Math.min(VW,VH)*(.9-.6*k)),VW/2,VH/2,Math.max(VW,VH)*.8); g.addColorStop(0,'rgba(20,0,0,0)'); g.addColorStop(1,`rgba(20,0,0,${.75*k})`); ctx.fillStyle=g; ctx.fillRect(0,0,VW,VH);
-    const w=Math.min(1,JUICE.deadT*3); ctx.save(); ctx.globalAlpha=w; ctx.translate(VW/2,VH*.34); ctx.scale(.7+.3*w,.7+.3*w); ctx.font='bold 54px '+PFONT; ctx.textAlign='center'; ctx.lineWidth=7; ctx.strokeStyle='rgba(40,0,0,.9)'; ctx.fillStyle='#fecaca'; ctx.strokeText('☠ TOMBÉ !',0,0); ctx.fillText('☠ TOMBÉ !',0,0); ctx.restore(); }
+    const w=Math.min(1,JUICE.deadT*3); if(!KC.on){ ctx.save(); ctx.globalAlpha=w; ctx.translate(VW/2,VH*.34); ctx.scale(.7+.3*w,.7+.3*w); ctx.font='bold 54px '+PFONT; ctx.textAlign='center'; ctx.lineWidth=7; ctx.strokeStyle='rgba(40,0,0,.9)'; ctx.fillStyle='#fecaca'; ctx.strokeText('☠ TOMBÉ !',0,0); ctx.fillText('☠ TOMBÉ !',0,0); ctx.restore(); } }
   // vignette de danger / de coup
   const hpk=e.alive?e.hp/maxhp(e):1, low=hpk<.35?(1-hpk/.35):0, pulse=low*(.5+.5*Math.sin(game.t*7));
   const va=Math.max(JUICE.vig*.55,pulse*.55);

@@ -104,18 +104,18 @@ function bindMp(){
   renderMp();
 }
 /* ---------- pause & paramètres ---------- */
-const SETTINGS={mute:false,q:'auto',shake:1,slow:true};
+const SETTINGS={mute:false,q:'auto',shake:1,slow:true,music:.65};
 function loadSettings(){ try{ Object.assign(SETTINGS,JSON.parse(localStorage.getItem('pirates_settings')||'{}')); }catch(e){} applySettings(); }
 function saveSettings(){ try{localStorage.setItem('pirates_settings',JSON.stringify(SETTINGS));}catch(e){} }
 function applySettings(){
-  muted=!!SETTINGS.mute; SET.shake=SETTINGS.shake; SET.slow=!!SETTINGS.slow;
+  muted=!!SETTINGS.mute; SET.shake=SETTINGS.shake; SET.slow=!!SETTINGS.slow; if(typeof MUS!=='undefined') MUS.setVol(SETTINGS.music);
   if(typeof Q!=='undefined'&&renderer){ if(SETTINGS.q==='auto'){ Q.auto=true; } else { Q.auto=false; Q.level=+SETTINGS.q; applyQuality(); } }
 }
 function setPause(on){ game.paused=!!on; const el=document.getElementById('pause'); el.classList.toggle('hidden',!on); if(on){ for(const k in keys) keys[k]=false; mouse.down=false; mouse.clicked=false; document.getElementById('pset').classList.add('hidden'); document.getElementById('pnote').textContent=NETON?'La partie continue en ligne pendant la pause.':''; } }
 function togglePause(){ if(game.state==='play') setPause(!game.paused); }
 function renderSettings(){
   const el=document.getElementById('pset'), row=(t,key,opts)=>`<div class="orow"><span class="olab">${t}</span>${opts.map(([v,n])=>`<button class="obtn ${String(SETTINGS[key])===String(v)?'on':''}" data-sk="${key}" data-sv="${v}">${n}</button>`).join('')}</div>`;
-  el.innerHTML=row('Son','mute',[[false,'Activé'],[true,'Coupé']])+row('Graphismes','q',[['auto','Auto'],[0,'Bas'],[1,'Moyen'],[2,'Élevé']])+row('Style','style3',[['3d','Cubes 3D'],['2d','Sprites 2D']])+row('Secousses','shake',[[1,'Normales'],[.4,'Réduites'],[0,'Aucune']])+row('Ralentis','slow',[[true,'Oui'],[false,'Non']]);
+  el.innerHTML=row('Son','mute',[[false,'Activé'],[true,'Coupé']])+row('Musique','music',[[0,'Coupée'],[.3,'Basse'],[.65,'Normale'],[1,'Forte']])+row('Graphismes','q',[['auto','Auto'],[0,'Bas'],[1,'Moyen'],[2,'Élevé']])+row('Style','style3',[['3d','Cubes 3D'],['2d','Sprites 2D']])+row('Secousses','shake',[[1,'Normales'],[.4,'Réduites'],[0,'Aucune']])+row('Ralentis','slow',[[true,'Oui'],[false,'Non']]);
   el.querySelectorAll('[data-sk]').forEach(b=>b.onclick=()=>{ const k=b.dataset.sk; let v=b.dataset.sv; if(v==='true') v=true; else if(v==='false') v=false; else if(v!=='auto'&&v!=='3d'&&v!=='2d') v=+v;
     if(k==='style3'){ game.opts.style=v; saveOpts(); setStyle(); renderOpts(); } else { SETTINGS[k]=v; saveSettings(); applySettings(); }
     renderSettings(); });
