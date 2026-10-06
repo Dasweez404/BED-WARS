@@ -15,6 +15,7 @@ Object.assign(game.opts,{mut:{},dn:1,wth:1,pers:1});
     atoll:{n:'Atoll',d:'Les bases aux quatre coins du monde et un anneau d\'îlots autour du galion : on se bat au centre !',bases:bases4,dia:[[24,24],[76,24],[24,76],[76,76]],relay:ring},
     scatter:{n:'Îlots dispersés',d:'Des îlots un peu partout : des ponts courts, des embuscades, beaucoup de possibilités.',bases:[[50,76,[0,-1]],[24,50,[1,0]],[50,24,[0,1]],[76,50,[-1,0]]],dia:[[30,30],[70,30],[30,70],[70,70]],relay:sc},
     glacier:{n:'Banquise',d:'Îles gelées : on glisse partout ! Neige, mer glacée et blocs de glace (attention au bord).',bases:[[50,76,[0,-1]],[24,50,[1,0]],[50,24,[0,1]],[76,50,[-1,0]]],dia:[[30,30],[70,30],[30,70],[70,70]],relay:[],ice:true,wx:'snow'},
+    jungle:{n:'Jungle du volcan',d:'Une jungle luxuriante, des îlots-volcans qui crachent de la lave : éruptions fréquentes et pluies tropicales !',bases:[[50,76,[0,-1]],[24,50,[1,0]],[50,24,[0,1]],[76,50,[-1,0]]],dia:[[30,30],[70,30],[30,70],[70,70]],relay:[[38,38],[62,38],[38,62],[62,62]],volcano:true,jungle:true,wx:'jungle'},
     tempest:{n:'Cap des tempêtes',d:'Îles rapprochées sous un orage perpétuel, de nuit. Éclairs, pluie et vent !',bases:[[50,70,[0,-1]],[30,50,[1,0]],[50,30,[0,1]],[70,50,[-1,0]]],dia:[[36,36],[64,36],[36,64],[64,64]],relay:[],wx:'storm',night:true}
   });
 })();
@@ -71,7 +72,13 @@ for(const it of SHOP){ if(it._pm) continue; it._pm=1; const i0=it.info; it.info=
     const x=t[0],y=t[1]; ring(x,y,T*1.4,'#f97316',1.1); bombs.push({x,y,tx:x,ty:y,fuse:1.1,team:-1,owner:null,kind:'bomb',R:1.6*T,dm:6,bd:.7,shell:true,drop:true,h:0});
   };
 }
+/* jungle : éruptions régulières */
+{ const _e=updateEvents; let nextV=30;
+  updateEvents=function(dt){ _e(dt); if(game.state!=='play'||!(MAPS[game.opts.map]||{}).volcano||(game.opts.evf|0)===0&&false) return;
+    nextV-=dt; if(nextV<=0&&!EV.cur){ nextV=rnd(32,48); startEvent('volcano'); } };
+  const _n=newGame; newGame=function(){ _n(); nextV=rnd(25,35); };
+}
 /* sol de la banquise : teinte glacée */
-{ const _g=groundColor, ic=new THREE.Color('#d9f1ff');
-  groundColor=function(reg,tx,ty,out){ _g(reg,tx,ty,out); if(iceOn()) out.lerp(ic,reg===4?.35:.7); return out; };
+{ const _g=groundColor, ic=new THREE.Color('#d9f1ff'), jg=new THREE.Color('#3f9a45');
+  groundColor=function(reg,tx,ty,out){ _g(reg,tx,ty,out); if(iceOn()) out.lerp(ic,reg===4?.35:.7); else if((MAPS[game.opts.map]||{}).jungle&&reg!==4) out.lerp(jg,.45); return out; };
 }

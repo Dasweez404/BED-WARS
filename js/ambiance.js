@@ -9,6 +9,7 @@ function dayPhase(t){ const o=game.opts, m=mapDef(); const dn=o.dn===undefined?1
 function wxTarget(t){
   const o=game.opts, m=mapDef(), mode=o.wth===undefined?1:o.wth|0; if(mode===0) return 'clear';
   if(m.wx==='storm') return 'storm';
+  if(m.wx==='jungle'){ const sg=Math.floor(t/60); return wxHash(WX.seed,sg)<.5?'rain':'clear'; }
   const seg=Math.floor(t/70), r=wxHash(WX.seed,seg);
   if(m.wx==='snow') return seg<1||r<.3?'clear':'snow';
   if(seg<1) return 'clear';
@@ -179,3 +180,18 @@ function nightSparkles(dt){
     ctx.save(); ctx.font='bold 12px '+FONT; ctx.textAlign='right'; ctx.lineWidth=3; ctx.strokeStyle='rgba(10,30,50,.8)'; ctx.fillStyle='rgba(255,236,190,.95)'; ctx.strokeText(txt,VW-14,206); ctx.fillText(txt,VW-14,206); ctx.restore();
   };
 }
+
+/* ---------- volcans décoratifs (carte Jungle) ---------- */
+let volG=null;
+function volBuild(){
+  if(volG){ scene.remove(volG); volG=null; } const m=mapDef(); if(!m.volcano||!scene) return;
+  volG=new THREE.Group(); volG.userData.v=[];
+  for(const [x,y] of m.relay){ const g=new THREE.Group(); const cone=new THREE.Mesh(GEO.cone,new THREE.MeshStandardMaterial({color:0x4a3a32,flatShading:true})); cone.scale.set(1.7,2.4,1.7); cone.position.y=1.2; g.add(cone);
+    const lava=new THREE.Mesh(GEO.sphere0,new THREE.MeshStandardMaterial({color:0xff5a1f,emissive:0xff4a10,emissiveIntensity:1.2,flatShading:true})); lava.scale.set(.62,.28,.62); lava.position.y=2.35; g.add(lava);
+    g.position.set(x+.5,0,y+.5); volG.add(g); volG.userData.v.push({x:(x+.5)*T,y:(y+.5)*T,lava}); }
+  scene.add(volG);
+}
+{ const _on=onNewGame; onNewGame=function(){ _on(); try{ volBuild(); }catch(e){} }; }
+{ const _r=render3d; render3d=function(dt){ _r(dt); if(!volG||game.state==='menu') return; const er=EV.cur&&EV.cur.id==='volcano';
+    for(const v of volG.userData.v){ v.lava.material.emissiveIntensity=1+.6*Math.sin(game.t*3+v.x)+(er?1.2:0);
+      if(parts.length<320&&Math.random()<dt*(er?14:2.2)){ parts.push({x:v.x,y:v.y,z:84,vx:rnd(-30,30),vy:rnd(-30,30),vz:er?rnd(120,260):rnd(40,90),life:er?1:1.6,max:er?1:1.6,col:Math.random()<.6?'#fb923c':'#6b7280',size:er?4:5,smoke:!er}); } } }; }
