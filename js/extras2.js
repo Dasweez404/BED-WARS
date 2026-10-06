@@ -99,6 +99,8 @@ useGadget2=function(e,id,wx,wy,ax,ay){
   }
   return _ug2(e,id,wx,wy,ax,ay);
 };
+/* catégorie « Outils » : déplacements et utilitaires */
+for(const id of ['grap','jet','dash','trampo','tp','bridge','bridge2','boat','glide','cannonman','springs','haste','cloak','smokebomb','shrink','giant','swap','lasso']) if(SHOPMAP[id]) SHOPMAP[id].cat='Outils';
 /* bots */
 BOT_RANGED.push(['pogo',2,7],['popcorn',1,5],['rubberchicken',2,7]);
 const NEW2_IDS=NEW2.map(i=>i.id).filter(id=>id!=='boat');

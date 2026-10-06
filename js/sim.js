@@ -103,7 +103,7 @@ const MODES={solo:{n:'Chacun pour soi',d:'4 équipages, 1 pirate chacun.'},duo:{
 const OPT_RES=[{n:'Lentes',v:.7},{n:'Normales',v:1},{n:'Rapides',v:1.5}];
 const OPT_START=[{n:'Aucun',r:{}},{n:'Petit pécule',r:{bronze:40,silver:10}},{n:'Butin de départ',r:{bronze:120,silver:40,gold:6,diamond:3}}];
 const OPT_CORE=[{n:'Fragiles',v:.6},{n:'Normaux',v:1},{n:'Solides',v:1.7}];
-let game={state:'menu',diff:'normal',cls:'matelot',look:{skin:0,hat:0,hair:0,face:0,patch:1},pname:'Toi',opts:{mode:'solo',map:'classic',res:1,start:0,core:1,stack:3,roster:20,evf:2,ev:{coins:1,curse:1,shark:1,storm:1,volcano:1,fog:1,kraken:1,rush:1}},t:0,win:false,hurtFx:0,hitmark:0,flash:0,flashCol:'#fff'};
+let game={state:'menu',diff:'normal',cls:'matelot',look:{skin:0,hat:0,hair:0,face:0,patch:1},pname:'Toi',opts:{mode:'solo',map:'classic',res:1,start:0,core:1,stack:3,roster:40,evf:2,ev:{coins:1,curse:1,shark:1,storm:1,volcano:1,fog:1,kraken:1,rush:1}},t:0,win:false,hurtFx:0,hitmark:0,flash:0,flashCol:'#fff'};
 let player=null;
 let shake=0, banner={txt:'',col:'#fff',t:0,max:3};
 let selId='block', selAnim=0;
@@ -870,7 +870,7 @@ function shopIco(id){
 function renderShop(){
   if(!shopOpen) return;
   const e=player, sc=shopEl.scrollTop;
-  let h=`<div class="top"><h2>Boutique</h2><div class="res">${Object.keys(RESCOL).map(k=>`<span style="color:${RESCOL[k]}"><img class="ri" src="${ICON[k]}"> ${e.res[k]}</span>`).join('')}</div><span class="x" data-close="1">✕</span></div>`;
+  let h=`<div class="top"><h2>Boutique${typeof ROSTER!=='undefined'&&ROSTER?` <small style="font-size:13px;color:#d9c49a;font-family:Fredoka,sans-serif">roster aléatoire : ${ROSTER.size} objets</small>`:''}</h2><div class="res">${Object.keys(RESCOL).map(k=>`<span style="color:${RESCOL[k]}"><img class="ri" src="${ICON[k]}"> ${e.res[k]}</span>`).join('')}</div><span class="x" data-close="1">✕</span></div>`;
   h+='<div class="tabs">'+TABS.map(t=>`<div class="tab ${t===shopTab?'on':''}" data-tab="${t}">${t==='Base'?'Améliorations (diamants)':t}</div>`).join('')+'</div><div class="grid">';
   for(const it of SHOP.filter(s=>s.cat===shopTab&&inRoster(s.id))){
     const inf=it.info(e), can=inf.ok!==false&&canAfford(e,inf.cost);
