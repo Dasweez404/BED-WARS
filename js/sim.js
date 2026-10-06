@@ -397,7 +397,7 @@ function doPlace(e,tx,ty,type){
   else if(wallT[i]===type){ hpW[i]+=BHP[type]; }
   else { wallT[i]=type; hpW[i]=BHP[type]; ownW[i]=e.team; }
   pop[i]=1;
-  if(Math.random()>=cv(e,'free')) e.blocks[type]--; e.cd.place=e.isBot?.32:.14; e.swing=.12; e.swingMax=.12;
+  if(Math.random()>=cv(e,'free')) e.blocks[type]--; e.cd.place=e.isBot?.45:.26; e.swing=.12; e.swingMax=.12;
   chunks((tx+.5)*T,(ty+.5)*T,col,4); ring((tx+.5)*T,(ty+.5)*T,T*.7,'#ffffff',.22); sfx('place',e.x,e.y);
   return true;
 }
@@ -412,7 +412,7 @@ function placeUnder(e){ // en saut : clic = bloc sous les pieds (pont au-dessus 
   else if(floorT[i]===0){ floorT[i]=type; hpF[i]=BHP[type]; ownF[i]=e.team; }
   else { if(e.z<WH-1) return false; wallT[i]=type; hpW[i]=BHP[type]; ownW[i]=e.team; }
   pop[i]=1; if(e===player&&!e.blocks[e.bsel]) e.bsel=type;
-  if(Math.random()>=cv(e,'free')) e.blocks[type]--; e.cd.place=e.isBot?.32:.14; e.swing=.12; e.swingMax=.12; e.squash=-.2;
+  if(Math.random()>=cv(e,'free')) e.blocks[type]--; e.cd.place=e.isBot?.45:.26; e.swing=.12; e.swingMax=.12; e.squash=-.2;
   chunks((tx+.5)*T,(ty+.5)*T,blockColor(type,e.team)[0],4); ring((tx+.5)*T,(ty+.5)*T,T*.7,'#ffffff',.22); sfx('place',e.x,e.y);
   return true;
 }

@@ -58,7 +58,7 @@ function cdFrac(e,id){
   let c=0,m=1;
   if(id==='sword'){c=e.cd.atk;m=.42;} else if(id==='glove'){c=e.cd.atk;m=.9;} else if(id==='hammer'){c=e.cd.atk;m=1.1;} else if(id==='baa'){c=e.cd.atk;m=1.2;}
   else if(PERM[id]){ c=e.pcd[id]||0; m=PERM[id].cd; }
-  else if(id==='pick'){c=e.cd.mine;m=.28;} else if(id==='block'){c=e.cd.place;m=.14;} else if(id==='grap'){c=e.cd.gad;m=.9;} else {c=e.cd.gad;m=.5;}
+  else if(id==='pick'){c=e.cd.mine;m=.28;} else if(id==='block'){c=e.cd.place;m=.26;} else if(id==='grap'){c=e.cd.gad;m=.9;} else {c=e.cd.gad;m=.5;}
   return clamp(c/m,0,1);
 }
 const TIPS={block:'Clic : poser (pont sur le vide, mur sur le sol) · C / clic droit : changer de bloc · en saut : bloc sous les pieds',pick:'Maintiens le clic pour casser blocs, ponts et le mouton ultime ennemi',
