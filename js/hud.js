@@ -71,14 +71,14 @@ const TIPS={block:'Clic : poser (pont sur le vide, mur sur le sol) · C / clic d
   turret:'Clic : pose une tourelle automatique',turret2:'Clic : pose une tourelle givrante',guard:'Clic : appelle deux moutons gardiens',repair:'Clic : répare ton mouton ultime',
   hammer2:'',springs:'Clic : super sauts 25 s',cloak:'Clic : invisible 7 s',haste:'Clic : vitesse +50 % 8 s',wallgad:'Clic : mur de 3 blocs',storm:'Clic : foudre sur la zone visée',cluster:'Clic : bombe à fragmentation',vortex:'Clic : trou noir qui aspire'};
 Object.assign(TIPS,TIPS2);
-Object.assign(TIPS,{pick:'Maintiens le clic pour casser blocs, ponts et le coffre ennemi',baa:'Clic : souffle de brume qui repousse les ennemis et dévie les tirs',
+Object.assign(TIPS,{pick:'Maintiens le clic pour casser blocs, ponts et le coffre ennemi (tes propres blocs te sont rendus)',baa:'Clic : souffle de brume qui repousse les ennemis et dévie les tirs',
   glove:'Clic : coup de crochet qui projette très loin',hammer:'Clic : onde de choc qui projette et casse les blocs',bow:'Clic : tirer un carreau (recharge entre chaque tir)',
   gun:'Maintiens le clic : la dispersion augmente en rafale · R : recharger',smg:'Deux pistolets : rafale rapide, le spray s\'élargit vite · R : recharger',shotgun:'Clic : 8 plombs en éventail · R : recharger',
   sniper:'Clic : tir perçant, précis à l\'arrêt · R : recharger',rocket:'Clic : boulet de canon explosif',woolgun:'Clic : filet qui emmêle et ralentit',boomerang:'Clic : la hache revient vers toi et touche deux fois',
   bubble:'Clic : enferme l\'ennemi dans une bulle d\'écume',ice:'Clic : harpon qui gèle la cible',flame:'Maintiens le clic : jet de flammes · R : recharger',grap:'Clic : accroche un bloc ou un ennemi et t\'attire',
   jet:'Clic : le perroquet te porte 4 s',dash:'Clic : élan',trampo:'Clic : pose un hamac rebondissant',tp:'Clic : lance la boussole, tu t\'y téléportes',bridge:'Clic : 8 planches de passerelle',
   bomb:'Clic : lance un baril de poudre',repel:'Clic : vague qui repousse tout le monde',mine:'Clic : pose une mine marine',banana:'Clic : pose une peau de banane',chicken:'Clic : lance un crabe kamikaze',
-  heal:'Clic : +12 PV',shield:'Clic : dôme de brume protectrice',turret:'Clic : pose un canon de pont automatique',turret2:'Clic : pose un canon givrant',guard:'Clic : appelle deux matelots gardiens',
+  heal:'Clic : +12 PV',shield:'Clic : érige un rempart autour de ton île (porte vers le centre) avec tes blocs',turret:'Clic : pose un canon de pont automatique',turret2:'Clic : pose un canon givrant',guard:'Clic : appelle deux matelots gardiens',
   repair:'Clic : répare ton coffre au trésor',springs:'Clic : super sauts 25 s',cloak:'Clic : invisible 7 s',haste:'Clic : vitesse +50 % 8 s',wallgad:'Clic : palissade de 3 planches',
   storm:'Clic : l\'orage frappe la zone visée',cluster:'Clic : baril qui explose en 6 mini-barils',vortex:'Clic : maelström qui aspire',flag:'Clic : pavillon noir : soigne tes alliés, ralentit les ennemis',
   anchor:'Clic : jette une ancre qui assomme',buoy:'Passif : te repêche si tu tombes à la mer',kraken:'Clic : un tentacule frappe la zone',barrage:'Clic : 6 boulets sur la zone visée',net:'Clic : pose un filet piégé'});

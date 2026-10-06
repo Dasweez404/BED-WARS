@@ -2,9 +2,10 @@
 /* =====================  CONSTANTES  ===================== */
 const T=32, W=100, H=100, CX=50, CY=50, WH=28; // hauteur des murs (px) ; 1 case = 32 px = 1 unité 3D
 const WOOL=2, WOOD=3, STONE=4, OBS=5, CORE=6;
-const BNAME={2:'Laine',3:'Bois',4:'Pierre',5:'Obsidienne'};
-const BHP={2:4,3:10,4:24,5:60,6:30};
-const BCOL={3:['#b98a52','#8a6234'],4:['#a7afb8','#79818b'],5:['#4a2d73','#2a1745']};
+const BNAME={2:'Laine',3:'Bois',4:'Pierre',5:'Obsidienne',7:'Corail',8:'Glace'};
+const BORDER=[2,8,3,7,4,5]; // du plus fragile au plus solide
+const BHP={2:4,3:10,4:24,5:60,6:30,7:16,8:7};
+const BCOL={3:['#b98a52','#8a6234'],4:['#a7afb8','#79818b'],5:['#4a2d73','#2a1745'],7:['#f472b6','#be185d'],8:['#c9f0ff','#7ec8e8']};
 const RESCOL={bronze:'#cd7f32',silver:'#d6dde6',gold:'#fbbf24',diamond:'#22d3ee'};
 const RESNAME={bronze:'Bronze',silver:'Argent',gold:'Or',diamond:'Diamant'};
 const TEAMS=[
@@ -197,9 +198,9 @@ function ship(cx,cy){
 }
 function makeEnt(team,isBot,name){
   return {team,isBot,name,x:0,y:0,z:0,vx:0,vy:0,vz:0,ix:0,iy:0,ang:0,hp:20,alive:false,elim:false,resp:0,inv:0,flash:0,
-    res:{bronze:0,silver:0,gold:0,diamond:0},blocks:{2:8,3:0,4:0,5:0},bsel:2,pick:0,sword:0,ws:{},slow:0,
+    res:{bronze:0,silver:0,gold:0,diamond:0},blocks:{2:8,3:0,4:0,5:0,7:0,8:0},bsel:2,pick:0,sword:0,ws:{},slow:0,
     grap:0,jet:0,bomb:0,repel:0,shield:0,own:{},am:{},held:'sword',
-    up:{fb:0,fs:0,hp:0,sp:0,ar:0,gold:0,core:0,jmp:0,reg:0,vamp:0,rel:0,dmg:0,loot:0,dia:0},
+    up:{mason:0,fb:0,fs:0,hp:0,sp:0,ar:0,gold:0,core:0,jmp:0,reg:0,vamp:0,rel:0,dmg:0,loot:0,dia:0},
     cd:{atk:0,mine:0,place:0,bow:0,gad:0},jetT:0,voidT:0,pull:null,grace:0,swing:0,swingMax:.2,kills:0,deaths:0,
     root:0,flagBuff:0,lastSafe:null,lastSafeT:0,bubble:0,cloak:0,haste:0,springT:0,frozen:0,slip:0,sdx:0,sdy:0,squash:0,muzzle:0,stepPh:0,stepT:0,burn:0,
     lastBy:null,lastByT:0,sinceHurt:99,ai:null,hook:null,aegis:0,slot:0,bar:[],pack:[],cls:'matelot',look:null,relics:{},pcd:{}};
@@ -343,7 +344,7 @@ function die(e,by,sea){
   // mort hors de sa base : on perd tout son équipement (les améliorations de base sont conservées)
   if(!nearBase(e)){
     const had=Object.keys(e.own).length+Object.values(e.am).filter(v=>v>0).length+e.grap+e.jet+e.bomb+e.repel+e.shield+(e.pick>0?1:0)+(e.sword>0?1:0)+totalBlocks(e);
-    e.blocks={2:8,3:0,4:0,5:0}; e.bsel=2; e.pick=0; e.sword=0; e.grap=e.jet=e.bomb=e.repel=e.shield=0; e.own=keepOwn(e); e.am=keepAm(e); e.ws={};
+    e.blocks={2:8,3:0,4:0,5:0,7:0,8:0}; e.bsel=2; e.pick=0; e.sword=0; e.grap=e.jet=e.bomb=e.repel=e.shield=0; e.own=keepOwn(e); e.am=keepAm(e); e.ws={};
     if(e===player&&had>8){ msg('Mort hors de ta base : tu perds ton équipement !','#fca5a5'); floatTxt(e.x,e.y-50,'ÉQUIPEMENT PERDU','#fca5a5',16); }
   }
   const lost=Object.values(e.res).reduce((a,b)=>a+b,0);
@@ -371,7 +372,7 @@ function wallBlockedByEnt(cx,cy){
 function spawnerAt(tx,ty){for(const s of spawners) if(s.x===tx&&s.y===ty) return s; return null;}
 
 /* =====================  ACTIONS  ===================== */
-function totalBlocks(e){return e.blocks[2]+e.blocks[3]+e.blocks[4]+e.blocks[5];}
+function totalBlocks(e){ let n=0; for(const t of BORDER) n+=e.blocks[t]||0; return n; }
 function canPlace(e,tx,ty,type){
   if(!inb(tx,ty)) return false;
   const f=fl(tx,ty), w=wl(tx,ty);
@@ -389,7 +390,7 @@ function canPlace(e,tx,ty,type){
 function doPlace(e,tx,ty,type){
   if(e.cd.place>0) return false;
   type=type||e.bsel;
-  if(!e.blocks[type]){ type=[2,3,4,5].find(t=>e.blocks[t]>0); if(!type) return false; if(e===player) e.bsel=type; }
+  if(!e.blocks[type]){ type=BORDER.find(t=>e.blocks[t]>0); if(!type) return false; if(e===player) e.bsel=type; }
   if(!canPlace(e,tx,ty,type)) return false;
   const i=idx(tx,ty), col=blockColor(type,e.team)[0];
   if(floorT[i]===0){ floorT[i]=type; hpF[i]=BHP[type]; ownF[i]=e.team; }
@@ -403,7 +404,7 @@ function doPlace(e,tx,ty,type){
 function placeUnder(e){ // en saut : clic = bloc sous les pieds (pont au-dessus de l'eau, sinon mur / couche supplémentaire pour monter)
   if(e.cd.place>0) return false;
   const tx=Math.floor(e.x/T), ty=Math.floor(e.y/T); if(!inb(tx,ty)) return false;
-  const type=e.blocks[e.bsel]?e.bsel:[2,3,4,5].find(t=>e.blocks[t]>0); if(!type) return false;
+  const type=e.blocks[e.bsel]?e.bsel:BORDER.find(t=>e.blocks[t]>0); if(!type) return false;
   if(protectedTile(tx,ty,e.team)||spawnerAt(tx,ty)) return false;
   const i=idx(tx,ty), w=wallT[i];
   if(w===CORE) return false;
@@ -418,7 +419,7 @@ function placeUnder(e){ // en saut : clic = bloc sous les pieds (pont au-dessus 
 function placeTarget(e,wx,wy){
   const dx=wx-e.x,dy=wy-e.y,d=Math.hypot(dx,dy)||1,ux=dx/d,uy=dy/d;
   const ctx_=Math.floor(wx/T),cty=Math.floor(wy/T);
-  const bt=e.blocks[e.bsel]?e.bsel:[2,3,4,5].find(t=>e.blocks[t]>0);
+  const bt=e.blocks[e.bsel]?e.bsel:BORDER.find(t=>e.blocks[t]>0);
   if(canPlace(e,ctx_,cty,bt)) return [ctx_,cty];
   for(let s=Math.min(d,3.6*T);s>=T*.5;s-=T*.2){
     const tx=Math.floor((e.x+ux*s)/T),ty=Math.floor((e.y+uy*s)/T);
@@ -465,7 +466,7 @@ function damageTile(tx,ty,dmg,src,layer){
       announce(`COFFRE DES ${td.name.toUpperCase()} DÉTRUIT !`,td.light); flashScreen(td.col,.3);
       if(td.ent===player) msg('Tu ne pourras plus réapparaître !','#ff7b7b');
       else if(src===player) msg('Bien joué, tu as détruit un coffre au trésor !','#fde68a');
-    } else { chunks(cx,cy,blockColor(t,Math.max(0,ownW[i]))[0],10); smoke(cx,cy,2,5,.6); }
+    } else { chunks(cx,cy,blockColor(t,Math.max(0,ownW[i]))[0],10); smoke(cx,cy,2,5,.6); if(src&&src.blocks&&src.team===ownW[i]&&src.blocks[t]!==undefined&&src.hp!==undefined){ src.blocks[t]++; if(src===player) floatTxt(cx,cy-30,'+1 '+BNAME[t],'#e5e7eb',12); } }
     wallT[i]=0; ownW[i]=-1;
   }
 }
@@ -547,11 +548,11 @@ function throwBomb(e,kind,wx,wy){
   e[kind]--; e.cd.gad=.5; e.swing=.15; e.swingMax=.15;
   bombs.push({x:e.x,y:e.y,tx:e.x+dx/d*m,ty:e.y+dy/d*m,fuse:1.7,team:e.team,owner:e,kind,h:20});
 }
-function useShield(e){
+function useShield(e){ // « Rempart d'île » : érige un mur autour de l'île avec les meilleurs blocs disponibles
   if(e.shield<=0||e.cd.gad>0) return;
-  e.shield--; e.cd.gad=.5;
-  shields.push({x:e.x,y:e.y,r:3.8*T,t:12,team:e.team,a:0});
-  ring(e.x,e.y,3.8*T,TEAMS[e.team].col,.5);
+  if(e.isBot&&totalBlocks(e)<36) return;
+  if(!buildRampart(e)) return;
+  e.shield--; e.cd.gad=.8;
 }
 function useJet(e){
   if(e.jet<=0||e.jetT>0||e.cd.gad>0) return;
@@ -786,6 +787,8 @@ const SHOP=[
   mk('wood','Blocs',e=>({name:'Planches ×4',desc:'Résistance moyenne.',cost:{silver:4}}),e=>e.blocks[3]+=4),
   mk('stone','Blocs',e=>({name:'Pierre de cale ×4',desc:'Solide. Résiste à une bombe.',cost:{silver:8}}),e=>e.blocks[4]+=4),
   mk('obs','Blocs',e=>({name:'Obsidienne ×2',desc:'Très solide : 2 bombes pour la casser.',cost:{gold:3}}),e=>e.blocks[5]+=2),
+  mk('coral','Blocs',e=>({name:'Corail ×4',desc:'Bloc rose, assez solide (16 PV) et pas cher.',cost:{silver:5}}),e=>e.blocks[7]+=4),
+  mk('iceblk','Blocs',e=>({name:'Glace ×8',desc:'Bloc translucide, très bon marché : parfait pour bâtir vite (7 PV).',cost:{bronze:6}}),e=>e.blocks[8]+=8),
   mk('sword','Combat',e=>{
     const t=e.sword; if(t>=3) return {name:SWORDS[3].n,desc:'Niveau maximum',cost:{},ok:false,tag:'MAX'};
     return {name:SWORDS[t+1].n,desc:`Dégâts ${SWORDS[t+1].d} (actuel ${SWORDS[t].d})`,cost:SWORD_COST[t+1]};
@@ -1301,7 +1304,7 @@ function controlEnt(e,dt,inp){ // commandes d'un pirate humain (local ou distant
   }
 }
 function cycleBlock(e){
-  const l=[2,3,4,5].filter(t=>e.blocks[t]>0); if(l.length<2) return;
+  const l=BORDER.filter(t=>e.blocks[t]>0); if(l.length<2) return;
   e.bsel=l[(Math.max(0,l.indexOf(e.bsel))+1)%l.length];
 }
 
@@ -1399,7 +1402,7 @@ function botBuy(b){
   }
 }
 function pickBlock(b,mode){
-  const order=mode==='wall'?[5,4,3,2]:[2,3,4,5];
+  const order=mode==='wall'?[5,4,7,3,8,2]:BORDER;
   for(const t of order){ if(b.blocks[t]>(mode==='wall'&&t===2?20:0)) return t; }
   return 0;
 }
