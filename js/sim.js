@@ -106,7 +106,7 @@ const MODES={solo:{n:'Chacun pour soi',d:'4 équipages, 1 pirate chacun.'},trio:
 const OPT_RES=[{n:'Lentes',v:.85},{n:'Normales',v:1.25},{n:'Rapides',v:1.75}];
 const DIA_INT=[Infinity,45,26,15];
 const OPT_START=[{n:'Aucun',r:{}},{n:'Laboratoire (test)',r:{bronze:400,silver:200,gold:40,diamond:80}},{n:'Petit pécule',r:{bronze:40,silver:10}},{n:'Butin de départ',r:{bronze:120,silver:40,gold:6,diamond:3}}];
-const OPT_CORE=[{n:'Fragiles',v:.6},{n:'Normaux',v:1},{n:'Solides',v:1.7}];
+const OPT_CORE=[{n:'Fragiles',v:1.3},{n:'Normaux',v:2.5},{n:'Solides',v:4},{n:'Blindés',v:6.5}];
 let game={state:'menu',diff:'normal',cls:'matelot',look:{skin:0,hat:0,hair:0,face:0,patch:1},pname:'Toi',opts:{style:'3d',mode:'solo',map:'classic',res:1.25,start:0,core:1,stack:3,roster:40,evf:2,ev:{coins:1,curse:1,shark:1,storm:1,volcano:1,fog:1,kraken:1,rush:1}},t:0,win:false,hurtFx:0,hitmark:0,flash:0,flashCol:'#fff'};
 let player=null;
 let shake=0, banner={txt:'',col:'#fff',t:0,max:3};
@@ -599,7 +599,7 @@ function useGadget(e,id,wx,wy){
       ring(e.x,e.y,T*1.6,'#fff',.4,true); burst(e.x,e.y,'#fff',14,160,.5,4); break;}
     case 'repair':{
       const td=TD[e.team],ci=idx(td.bx,td.by); if(!td.coreAlive||hpW[ci]>=BHP[CORE]-.5) return false;
-      hpW[ci]=Math.min(BHP[CORE],hpW[ci]+14); ring((td.bx+.5)*T,(td.by+.5)*T,T*2.2,'#86efac',.5,true); floatTxt((td.bx+.5)*T,(td.by+.5)*T-50,'+14 PV','#86efac',16); break;}
+      hpW[ci]=Math.min(BHP[CORE],hpW[ci]+Math.max(14,BHP[CORE]*.2)); ring((td.bx+.5)*T,(td.by+.5)*T,T*2.2,'#86efac',.5,true); floatTxt((td.bx+.5)*T,(td.by+.5)*T-50,'+14 PV','#86efac',16); break;}
     case 'turret2':{
       const tx=Math.floor(wx/T),ty=Math.floor(wy/T);
       if(fl(tx,ty)===0||wl(tx,ty)>0||Math.hypot((tx+.5)*T-e.x,(ty+.5)*T-e.y)>3.7*T) return false;

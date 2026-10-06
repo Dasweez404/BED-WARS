@@ -74,7 +74,7 @@ const OPTDEF=[
   {k:'dn',t:'Cycle',list:()=>[{v:0,n:'Jour fixe',d:'Il fait toujours jour.'},{v:1,n:'Jour & nuit',d:'Le soleil se couche : nuits sombres éclairées par les halos des coffres et des pirates.'},{v:2,n:'Nuit',d:'Il fait nuit en permanence.'}]},
   {k:'wth',t:'Météo',list:()=>[{v:0,n:'Aucune',d:'Ciel dégagé en permanence.'},{v:1,n:'Variable',d:'Pluie, brouillard et orages passent de temps en temps.'},{v:2,n:'Orageuse',d:'Souvent de la pluie, du brouillard et des orages.'}]},
   {k:'pers',t:'Bots',list:()=>[{v:0,n:'Classiques',d:'Tous les bots se comportent de la même façon.'},{v:1,n:'Personnalités',d:'Les capitaines ont chacun un caractère : Rusé, Bâtisseur, Kamikaze, Chasseur de primes ou Pillard.'}]},
-  {k:'core',t:'Coffres',list:()=>OPT_CORE.map((o,i)=>({v:i,n:o.n,d:'Résistance des coffres au trésor.'}))}
+  {k:'core',t:'Coffres',list:()=>OPT_CORE.map((o,i)=>({v:i,n:o.n,d:'Résistance des coffres au trésor ('+Math.round(30*o.v)+' PV : plus c\'est haut, plus il faut de temps pour les piller).'}))}
 ];
 function saveChar(){ if(typeof netHello==='function') netHello(); try{localStorage.setItem('pirates_char',JSON.stringify({cls:game.cls,look:game.look,pname:game.pname}));}catch(e){} }
 function renderChar(){
