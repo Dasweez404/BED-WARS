@@ -5,7 +5,7 @@ const stOf=e=>e.st||(e.st={dmg:0,taken:0,blocks:0,gath:0,core:0,lastRes:0});
   hurt=function(e,a,by,kx,ky){ const hp0=e.hp; _h(e,a,by,kx,ky); const d=hp0-e.hp; if(d>0){ stOf(e).taken+=d; if(by&&by!==e&&by.team!==undefined&&by.hp!==undefined) stOf(by).dmg+=d; } };
   const _p=doPlace; doPlace=function(e,tx,ty,type){ const r=_p(e,tx,ty,type); if(e&&e.hp!==undefined) stOf(e).blocks++; return r; };
   const _d=damageTile; damageTile=function(tx,ty,dmg,src,layer){ if(src&&src.hp!==undefined&&inb(tx,ty)){ const i=idx(tx,ty); if(wallT[i]===CORE&&ownW[i]!==src.team) stOf(src).core+=Math.min(dmg,hpW[i]); } return _d(tx,ty,dmg,src,layer); };
-  const _u=updateEvents; updateEvents=function(dt){ _u(dt); if(game.state!=='play') return; for(const e of ents){ const s=stOf(e), tot=e.res.bronze+e.res.silver*2+e.res.gold*6+e.res.diamond*12; if(tot>s.lastRes) s.gath+=tot-s.lastRes; s.lastRes=tot; } };
+  const _u=updateEvents; updateEvents=function(dt){ _u(dt); if(game.state!=='play') return; for(const e of ents){ if(game.opts.share&&TD[e.team]&&e!==TD[e.team].ent) continue; const s=stOf(e), tot=e.res.bronze+e.res.silver*2+e.res.gold*6+e.res.diamond*12; if(tot>s.lastRes) s.gath+=tot-s.lastRes; s.lastRes=tot; } };
 }
 /* ---------- réseau : les stats finales voyagent avec le dernier instantané ---------- */
 { const _nc=netCommon; netCommon=function(){ const c=_nc(); if(game.state==='over') c.stt=ents.map(e=>{ const s=stOf(e); return [e.kills,e.deaths,Math.round(s.dmg),Math.round(s.taken),s.blocks,Math.round(s.gath),Math.round(s.core)]; }); return c; };

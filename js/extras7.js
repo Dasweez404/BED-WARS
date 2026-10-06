@@ -1,7 +1,7 @@
 'use strict';
 /* =====================  NOUVELLES CARTES, MUTATEURS, GLACE  =====================
    4 cartes, 7 mutateurs (règles folles activables), banquise glissante. */
-Object.assign(game.opts,{mut:{},dn:1,wth:1,pers:1,loss:0,rkeep:0,bheal:0});
+Object.assign(game.opts,{mut:{},dn:1,wth:1,pers:1,loss:0,rkeep:0,bheal:0,share:0});
 /* ---------- cartes ---------- */
 (function(){
   const bases4=[[50,82,[0,-1]],[18,50,[1,0]],[50,18,[0,1]],[82,50,[-1,0]]];
@@ -87,4 +87,11 @@ for(const it of SHOP){ if(it._pm) continue; it._pm=1; const i0=it.info; it.info=
 { const _e=updateEvents;
   updateEvents=function(dt){ _e(dt); const r=[0,1.2,3.5][game.opts.bheal|0]; if(!r||game.state!=='play') return;
     for(const e of ents){ if(!e.alive||e.hp>=maxhp(e)||!nearBase(e)) continue; e.hp=Math.min(maxhp(e),e.hp+r*dt); if(Math.random()<dt*2) burst(e.x,e.y-e.z-10,'#86efac',1,40,.5,3); } };
+}
+
+/* ressources d'équipe partagées (option) : tous les coéquipiers piochent dans la même réserve */
+{ const _ng=newGame;
+  newGame=function(){ _ng(); if(game.opts.share) for(const td of TD) for(const m of td.members) if(m!==td.ent) m.res=td.ent.res; };
+  const _d=die;
+  die=function(e,by,sea){ if(game.opts.share&&e.alive&&TD[e.team]&&TD[e.team].members.length>1){ const pool=e.res; e.res={bronze:0,silver:0,gold:0,diamond:0}; try{ _d(e,by,sea); } finally{ e.res=pool; } } else _d(e,by,sea); };
 }
