@@ -44,7 +44,7 @@ const pers=b=>b.ai&&b.ai.pers;
   /* le chasseur de primes vise le leader en éliminations */
   const _nt=navTo;
   navTo=function(b,gx,gy){
-    if(b.ai&&b.ai.bounty&&b.ai.mode==='hunt'){ let tg=null,bk=-1; for(const o of ents){ if(!o.alive||o.team===b.team) continue; const sc=o.kills*10+(o===player?5:0)+(o.res.diamond||0)+Math.random()*.01; if(sc>bk){ bk=sc; tg=o; } } if(tg){ gx=Math.floor(tg.x/T); gy=Math.floor(tg.y/T); } }
+    if(b.ai&&b.ai.bounty&&b.ai.mode==='hunt'){ let tg=null,bk=-1; const rv=b.ai.revenge; if(rv&&rv.until>game.t&&rv.tg&&rv.tg.alive&&rv.tg.team!==b.team) tg=rv.tg; else for(const o of ents){ if(!o.alive||o.team===b.team) continue; const sc=o.kills*10+(o===player?5:0)+(o.res.diamond||0)+Math.random()*.01; if(sc>bk){ bk=sc; tg=o; } } if(tg){ gx=Math.floor(tg.x/T); gy=Math.floor(tg.y/T); } }
     return _nt(b,gx,gy);
   };
 }
@@ -145,4 +145,54 @@ function botRetreat(b,why){
     }
     _bb(b);
   };
+}
+
+
+/* =====================  BOTS PLUS FINS  =====================
+   pings d'équipe, feintes, adaptation à ton style de jeu, rivaux qui reviennent se venger. */
+const PMEM={melee:0,gun:0,build:0,gad:0,style:'',t:0,said:false};
+const botPing=(b,k,x,y)=>{ if(!player||b.team!==player.team||game.tut) return; const td=TD[b.team]; if((td.botPingT||0)>game.t) return; td.botPingT=game.t+14; addPing(b.team,x,y,k,b.name,b); };
+{ const _u=updateEvents;
+  updateEvents=function(dt){
+    _u(dt); if(game.state!=='play'||game.tut) return;
+    // mémoire du style de jeu des humains
+    for(const e of ents){ if(e.isBot||!e.alive) continue; const down=e===player?(mouse.down||mouse.clicked):(e.inp&&e.inp.down); if(!down) continue; const sel=e===player?selId:(e.inp&&e.inp.sel); if(!sel) continue;
+      const k=(sel==='sword'||sel==='glove'||sel==='hammer')?'melee':(GUNS[sel]||sel==='bomb'||sel==='bow')?'gun':(sel==='block'||sel==='pick')?'build':'gad'; PMEM[k]+=dt; }
+    PMEM.t+=dt; if(PMEM.t>12){ PMEM.t=0; const tot=PMEM.melee+PMEM.gun+PMEM.build+PMEM.gad; if(tot>25){ const top=['melee','gun','build','gad'].sort((a,b)=>PMEM[b]-PMEM[a])[0]; if(PMEM[top]/tot>.42){ if(PMEM.style!==top&&!PMEM.said){ PMEM.said=true; msg('🤖 Les capitaines étudient ton style de jeu…','#c4b5fd'); } PMEM.style=top; } } }
+    // danger près d'un coffre allié : un bot de l'équipe du joueur prévient
+    for(const td of TD){ if(td.id!==player.team||td.threat<1||(td.dangerT||0)>game.t) continue; const cx=(td.bx+.5)*T, cy=(td.by+.5)*T; let f=null,bd=1e9; for(const o of ents){ if(!o.alive||o.team===td.id) continue; const d=Math.hypot(o.x-cx,o.y-cy); if(d<11*T&&d<bd){ bd=d; f=o; } } const b=td.members.find(m=>m.isBot&&m.alive); if(f&&b){ td.dangerT=game.t+20; botPing(b,'danger',f.x,f.y); } }
+  };
+  const _d=die;
+  die=function(e,by,sea){ const was=e.alive; _d(e,by,sea);
+    if(was&&!e.alive&&e.isBot&&e.ai&&!e.remote&&by&&by!==e&&!by.isBot&&by.team!==e.team){ e.ai.revenge={tg:by,until:game.t+75}; if(typeof addEmote==='function') addEmote(e,'😡'); } };
+  const _pg=pickGoal;
+  pickGoal=function(b){ const rv=b.ai.revenge;
+    if(rv&&rv.until>game.t&&rv.tg&&rv.tg.alive&&rv.tg.team!==b.team&&Math.random()<.85){ b.ai.mode='hunt'; b.ai.bounty=true; floatTxt(b.x,b.y-44,'Revanche !','#fca5a5',15); return; }
+    _pg(b); };
+  const _bt=botThink;
+  botThink=function(b,dt){
+    const ai=b.ai; if(!ai||!b.alive||game.tut||b.remote) return _bt(b,dt);
+    const t=game.t, mhp=maxhp(b);
+    // feinte : fausse retraite puis retour en force
+    if(ai.feint>0){ ai.feint-=dt; const td=TD[b.team]; b.held='sword'; steerSafe(b,(td.bx+.5)*T-b.x,(td.by+.5)*T-b.y); if(ai.feint<=0){ b.rage=Math.max(b.rage||0,3.5); floatTxt(b.x,b.y-46,'Surprise !','#fb923c',16); ring(b.x,b.y,T*1.4,'#fb923c',.5,true); } return; }
+    if(ai.foe&&ai.foe.alive&&b.hp<mhp*.65&&!(ai.feintCd>t)&&(ai.pers==='ruse'||ai.sly)&&Math.random()<dt*.3){ const d=Math.hypot(ai.foe.x-b.x,ai.foe.y-b.y); if(d>2.5*T&&d<8*T){ ai.feint=1.7; ai.feintCd=t+26; floatTxt(b.x,b.y-44,'Aïe… je recule !','#fde68a',13); } }
+    if(ai.sly===undefined) ai.sly=Math.random()<.35;
+    const m0=ai.mode; _bt(b,dt);
+    if(ai.mode!==m0&&b.team===player.team){
+      if(ai.mode==='raid'&&TD[ai.target]) botPing(b,'atk',(TD[ai.target].bx+.5)*T,(TD[ai.target].by+.5)*T);
+      else if(ai.mode==='res'&&ai.goal) botPing(b,'loot',(ai.goal[0]+.5)*T,(ai.goal[1]+.5)*T);
+    }
+  };
+  // les bots s'adaptent au style du joueur
+  const _bb=botBuy;
+  botBuy=function(b){
+    if(b.ai&&PMEM.style&&nearBase(b)&&!game.tut&&Math.random()<.5){
+      const L={gun:['ar','aegis','shield','hp'],melee:['sniper','rocket','gun','bow','boomerang','bomb'],build:['bomb','rocket','quake','cluster','pick'],gad:['dmg','ar','hp']}[PMEM.style]||[];
+      for(const id of L){ const it=SHOPMAP[id]; if(!it||!inRoster(id)) continue; if(id==='bomb'&&b.bomb>=3) continue; const inf=it.info(b); if(inf.ok===false||!canAfford(b,inf.cost)) continue; buy(b,id); return; }
+    }
+    _bb(b);
+  };
+  const _nr=botRetreat;
+  botRetreat=function(b,why){ _nr(b,why); if(why==='def'){ const td=TD[b.team]; botPing(b,'def',(td.bx+.5)*T,(td.by+.5)*T); } };
+  const _ng=newGame; newGame=function(){ _ng(); PMEM.melee=PMEM.gun=PMEM.build=PMEM.gad=0; PMEM.style=''; PMEM.said=false; PMEM.t=0; };
 }

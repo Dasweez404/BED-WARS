@@ -67,7 +67,7 @@ function touchBuild(){
     move(vx,vy,m){ if(m>.08){ TOUCH.ax=vx/m; TOUCH.ay=vy/m; TOUCH.am=m; } if(isCont(selId)&&player.alive) mouse.down=m>.22; },
     end(){ const was=TOUCH.aimOn; TOUCH.aimOn=false; mouse.down=false; TOUCH.relT=performance.now()/1000; if(was&&player.alive&&game.state==='play'&&!isCont(selId)) mouse.clicked=true; }});
   const ui=document.getElementById('ui');
-  ui.addEventListener('pointerdown',ev=>{ if(ev.pointerType!=='touch') return; ev.preventDefault(); if(!TOUCH.on) return; if(touchTapHud(ev.clientX,ev.clientY)) return; if(game.state==='over') showMenu(); });
+  ui.addEventListener('pointerdown',ev=>{ if(ev.pointerType!=='touch') return; ev.preventDefault(); if(!TOUCH.on) return; if(touchTapHud(ev.clientX,ev.clientY)) return; if(game.state==='over'&&!game.replay) showMenu(); });
 }
 /* stick flottant */
 function stickZone(z,base,h){

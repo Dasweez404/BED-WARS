@@ -364,14 +364,7 @@ function drawHud(){
     if(TD[0].coreAlive){ ctx.fillText(`Tu es tombé ! Réapparition dans ${Math.ceil(e.resp)} s`,VW/2,VH/2+10); ctx.fillStyle='rgba(255,255,255,.25)'; ctx.fillRect(VW/2-120,VH/2+24,240,6); ctx.fillStyle='#7cc0ff'; ctx.fillRect(VW/2-120,VH/2+24,240*(1-e.resp/3),6); }
     else ctx.fillText('Éliminé…',VW/2,VH/2+10);
   }
-  if(game.state==='over'){
-    ctx.fillStyle='rgba(10,20,60,.75)';ctx.fillRect(0,0,VW,VH);
-    ctx.fillStyle=game.win?'#fde68a':'#ff8a8a';ctx.font='bold 72px '+PFONT;ctx.fillText(game.win?'VICTOIRE !':'DÉFAITE',VW/2,VH/2-10);
-    ctx.fillStyle='#fff';ctx.font='20px '+FONT;
-    ctx.fillText(game.win?'Tous les équipages ennemis sont coulés.':'Ton équipe est éliminée.',VW/2,VH/2+26);
-    ctx.fillText(`Éliminations : ${player.kills} · Durée : ${Math.floor(game.t/60)} min ${Math.floor(game.t%60)} s`,VW/2,VH/2+56);
-    ctx.fillText('Clic ou Entrée : retour au menu',VW/2,VH/2+90);
-  }
+  if(game.state==='over'){ if(typeof drawBilan==='function') drawBilan(); }
   if(game.hitmark>0&&game.state==='play'){ const k=game.hitmark/.18; ctx.strokeStyle=`rgba(255,255,255,${k})`; ctx.lineWidth=3; const m=11+(1-k)*8; ctx.beginPath(); ctx.moveTo(mouse.x-m,mouse.y-m);ctx.lineTo(mouse.x-4,mouse.y-4);ctx.moveTo(mouse.x+m,mouse.y-m);ctx.lineTo(mouse.x+4,mouse.y-4);ctx.moveTo(mouse.x-m,mouse.y+m);ctx.lineTo(mouse.x-4,mouse.y+4);ctx.moveTo(mouse.x+m,mouse.y+m);ctx.lineTo(mouse.x+4,mouse.y+4);ctx.stroke(); }
   drawCrosshair();
 }
