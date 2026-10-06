@@ -206,7 +206,8 @@ function botWish(b){
   if(!nearBase(b)||b.sword<1||totalBlocks(b)<14) return false;
   const guns=Object.keys(b.own).filter(k=>GUNS[k]&&b.own[k]).length, cands=[];
   for(const it of SHOP){ const id=it.id; if(!inRoster(id)||!ITEMMAP[id]&&!RELICS[id]) continue; let w=0;
-    if(GUNS[id]){ if(b.own[id]||guns>=4) continue; w=guns<1?6:guns<2?4:1.5; }
+    if(typeof SW2!=='undefined'&&SW2[id]){ if(Object.keys(SW2).some(k=>b.own[k])) continue; w=3.2; }
+    else if(GUNS[id]){ if(b.own[id]||guns>=4) continue; w=guns<1?6:guns<2?4:1.5; }
     else if(RELICS[id]){ if(b.relics&&b.relics[id]) continue; if(RELICS[id].lose&&b.res.gold<8) continue; w=2.6; }
     else if(BOT_USES.has(id)){ if((b.am[id]||0)>=2) continue; w=({heal:2.4,aegis:2,cloak:1.6,rage:1.6,cluster:1.6,kraken:1.5,storm:1.5})[id]||1.2; }
     else continue;

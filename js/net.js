@@ -148,7 +148,7 @@ function netLeave(keepLobbyUI){
 const R2=v=>{ if(typeof v==='number') return Math.round(v*100)/100; if(Array.isArray(v)) return v.map(R2); if(v&&typeof v==='object'&&!(v instanceof Set)){ const o={}; for(const k in v){ const x=v[k]; if(typeof x==='function') continue; o[k]=R2(x); } return o; } return v; };
 const ENT_SKIP=new Set(['riding','ai','lastBy','burnBy','hook','inp','x','y','z','ang','held','ix','iy','_tx','_ty','_tz','_follow','_ff']);
 const ENT_STATIC=['team','slot','name','cls','look','isBot','remote','up','pers'];
-const ENT_NUM=['resp','inv','flash','swing','swingMax','cloak','bubble','frozen','slow','root','curse','aegis','plate','rage','burn','slip','squash','muzzle','stepPh','springT','jetT','voidT','haste','kills','deaths','ix','iy','bsel','sword','jet','grap','shield','sdx','sdy','tiny','giant','glide','stickT','carry'];
+const ENT_NUM=['resp','inv','flash','swing','swingMax','cloak','bubble','frozen','slow','root','curse','aegis','plate','rage','burn','slip','squash','muzzle','stepPh','springT','jetT','voidT','haste','kills','deaths','ix','iy','bsel','sword','jet','grap','shield','sdx','sdy','tiny','giant','glide','stickT','carry','pilot'];
 const r1=v=>Math.round(v*10)/10, r2=v=>Math.round(v*100)/100;
 function packEntDyn(e){
   const o={x:r1(e.x),y:r1(e.y),z:r1(e.z),g:r2(e.ang),h:r1(e.hp),a:e.alive?1:0};
@@ -265,7 +265,7 @@ function netClientFrame(dt){
   const li=game.paused?{ix:0,iy:0}:netLocalInput(); const inp=NET.inp; inp.ix=li.ix; inp.iy=li.iy; inp.wx=aim.x; inp.wy=aim.y; inp.down=game.paused?false:!!mouse.down; inp.sel=selId; if(mouse.clicked&&!game.paused) inp.clk=1;
   if(game.state==='play'){
     if(!me.bar.includes(selId)) selId='sword'; me.held=selId; if(me.alive&&me.slip<=0) me.ang=Math.atan2(aim.y-me.y,aim.x-me.x);
-    if(me.alive&&me.frozen<=0&&me.bubble<=0&&me.root<=0&&!me.pull&&!NET.ff&&!me.riding){ const sp=speedOf(me); moveEnt(me,li.ix*sp*dt,li.iy*sp*dt); }
+    if(me.alive&&me.frozen<=0&&me.bubble<=0&&me.root<=0&&!me.pull&&!NET.ff&&!me.riding&&!me.pilot){ const sp=speedOf(me); moveEnt(me,li.ix*sp*dt,li.iy*sp*dt); }
     if(shopOpen&&(!me.alive||!nearBase(me))) toggleShop(false);
   }
   mouse.clicked=false;

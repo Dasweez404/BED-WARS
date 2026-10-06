@@ -129,7 +129,7 @@ function touchBindMenu(){
     if(TOUCH.aimOn){ TOUCH.lastDir=[ax,ay,am]; }
     else if(TOUCH.mag>.25&&performance.now()/1000-TOUCH.relT>1.2){ const m=Math.hypot(TOUCH.ix,TOUCH.iy)||1; ax=TOUCH.ix/m; ay=TOUCH.iy/m; am=.45; TOUCH.ax=ax; TOUCH.ay=ay; TOUCH.am=am; TOUCH.lastDir=[ax,ay,am]; }
     else if(TOUCH.lastDir){ [ax,ay,am]=TOUCH.lastDir; }
-    const d=T*(1.5+Math.min(1,am)*6); aim.x=e.x+ax*d; aim.y=e.y+ay*d; aim.ok=true;
+    const d=T*(1.5+Math.min(1,am)*6); { const bs=(e.pilot&&typeof pilotMissile==='function'&&pilotMissile(e))||e; aim.x=bs.x+ax*d; aim.y=bs.y+ay*d; aim.ok=true; }
   };
   const _r=render3d;
   render3d=function(dt){ _r(dt);
