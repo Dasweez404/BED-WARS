@@ -252,7 +252,7 @@ function spawnEnt(e){
   const i=idx(td.spawnTile[0],td.spawnTile[1]); if(wallT[i]){wallT[i]=0;}
   if(floorT[i]===0){floorT[i]=1;}
   e.hp=maxhp(e); e.alive=true; e.inv=2; e.vx=e.vy=0; e.z=60; e.vz=0; e.voidT=0; e.jetT=0; e.pull=null; e.grace=0; e.hook=null; e.riding=null; e.tkH=0; e.glide=0; e.tiny=0; e.giant=0;
-  e.frozen=0; e.slip=0; e.burn=0; e.bubble=0; e.cloak=0;
+  e.frozen=0; e.slip=0; e.burn=0; e.bubble=0; e.cloak=0; e.squash=-.7;
   beams.push({x:e.x,y:e.y,t:0,col:TEAMS[e.team].light}); ring(e.x,e.y,T*2,TEAMS[e.team].col,.6);
   burst(e.x,e.y,TEAMS[e.team].light,14,160,.6,3);
   if(e.ai){e.ai.mode='home'; e.ai.leaveAt=e.ai.t+rnd(12,22)*(getD().leave[0]/40);}

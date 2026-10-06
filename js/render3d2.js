@@ -361,7 +361,7 @@ function buildAmbient(){
 }
 function updateAmbient(dt){
   if(!ambient) return; const t=game.t, u=ambient.userData;
-  const st2=SPR2D();
+  const st2=false; // mouettes toujours en 3D
   for(const b of u.gulls){ const d=b.userData, a=t*d.sp+d.ph; b.position.set(d.cx+Math.cos(a)*d.r,d.h+Math.sin(t*.8+d.fl)*.4,d.cz+Math.sin(a)*d.r); b.rotation.y=-(a+Math.PI/2); const f=Math.sin(t*7+d.fl)*.6; d.wings[0].rotation.x=f; d.wings[1].rotation.x=-f;
     b.visible=!st2||!d.spr; if(d.spr){ d.spr.visible=st2; if(st2){ d.spr.position.copy(b.position); const fl=Math.sin(t*8+d.fl)>0, dir=-Math.sin(a)>=0?1:-1, tx=d.spr.material.map; tx.repeat.x=dir*.5; tx.offset.x=(dir>0?(fl?0:.5):(fl?.5:1)); d.spr.scale.set(1.5,.56,1); } } }
   for(const m of u.debris){ const d=m.userData; d.x+=d.sp*dt; if(d.x>CX+50) d.x=CX-50; m.position.set(d.x,-1.12+Math.sin(t*1.4+d.ph)*.07,d.z); m.rotation.y=d.rot+Math.sin(t*.3+d.ph)*.3; m.rotation.x=Math.sin(t*1.1+d.ph)*.08; }

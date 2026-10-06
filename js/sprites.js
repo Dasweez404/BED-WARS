@@ -24,7 +24,7 @@ function drawPirateFrame(c,ox,pose,td,look,neutral){
   c.fillStyle='#3b2a1c'; c.fillRect(27,92+bob,42,6); c.fillStyle='#fbbf24'; c.fillRect(44,92+bob,9,6); c.strokeStyle=OUT; c.lineWidth=1.5; c.strokeRect(44,92+bob,9,6);
   // tête
   const hy=44+bob;
-  c.beginPath(); c.ellipse(48,hy,31,28,0,0,6.3); fillStroke(c,skin,3.5);
+  if(l.shape===1){ c.beginPath(); rrp(c,17,hy-28,62,57,9); fillStroke(c,skin,3.5); } else { c.beginPath(); c.ellipse(48,hy,31,28,0,0,6.3); fillStroke(c,skin,3.5); }
   // cheveux latéraux
   c.fillStyle=hair; c.beginPath(); c.ellipse(20,hy+4,6,11,0,0,6.3); c.fill(); c.beginPath(); c.ellipse(76,hy+4,6,11,0,0,6.3); c.fill();
   // barbe / moustache
@@ -32,15 +32,16 @@ function drawPirateFrame(c,ox,pose,td,look,neutral){
   // joues
   c.fillStyle='#ff98ae'; c.beginPath(); c.ellipse(27,hy+9,6,4,0,0,6.3); c.fill(); c.beginPath(); c.ellipse(69,hy+9,6,4,0,0,6.3); c.fill();
   // yeux
-  const eye=(x)=>{ c.beginPath(); c.ellipse(x,hy+1,8,10,0,0,6.3); fillStroke(c,'#fff',2.5); c.fillStyle='#1a1620'; c.beginPath(); c.ellipse(x+1.5,hy+3,5,6.5,0,0,6.3); c.fill(); c.fillStyle='#fff'; c.beginPath(); c.arc(x+3.5,hy,2,0,6.3); c.fill(); };
-  if(l.patch){ c.beginPath(); c.ellipse(36,hy+1,9,10,0,0,6.3); fillStroke(c,'#15121a',2.5); c.strokeStyle='#15121a'; c.lineWidth=3; c.beginPath(); c.moveTo(18,hy-12); c.lineTo(76,hy-4); c.stroke(); eye(60); } else { eye(36); eye(60); }
+  const eye=(x)=>{ c.fillStyle='#15121a'; c.beginPath(); c.arc(x,hy+3,4.2,0,6.3); c.fill(); };
+  const brow=(x,dir)=>{ if(l.brow<=0) return; c.strokeStyle=hair==='#e5e7eb'?'#8b8f96':hair; c.lineWidth=2+l.brow*2.2; c.lineCap='round'; c.beginPath(); c.moveTo(x-9,hy-6+dir*2); c.lineTo(x+9,hy-6-dir*2); c.stroke(); c.strokeStyle=OUT; c.lineWidth=.9; c.stroke(); };
+  if(l.patch){ c.beginPath(); c.ellipse(36,hy+2,9,10,0,0,6.3); fillStroke(c,'#15121a',2.5); c.strokeStyle='#15121a'; c.lineWidth=3; c.beginPath(); c.moveTo(18,hy-12); c.lineTo(76,hy-4); c.stroke(); eye(60); brow(60,-1); } else { eye(36); eye(60); brow(36,1); brow(60,-1); }
   // bouche
   c.strokeStyle='#7a2a1a'; c.lineWidth=2.5; c.lineCap='round'; c.beginPath(); c.arc(48,hy+13,7,.15,3); c.stroke();
   if(l.face===2){ c.fillStyle=hair; c.strokeStyle=OUT; c.lineWidth=2; c.beginPath(); c.ellipse(41,hy+9,8,3.5,.2,0,6.3); c.fill(); c.stroke(); c.beginPath(); c.ellipse(55,hy+9,8,3.5,-.2,0,6.3); c.fill(); c.stroke(); }
   // boucle d'oreille
   c.strokeStyle='#e8b04a'; c.lineWidth=3; c.beginPath(); c.arc(18,hy+16,4,0,6.3); c.stroke();
   // chapeau
-  const top=hy-24;
+  const top=hy-30;
   if(l.hat===0){ // tricorne
     c.beginPath(); c.ellipse(48,top+10,40,10,0,0,6.3); fillStroke(c,'#1c1722',3);
     c.beginPath(); rrp(c,26,top-18,44,30,9); fillStroke(c,hatc,3); c.fillStyle=trim; c.fillRect(27,top+2,42,7); c.strokeStyle=OUT; c.lineWidth=2; c.strokeRect(27,top+2,42,7);
@@ -105,7 +106,7 @@ createPirate=function(td,opts){
   const holder=new THREE.Group(); g.add(holder);
   const tex=atlas.clone(); tex.needsUpdate=true; tex.repeat.set(1/FR_N,1);
   const body=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,alphaTest:.45,transparent:false})); body.center.set(.5,0); holder.add(body);
-  const arm=new THREE.Sprite(new THREE.SpriteMaterial({map:null,alphaTest:.45,transparent:false})); holder.add(arm);
+  const arm=new THREE.Sprite(new THREE.SpriteMaterial({map:null,alphaTest:.45,transparent:false})); arm.visible=false; holder.add(arm);
   const sh=new THREE.Mesh(new THREE.PlaneGeometry(1,1),new THREE.MeshBasicMaterial({map:getShadowTex(),transparent:true,depthWrite:false})); sh.rotation.x=-Math.PI/2; holder.add(sh);
   u.spr={holder,body,arm,sh,td,look:opts.look,neutral:!!opts.neutral,armKey:'',tex};
   return g;
@@ -118,6 +119,8 @@ function updateSprite(e,m){
   let col; if(air>2) col=6; else if(moving) col=[2,3,4,5][Math.floor(((e.stepPh||0)*1.15/6.2832)*4)&3]; else col=Math.floor(game.t*2+(e.team||0))&1;
   const tx=S.tex; tx.repeat.x=face/FR_N; tx.offset.x=(face>0?col:col+1)/FR_N;
   S.body.scale.set(SPW*sz*(1+sq*.28),SPH*sz*(1-sq*.32),1);
+  { const swn=e.swingMax?Math.max(0,(e.swing||0)/e.swingMax):0, lunge=swn>0?Math.sin((1-swn)*Math.PI)*.08:0, shk=e.flash>0?(Math.random()-.5)*.07:0, lean=(moving?Math.sin((e.stepPh||0)*1.15)*.05:0)+(e.slip>0?Math.sin(game.t*20)*.3:0)-(e.ix||0)*.05*(face);
+    S.bx=face*lunge+shk; S.body.position.x=S.bx; S.body.material.rotation=-lean*face; }
   const bm=S.body.material;
   if(e.flash>0) bm.color.setRGB(1.8,1.3,1.3); else if(e.frozen>0) bm.color.setRGB(.65,.9,1.5); else if(e.curse>0) bm.color.setRGB(1.25,.7,1.5); else if(e.stickT>0) bm.color.setRGB(1.5,.9,1.6); else bm.color.setRGB(1,1,1);
   const gh=groundH(e); S.sh.position.set(0,(gh-e.z)*U+.03,0); const ss=.62*sz*(1-Math.min(.5,air*U*.15)); S.sh.scale.set(ss,ss*.7,1);
@@ -129,7 +132,7 @@ function updateSprite(e,m){
   S.arm.center.set(face>0?12/128:1-12/128,.5);
   S.arm.material.rotation=face>0?(theta-Math.PI/2):-(theta-Math.PI/2);
   const bobU=(col===0?0:col===1?-.015:(col>=2&&col<=5?(col===3||col===5?-.02:0):-.02));
-  S.arm.position.set(face*.14*sz,(.43+bobU)*sz,.06); S.arm.scale.set(1.0*sz,.5*sz,1);
+  S.arm.position.set(face*.17*sz+(S.bx||0),(.55+bobU)*sz,.06); S.arm.scale.set(1.22*sz,.61*sz,1);
   S.arm.visible=!(e.cloak>0&&e!==player);
   const cl=e.cloak>0; if(S.body.material.transparent!==cl){ for(const mm of [S.body.material,S.arm.material]){ mm.transparent=cl; mm.needsUpdate=true; } }
   S.body.material.opacity=S.arm.material.opacity=cl?(e===player?.4:.12):1;
@@ -150,7 +153,7 @@ function getGrassTex(){
   return SPRC.grassTex=new THREE.CanvasTexture(cv);
 }
 let _grassGeo=null; function grassGeo(){ if(!_grassGeo){ _grassGeo=new THREE.PlaneGeometry(1,1); _grassGeo.translate(0,.5,0); } return _grassGeo; }
-function grassMat(){ return new THREE.MeshLambertMaterial({map:getGrassTex(),alphaTest:.5,side:THREE.DoubleSide}); }
+function grassMat(){ return swayMat(new THREE.MeshLambertMaterial({map:getGrassTex(),alphaTest:.5,side:THREE.DoubleSide})); }
 function getGullTex(){
   if(SPRC.gullTex) return SPRC.gullTex; const cv=document.createElement('canvas'); cv.width=128; cv.height=48; const c=cv.getContext('2d'); c.lineJoin='round';
   const gull=(ox,up)=>{ c.save(); c.translate(ox,0);

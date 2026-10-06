@@ -58,19 +58,22 @@ function buildModels(){
 const PG={}; // cache par variante
 const SKINS=['#ffd9b5','#f5c08f','#d9a066','#a8693a','#6b4226'], HAIRS=['#6b4a2a','#1b1512','#d9a441','#c2410c','#e5e7eb'];
 const HATS=['Tricorne','Bicorne','Bandana','Tête nue'], FACES=['Rasé','Barbe','Moustache'];
-const DEF_LOOK={skin:0,hat:0,hair:0,face:0,patch:1};
+const BROWS=['Aucun','Fins','Épais','Très épais'], SHAPES=['Ronde','Carrée'];
+const DEF_LOOK={skin:0,hat:0,hair:0,face:0,patch:1,shape:1,brow:1};
 const lookOf=l=>Object.assign({},DEF_LOOK,l||{});
-const lookKey=l=>l.skin+'.'+l.hat+'.'+l.hair+'.'+l.face+'.'+l.patch;
-function randomLook(){ const r=n=>Math.floor(Math.random()*n); return {skin:r(SKINS.length),hat:r(HATS.length),hair:r(HAIRS.length),face:r(3),patch:Math.random()<.5?1:0}; }
+const lookKey=l=>l.skin+'.'+l.hat+'.'+l.hair+'.'+l.face+'.'+l.patch+'.'+l.shape+'.'+l.brow;
+function randomLook(){ const r=n=>Math.floor(Math.random()*n); return {skin:r(SKINS.length),hat:r(HATS.length),hair:r(HAIRS.length),face:r(3),patch:Math.random()<.5?1:0,shape:Math.random()<.7?1:0,brow:r(4)}; }
 function headGeo(l){
   const key='h'+lookKey(l); if(PG[key]) return PG[key];
   const S=GEO.sphere, Cy=GEO.cyl, skin=SKINS[l.skin], hair=HAIRS[l.hair], smile=new THREE.TorusGeometry(.085,.017,5,10,Math.PI);
-  const P=[{geo:S,pos:[0,0,0],scale:[.42,.38,.42],color:skin},
+  const sq=l.shape===1, fx=sq?.4:.37;
+  const P=[sq?{geo:GEO.box,pos:[0,0,0],scale:[.8,.74,.8],color:skin}:{geo:S,pos:[0,0,0],scale:[.42,.38,.42],color:skin},
     {geo:S,pos:[.37,-.12,.25],scale:[.05,.045,.09],color:'#ff98ae'},{geo:S,pos:[.37,-.12,-.25],scale:[.05,.045,.09],color:'#ff98ae'},
     {geo:S,pos:[.43,-.03,0],scale:[.05,.05,.05],color:'#ffab94'},
     {geo:smile,pos:[.41,-.12,0],rot:[0,Math.PI/2,Math.PI],color:'#7a2a1a'},
     {geo:S,pos:[.18,.36,.1],scale:[.1,.07,.1],color:'#e8b04a'},{geo:S,pos:[-.3,-.1,0],scale:[.08,.12,.08],color:hair}];
-  if(l.patch){ P.push({geo:S,pos:[.37,.06,-.17],scale:[.045,.12,.12],color:'#15121a'},{geo:Cy,pos:[0,.1,0],scale:[.41,.014,.41],rot:[0,0,.35],color:'#15121a'}); }
+  if(l.brow>0){ const th=.035+.035*l.brow; for(const z of [-1,1]) if(!(l.patch&&z<0)) P.push({geo:GEO.box,pos:[fx+.01,.2,z*.17],scale:[.03,th,.2],rot:[z*.12,0,0],color:'#2a1a12'}); }
+  if(l.patch){ P.push({geo:S,pos:[fx,.06,-.17],scale:[.045,.12,.12],color:'#15121a'},{geo:Cy,pos:[0,.1,0],scale:[.41,.014,.41],rot:[0,0,.35],color:'#15121a'}); }
   if(l.face===1) P.push({geo:S,pos:[.3,-.27,0],scale:[.26,.17,.3],color:hair},{geo:S,pos:[.43,-.2,0],scale:[.06,.07,.1],color:hair});
   if(l.face===2) P.push({geo:S,pos:[.43,-.065,.07],scale:[.045,.03,.09],color:hair},{geo:S,pos:[.43,-.065,-.07],scale:[.045,.03,.09],color:hair});
   return PG[key]=mergeParts(P);
@@ -99,7 +102,7 @@ function pirateVariant(td,neutral,look){
 function buildPirateGeos(){
   const S=GEO.sphere, Cy=GEO.cyl, B=GEO.box;
   const smile=new THREE.TorusGeometry(.085,.017,5,10,Math.PI);
-  PG.eye=mergeParts([{geo:S,pos:[0,0,0],scale:[.1,.125,.115],color:'#ffffff'},{geo:S,pos:[.06,-.01,0],scale:[.065,.08,.075],color:'#1a1620'},{geo:S,pos:[.105,.04,.03],scale:[.028,.028,.028],color:'#ffffff'}]);
+  PG.eye=mergeParts([{geo:S,pos:[0,0,0],scale:[.05,.05,.05],color:'#15121a'}]); const _eyeOld=mergeParts([{geo:S,pos:[0,0,0],scale:[.1,.125,.115],color:'#ffffff'},{geo:S,pos:[.06,-.01,0],scale:[.065,.08,.075],color:'#1a1620'},{geo:S,pos:[.105,.04,.03],scale:[.028,.028,.028],color:'#ffffff'}]);
   PG.leg=mergeParts([{geo:Cy,pos:[0,-.07,0],scale:[.085,.16,.085],color:'#5b4630'},{geo:B,pos:[.03,-.17,0],scale:[.2,.09,.15],color:'#1f1812'},{geo:B,pos:[.03,-.12,0],scale:[.19,.025,.155],color:'#4a3320'}]);
 }
 function createPirate(td,opts){
@@ -108,9 +111,9 @@ function createPirate(td,opts){
   const mesh=(geo,par,x,y,z)=>{ const m=new THREE.Mesh(geo,mat); m.position.set(x,y,z); m.castShadow=true; par.add(m); return m; };
   const body=new THREE.Group(); body.position.y=.07; g.add(body); u.body=body; mesh(v.body,body,0,0,0);
   const head=new THREE.Group(); head.position.set(.03,.84,0); body.add(head); u.head=head; mesh(headGeo(lk),head,0,0,0);
-  u.eyes=[mesh(PG.eye,head,.37,.06,.17)]; if(!lk.patch) u.eyes.push(mesh(PG.eye,head,.37,.06,-.17)); u.eyes.forEach(q=>q.castShadow=false);
+  const ex=lk.shape===1?.4:.37; u.eyes=[mesh(PG.eye,head,ex,.06,.17)]; if(!lk.patch) u.eyes.push(mesh(PG.eye,head,ex,.06,-.17)); u.eyes.forEach(q=>q.castShadow=false);
   const hat=mesh(v.hat,head,0,.36,0); hat.rotation.z=-.1; hat.position.x=-.02; u.hat=hat;
-  for(const z of [-1,1]){ const piv=new THREE.Group(); piv.position.set(0,.6,z*.31); body.add(piv); mesh(v.arm,piv,0,0,0); if(z>0){ u.armR=piv; const an=new THREE.Group(); an.position.set(.0,-.26,0); an.scale.setScalar(1.6); piv.add(an); u.anchor=an; } else u.armL=piv; }
+  for(const z of [-1,1]){ const piv=new THREE.Group(); piv.position.set(0,.65,z*.29); body.add(piv); mesh(v.arm,piv,0,0,0); if(z>0){ u.armR=piv; const an=new THREE.Group(); an.position.set(.0,-.26,0); an.scale.setScalar(1.6); piv.add(an); u.anchor=an; } else u.armL=piv; }
   for(const z of [-.13,.13]){ const piv=new THREE.Group(); piv.position.set(0,.3,z); body.add(piv); mesh(PG.leg,piv,0,0,0); u.legs.push(piv); }
   const bub=new THREE.Mesh(GEO.sphere,new THREE.MeshStandardMaterial({color:0xbfe3ff,transparent:true,opacity:.35,roughness:.1})); bub.scale.setScalar(1.15); bub.position.y=.75; bub.visible=false; g.add(bub); u.bubble=bub;
   const ice=new THREE.Mesh(GEO.box,new THREE.MeshStandardMaterial({color:0xbfeaff,transparent:true,opacity:.45,roughness:.2})); ice.scale.set(1,1.8,1); ice.position.y=.8; ice.visible=false; g.add(ice); u.ice=ice;
@@ -200,15 +203,17 @@ function initPreview(){
   const cv=document.getElementById('pvc'); if(!cv||!renderer) return;
   const W=cv.width, H=cv.height, sc=new THREE.Scene(); sc.background=new THREE.Color(0x2f6f95);
   sc.add(new THREE.HemisphereLight(0xffffff,0x6a8fa8,1.0)); const dl=new THREE.DirectionalLight(0xffffff,1.1); dl.position.set(2,4,3); sc.add(dl);
-  const cam=new THREE.PerspectiveCamera(30,W/H,.1,20); cam.position.set(1.15,.62,1.75); cam.lookAt(0,.36,0);
+  const cam=new THREE.PerspectiveCamera(30,W/H,.1,20); cam.position.set(1.15,.62,1.75); cam.lookAt(0,.36,0); PV0=cam;
   PV={W,H,cv,ctx:cv.getContext('2d'),sc,cam,rt:new THREE.WebGLRenderTarget(W,H),buf:new Uint8Array(W*H*4),img:null,g:null,key:'',n:0};
   PV.img=PV.ctx.createImageData(W,H);
 }
+let PV0=null;
 function renderPreview(t){
   if(!PV) return; PV.n++; if(PV.n%3) return;
   const look=lookOf(game.look), key=lookKey(look)+'|'+game.cls;
-  if(key!==PV.key){ if(PV.g) PV.sc.remove(PV.g); PV.g=createPirate(TEAMS[0],{look}); PV.g.userData.heldMesh=null; PV.sc.add(PV.g); PV.key=key; }
+  if(key!==PV.key){ if(PV.g) PV.sc.remove(PV.g); PV.g=createPirate(TEAMS[0],{look}); PV.g.userData.heldMesh=null; PV.sc.add(PV.g); PV.key=key; if(SPR2D()){ PV.cam.position.set(1.7,1.0,2.6); PV.cam.lookAt(0,.6,0); } else { PV.cam.position.set(1.15,.62,1.75); PV.cam.lookAt(0,.36,0); } }
   const g=PV.g, u=g.userData; g.rotation.y=-.5+Math.sin(t*.8)*.7; u.body.position.y=.07+Math.abs(Math.sin(t*2.4))*.03; u.head.rotation.z=Math.sin(t*2.2)*.06; u.armR.rotation.z=1.0+Math.sin(t*2)*.05;
+  if(u.spr) updateSprite({ang:0,z:0,x:0,y:0,ix:0,iy:0,stepPh:0,held:'sword',sword:1,bsel:2,team:0,flash:0,cloak:0,frozen:0,curse:0,squash:0,stickT:0},g);
   const ca=renderer.getClearAlpha(); renderer.setRenderTarget(PV.rt); renderer.render(PV.sc,PV.cam); renderer.setRenderTarget(null);
   renderer.readRenderTargetPixels(PV.rt,0,0,PV.W,PV.H,PV.buf);
   const W=PV.W,H=PV.H,src=PV.buf,dst=PV.img.data;

@@ -68,6 +68,7 @@ function renderChar(){
   <div id="clsInfo"><b>${ci.n}</b> — ${ci.d}<br>${ci.pros.map(x=>`<span class="p">＋ ${x}</span>`).join(' · ')}${ci.cons.length?'<br>':''}${ci.cons.map(x=>`<span class="c">－ ${x}</span>`).join(' · ')}</div>
   <div class="orow"><span class="olab">Peau</span>${sw(SKINS,'skin')}<span class="olab" style="width:auto;margin-left:10px">Cheveux</span>${sw(HAIRS,'hair')}</div>
   <div class="orow"><span class="olab">Chapeau</span>${bt(HATS,'hat')}</div>
+  <div class="orow"><span class="olab">Tête</span>${bt(SHAPES,'shape')}<span class="olab" style="width:auto;margin-left:10px">Sourcils</span>${bt(BROWS,'brow')}</div>
   <div class="orow"><span class="olab">Visage</span>${bt(FACES,'face')}<button class="obtn ${L.patch?'on':''}" data-lk="patch" data-v="${L.patch?0:1}">Cache-œil</button></div>`;
   el.querySelector('#pname').oninput=ev=>{ game.pname=ev.target.value; saveChar(); };
   el.querySelectorAll('[data-cls]').forEach(b=>b.onclick=()=>{ game.cls=b.dataset.cls; saveChar(); renderChar(); });
@@ -106,7 +107,7 @@ function renderOpts(){
 }
 let hudN=0, last=performance.now(), shopT=0;
 function frame(now){
-  const dt=Math.min(.05,(now-last)/1000); last=now;
+  const dtr=Math.min(.05,(now-last)/1000); last=now; JUICE.tick(dtr); const dt=dtr*JUICE.ts();
   if(game.state!=='menu'){
     if(NETCLIENT) netClientFrame(dt); else { update(dt); mouse.clicked=false; if(NETON) netHostTick(dt); }
     shopT+=dt; if(shopOpen&&shopT>.4){shopT=0;renderShop();}

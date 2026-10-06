@@ -229,7 +229,7 @@ function overlayWorld(){
   // PV des moutons ultimes
   for(const td of TD){ const ci=idx(td.bx,td.by); if(!td.coreAlive||wallT[ci]!==CORE) continue; const k=hpW[ci]/BHP[CORE]; if(k>=1) continue; const s=w2s((td.bx+.5)*T,(td.by+.5)*T,110); ctx.fillStyle='rgba(10,20,50,.8)'; rr(s[0]-24,s[1]-2,48,9,4); ctx.fill(); ctx.fillStyle=k>.5?td.col:k>.25?'#f59e0b':'#ef4444'; rr(s[0]-22,s[1],Math.max(4,44*k),5,2); ctx.fill(); }
   // textes flottants
-  for(const f of floats){ if(f.y0===undefined) f.y0=f.y; const s=w2s(f.x,f.y0,40); if(!s[2]) continue; ctx.globalAlpha=Math.min(1,f.t*2); ctx.font=`bold ${Math.round(f.s*1.15)}px ${FONT}`; ctx.textAlign='center'; ctx.lineWidth=4; ctx.strokeStyle='rgba(10,20,50,.9)'; const yy=s[1]-(f.y0-f.y)*1.3; ctx.strokeText(f.txt,s[0],yy); ctx.fillStyle=f.col; ctx.fillText(f.txt,s[0],yy); }
+  for(const f of floats){ if(f.y0===undefined) f.y0=f.y; const s=w2s(f.x,f.y0,40); if(!s[2]) continue; ctx.globalAlpha=Math.min(1,f.t*2); ctx.font=`bold ${Math.round(f.s*1.15*(1+Math.max(0,f.t-.78)*3.2))}px ${FONT}`; ctx.textAlign='center'; ctx.lineWidth=4; ctx.strokeStyle='rgba(10,20,50,.9)'; const yy=s[1]-(f.y0-f.y)*1.3; ctx.strokeText(f.txt,s[0],yy); ctx.fillStyle=f.col; ctx.fillText(f.txt,s[0],yy); }
   ctx.globalAlpha=1;
 }
 let miniT=0;
@@ -276,7 +276,7 @@ function drawHud(){
     const x=cx0+i*(cw+6), y=10, v=e.res[k], hv=hud.res[k];
     if(v>hv.v){hud.pops.push({x:x+cw/2,y:y+46,txt:'+'+(v-hv.v),col:RESCOL[k],t:1});hv.f=1;}
     else if(v<hv.v){hud.pops.push({x:x+cw/2,y:y+46,txt:'-'+(hv.v-v),col:'#fca5a5',t:1});hv.f=.7;}
-    hv.v=v; hv.f=Math.max(0,hv.f-dt*3);
+    hv.v=v; hv.f=Math.max(0,hv.f-dt*3); (hud.slotPos=hud.slotPos||{})[k]={x:x+22,y:y+18};
     ctx.save(); ctx.translate(x+cw/2,y+18); ctx.scale(1+hv.f*.14,1+hv.f*.14); ctx.translate(-cw/2,-18);
     panel(0,0,cw,36,18,hv.f>0?RESCOL[k]:null); drawRes(ctx,k,22,18,26);
     ctx.fillStyle='#fff'; ctx.font='bold 20px '+FONT; ctx.fillText(v,42,26);
