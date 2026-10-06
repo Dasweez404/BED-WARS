@@ -2,14 +2,14 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>Pirates & Trésors — Bed Wars 3D</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Pirata+One&family=Lilita+One&display=swap" rel="stylesheet">
 <style>
   html,body{margin:0;height:100%;background:#2a78b0;overflow:hidden;font-family:'Fredoka',system-ui,Segoe UI,Roboto,sans-serif;color:#fff6e0;user-select:none}
   canvas{position:fixed;left:0;top:0;display:block}
-  #ui{cursor:none;z-index:2}
+  #ui{cursor:none;z-index:2;touch-action:none}
   body.shop #ui{cursor:default}
   .hidden{display:none!important}
   #start{position:fixed;inset:0;background:linear-gradient(180deg,rgba(10,40,70,.45),rgba(255,200,120,.2));backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;z-index:10}
@@ -46,6 +46,8 @@
   .mplocal{font-size:12px;color:#d9c49a}
   #mpInfo{font-size:14px;color:#f4e4c4;min-height:18px}#mpInfo b{color:#ffe08a;font-size:18px;letter-spacing:2px}
   #mpPlayers{font-size:13px;color:#9af2b8;margin:2px 0 4px}
+  @keyframes pulseb{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+  #tutBtn.pulse{animation:pulseb 1.3s ease-in-out infinite}
   #diffDesc{font-size:14px;color:#f4e4c4;min-height:20px;margin:0 0 14px}
   button.big{font-family:'Pirata One','Lilita One',serif;background:#e2b14f;color:#3a2000;border:0;border-radius:12px;padding:10px 38px;font-size:28px;cursor:pointer;box-shadow:0 6px 0 #9a6b14,0 12px 24px #0008;transition:transform .1s}
   button.big:hover{transform:translateY(-2px)}
@@ -109,6 +111,7 @@
       <li>Munitions <b>illimitées</b> : chaque arme a un chargeur, un temps de recharge (<b>R</b>) et une dispersion propres.</li>
       <li><b>Molette</b> ou <b>1-0</b> : changer d'objet (10 emplacements, <b>Tab</b> échange avec la réserve) · <b>C</b> / clic droit : changer de bloc · <b>E</b> : boutique (sur ton île) · <b>G</b> : graphismes</li>
       <li>Blocs : sur la mer = passerelle, sur le sol = palissade (empilables) ; <b>en saut, clic = bloc sous tes pieds</b> (monte en piliers ou rattrape-toi au-dessus de l'eau) ; les armes à feu et flèches abîment les murs, mais pas les ponts ni les coffres. Onglet <b>Défense</b> : canons, matelots gardiens, filets, pavillon noir, bouée…</li>
+      <li><b>V</b> : ping d'équipe (maintiens pour choisir) · <b>X</b> : roue d'emojis · <b>F</b> : caméra libre en spectateur · jeu <b>tactile</b> pris en charge · nouveau ? lance le <b>tutoriel</b> en bas !</li>
       <li>Bronze/argent sur ton île, <b>or</b> sur le galion, <b>diamants</b> sur les îlots. Tomber à la mer = mort (sauf bouée de sauvetage).</li>
     </ul>
     <div style="font-weight:700;color:#ffe9b0;margin-top:6px">Ton pirate</div>
@@ -125,7 +128,8 @@
       <details style="margin:4px 0"><summary style="cursor:pointer;color:#d9c49a;font-size:13px">Journal réseau (diagnostic)</summary><pre id="mpLog" style="max-height:110px;overflow:auto;background:#1b1109;border-radius:8px;padding:6px 8px;font-size:11px;color:#cfe8d0;white-space:pre-wrap;margin:4px 0"></pre><button class="obtn" id="mpCopy" style="font-size:12px">Copier le journal</button></details>
       <div class="orow"><button class="obtn" id="mpStart" style="display:none">▶ Lancer la partie</button><button class="obtn" id="mpLeave" style="display:none">Quitter le salon</button></div>
     </div>
-    <div class="sticky"><button class="big" id="playBtn">À l'abordage !</button></div>
+    <div class="orow" style="margin-top:8px"><span class="olab">Contrôles</span><button class="obtn" data-tc="auto">Auto</button><button class="obtn" data-tc="on">📱 Tactile</button><button class="obtn" data-tc="off">⌨ Clavier / souris</button><button class="obtn" id="tcFull">⛶ Plein écran</button></div>
+    <div class="sticky"><div id="tutNote" style="display:none;font-size:13px;color:#fde68a;margin-bottom:6px">👋 Première partie ? Le tutoriel t'apprend tout en deux minutes.</div><button class="big" id="playBtn">À l'abordage !</button> <button class="big" id="tutBtn" style="font-size:22px;padding:10px 22px;margin-left:8px;background:#7dd3fc;box-shadow:0 6px 0 #2a7ea6,0 12px 24px #0008">📘 Tutoriel</button></div>
   </div>
 </div>
 <script src="js/three.min.js"></script>
@@ -148,6 +152,9 @@
 <script src="js/ambiance.js"></script>
 <script src="js/music.js"></script>
 <script src="js/social.js"></script>
+<script src="js/bots2.js"></script>
+<script src="js/touch.js"></script>
+<script src="js/tutorial.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

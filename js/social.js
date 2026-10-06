@@ -57,12 +57,11 @@ function doEmote(i){
   const _p=netPlayFx;
   netPlayFx=function(f){
     const k=f[0];
-    if(k==='P'){ const a=f[1]; addPingLocal(a[0],a[1],a[2],a[3],a[4]); return; }
-    if(k==='E'){ const a=f[1]; addEmote(ents[a[0]],a[1],true); return; }
-    if(k==='K'){ const a=f[1]; if(ents[a[0]]===player) killCamStart(ents[a[1]],a[2]); return; }
+    if(k==='P'){ const a=f.slice(1); addPingLocal(a[0],a[1],a[2],a[3],a[4]); return; }
+    if(k==='E'){ const a=f.slice(1); addEmote(ents[a[0]],a[1],true); return; }
+    if(k==='K'){ const a=f.slice(1); if(ents[a[0]]===player) killCamStart(ents[a[1]],a[2]); return; }
     _p(f);
   };
-  // netRec stocke ['P',[...]] -> netPlayFx reçoit f=['P',[...]]
 }
 function addPingLocal(team,x,y,k,name){ if(!PK[k]) k='go'; PINGS.push({team,x,y,k,name,t:7,max:7}); if(PINGS.length>14) PINGS.shift(); ring(x,y,T*1.9,PK[k].col,.7); ring(x,y,T*.9,PK[k].col,.5,true); if(player&&team===player.team) MUS.sting('ping'); }
 /* ---------- roue (ping / emoji) ---------- */
@@ -230,7 +229,7 @@ function drawOverButtons(){
     HUDB.push({x,y,w,h,fn}); panel(x,y,w,h,14,col); ctx.font='bold 16px '+FONT; ctx.textAlign='center'; ctx.fillStyle='#fff'; ctx.fillText(txt,x+w/2,y+28); }
 }
 function drawMiniPings(){
-  const S=150,mx=VW-S-10,my=10; ctx.save(); rr(mx,my,S,S,8); ctx.clip();
+  const S=miniSize(),mx=VW-S-10,my=10; ctx.save(); rr(mx,my,S,S,8); ctx.clip();
   for(const p of PINGS){ if(p.team!==player.team) continue; const x=mx+p.x/T/W*S, y=my+p.y/T/H*S, r=3+((p.max-p.t)*8)%10, c=PK[p.k].col; ctx.strokeStyle=c; ctx.globalAlpha=.9; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(x,y,r,0,6.3); ctx.stroke(); ctx.fillStyle=c; ctx.beginPath(); ctx.arc(x,y,2.5,0,6.3); ctx.fill(); }
   ctx.restore();
 }

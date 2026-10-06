@@ -55,7 +55,7 @@ function screenTransition(fn){ // volet en iris : on couvre l'écran, on change,
   setTimeout(()=>{ try{ fn(); }finally{ requestAnimationFrame(()=>{ f.classList.remove('on'); setTimeout(()=>{ _trBusy=false; },480); }); } },480);
 }
 function showMenu(){ if(game.state==='menu') return _showMenu(); screenTransition(_showMenu); }
-function _showMenu(){ setPause(false); netLeave(false); toggleShop(false); newGame(); game.state='menu'; document.getElementById('start').classList.remove('hidden'); }
+function _showMenu(){ if(typeof tutLeave==='function') tutLeave(); setPause(false); netLeave(false); toggleShop(false); newGame(); game.state='menu'; document.getElementById('start').classList.remove('hidden'); if(typeof tutMenuUi==='function') tutMenuUi(); }
 function selectDiff(d){ game.diff=d; try{localStorage.setItem('pirates_diff',d);}catch(e){} document.querySelectorAll('#diff .dbtn').forEach(b=>b.classList.toggle('on',b.dataset.d===d)); document.getElementById('diffDesc').textContent=DIFFS[d].desc; }
 const OPTDEF=[
   {k:'mode',t:'Mode',list:()=>Object.entries(MODES).map(([v,m])=>({v,n:m.n,d:m.d})),prev:true},
@@ -91,7 +91,7 @@ function renderMp(){
   el('mpInfo').innerHTML=info;
   el('mpPlayers').textContent=NET.lobby&&NET.lobby.length&&role!=='none'?'Joueurs : '+NET.lobby.map(p=>p.name).join(' · '):'';
   el('mpStart').style.display=role==='host'&&!NET.started?'':'none'; el('mpLeave').style.display=role!=='none'&&!NET.started?'':'none';
-  el('playBtn').style.display=role==='none'?'':'none'; el('mpHost').disabled=el('mpJoin').disabled=role!=='none';
+  el('playBtn').style.display=role==='none'?'':'none'; if(el('tutBtn')) el('tutBtn').style.display=role==='none'?'':'none'; el('mpHost').disabled=el('mpJoin').disabled=role!=='none';
 }
 function bindMp(){
   const el=id=>document.getElementById(id);
