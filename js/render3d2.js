@@ -1,11 +1,11 @@
 'use strict';
 /* =====================  RENDU 3D : navire, îles, objets dynamiques, effets, caméra  ===================== */
-const entM=new Map(), guardM=new Map(), chickM=new Map(), projM=new Map(), bombM=new Map(), trapM=new Map(), shieldM=new Map(), hookM=new Map(), pearlM=new Map(), pullM=new Map(), sharkM=new Map(), dropM=new Map();
+const entM=new Map(), guardM=new Map(), chickM=new Map(), projM=new Map(), bombM=new Map(), trapM=new Map(), shieldM=new Map(), hookM=new Map(), pearlM=new Map(), pullM=new Map(), sharkM=new Map(), dropM=new Map(), boatM=new Map();
 let coreM=[], propM=[], propInst=[], ringPool=[], beamPool=[], playerRing=null, ghostMesh=null, shipGroup=null, jrTex=null, ambient=null, syncFrame=0, frameN=0;
 let padInst=null, padList=[];
 
 function clearDynamic(){
-  for(const mp of [entM,guardM,chickM,projM,bombM,trapM,shieldM,hookM,pearlM,pullM,sharkM,dropM]){ for(const [,m] of mp) scene.remove(m); mp.clear(); }
+  for(const mp of [entM,guardM,chickM,projM,bombM,trapM,shieldM,hookM,pearlM,pullM,sharkM,dropM,boatM]){ for(const [,m] of mp) scene.remove(m); mp.clear(); }
   for(const m of coreM) scene.remove(m); coreM=[];
   for(const g of propM) scene.remove(g.m); propM=[];
   for(const m of propInst) scene.remove(m); propInst=[];
@@ -286,6 +286,19 @@ function updateShieldM(s,m){ const R=s.r*U*(.7+.3*s.a); m.position.set(s.x*U,0,s
 function createHook(h){ const g=new THREE.Group(); const l=new THREE.Mesh(GEO.cyl,M('#c9a24a')); g.add(l); const tip=new THREE.Mesh(GEO.cone,M('#9ca3af',{metalness:.5})); tip.scale.setScalar(.12); g.add(tip); g.userData={l,tip}; return g; }
 function updateHookM(h,m){ const o=h.owner; const L=m.userData.l; beamBetween(L,o.x*U,.4,o.y*U,h.x*U,.4,h.y*U,.025); m.userData.tip.position.set(h.x*U,.4,h.y*U); }
 function createPearl(){ const m=new THREE.Mesh(GEO.torus,new THREE.MeshStandardMaterial({color:0xfbbf24,emissive:0xb07a00,emissiveIntensity:.7,flatShading:true})); m.scale.setScalar(.2); return m; }
+function createBoat(b){
+  const g=new THREE.Group(), B=GEO.box, S=GEO.sphere, tc=TEAMS[Math.max(0,b.team)].col;
+  const mat=new THREE.MeshStandardMaterial({vertexColors:true,flatShading:true,roughness:.8}); g.userData={mat};
+  const hull=new THREE.Mesh(mergeParts([
+    {geo:B,pos:[0,-.55,0],scale:[.9,.85,.5],color:'#7a4c24'},{geo:B,pos:[0,-.1,0],scale:[.96,.12,.56],color:'#f6efdc'},{geo:B,pos:[-.05,-.62,0],scale:[.95,.35,.46],color:'#5e3a1e'},
+    {geo:GEO.cone,pos:[1.02,-.5,0],scale:[.5,.55,.5],rot:[0,0,-Math.PI/2],color:'#7a4c24'},{geo:GEO.cone,pos:[1.1,-.12,0],scale:[.3,.12,.3],rot:[0,0,-Math.PI/2],color:'#f6efdc'},
+    {geo:B,pos:[-.9,-.5,0],scale:[.08,.7,.46],color:'#5e3a1e'},
+    {geo:B,pos:[.1,-.12,.46],scale:[.4,.04,.04],color:tc},{geo:B,pos:[.1,-.12,-.46],scale:[.4,.04,.04],color:tc},
+    {geo:B,pos:[0,-.07,0],scale:[.8,.04,.42],color:'#a8743a'},
+    {geo:B,pos:[.15,.28,0],scale:[.04,.5,.04],color:'#7c4a21'},{geo:B,pos:[.17,.45,0],scale:[.01,.25,.2],color:tc}]),mat);
+  hull.castShadow=true; g.add(hull); g.scale.setScalar(.95); return g;
+}
+function updateBoatM(b,m){ m.position.set(b.x*U,Math.sin(game.t*2+b.x*.01)*.03,b.y*U); m.rotation.y=-b.ang; m.rotation.z=Math.sin(game.t*1.7+b.y*.01)*.025; m.userData.mat.emissive.setRGB(b.flash>0?.7:0,b.flash>0?.15:0,0); }
 function createShark(){
   const g=new THREE.Group(), mat=new THREE.MeshStandardMaterial({vertexColors:true,flatShading:true,roughness:.6}), S=GEO.sphere;
   const body=new THREE.Mesh(mergeParts([{geo:S,pos:[0,0,0],scale:[1.0,.3,.34],color:'#6b8aa6'},{geo:S,pos:[.15,-.14,0],scale:[.8,.17,.28],color:'#e8eef4'},
@@ -430,7 +443,7 @@ function render3d(dt){
   qualityTick(dt); frameN++;
   sigTick++; if(sigTick%3===0||popActive){ const sig=(popActive&&sigTick%2)?worldSig:worldSignature(); if(sig!==worldSig||(popActive&&sigTick%2===0)){ rebuildWorld(); worldSig=sig; renderer.shadowMap.needsUpdate=true; } }
   updateSea(game.t); updateShip(); updateAmbient(dt); syncEnts(dt); syncCores(); syncPads(); syncProps();
-  sync(sharkM,sharks,createShark,updateSharkM); sync(dropM,drops,createDrop,updateDropM);
+  sync(boatM,boats,createBoat,updateBoatM); sync(sharkM,sharks,createShark,updateSharkM); sync(dropM,drops,createDrop,updateDropM);
   sync(guardM,guards,createGuard,updateGuardM); sync(chickM,chickens,createCrab,updateCrabM);
   sync(projM,projs,createProj,updateProjM); sync(bombM,bombs,createBomb,updateBombM); sync(trapM,traps,createTrap,updateTrapM);
   sync(shieldM,shields,createShield,updateShieldM); sync(hookM,hooks,createHook,updateHookM); sync(pearlM,pearls,createPearl,(p,m)=>{ m.position.set(p.x*U,.5,p.y*U); m.rotation.y=game.t*6; });

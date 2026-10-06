@@ -71,6 +71,7 @@ function netHostData(team,m){
     else if(m.a==='rl'){ if(GUNS[e.inp.sel]) startReload(e,e.inp.sel); }
     else if(m.a==='cb') cycleBlock(e);
     else if(m.a==='sw') swapPack(e,e.inp.sel);
+    else if(m.a==='boat') boatInteract(e);
   }
   else if(m.t==='buy'){ if(e.alive&&nearBase(e)&&buy(e,String(m.id))){ ring(e.x,e.y,T*1.2,'#fde68a',.35); floatTxt(e.x,e.y-40,'Acheté !','#fde68a',15); } }
 }
@@ -129,9 +130,9 @@ function netLeave(keepLobbyUI){
 
 /* ---------- sérialisation (compacte : on n'envoie que ce qui n'est pas nul / pas changé) ---------- */
 const R2=v=>{ if(typeof v==='number') return Math.round(v*100)/100; if(Array.isArray(v)) return v.map(R2); if(v&&typeof v==='object'&&!(v instanceof Set)){ const o={}; for(const k in v){ const x=v[k]; if(typeof x==='function') continue; o[k]=R2(x); } return o; } return v; };
-const ENT_SKIP=new Set(['ai','lastBy','burnBy','hook','inp','x','y','z','ang','held','ix','iy','_tx','_ty','_tz','_follow','_ff']);
+const ENT_SKIP=new Set(['riding','ai','lastBy','burnBy','hook','inp','x','y','z','ang','held','ix','iy','_tx','_ty','_tz','_follow','_ff']);
 const ENT_STATIC=['team','slot','name','cls','look','isBot','remote','up'];
-const ENT_NUM=['resp','inv','flash','swing','swingMax','cloak','bubble','frozen','slow','root','curse','aegis','plate','rage','burn','slip','squash','muzzle','stepPh','springT','jetT','voidT','haste','kills','deaths','ix','iy','bsel','sword','jet','grap','shield','sdx','sdy'];
+const ENT_NUM=['resp','inv','flash','swing','swingMax','cloak','bubble','frozen','slow','root','curse','aegis','plate','rage','burn','slip','squash','muzzle','stepPh','springT','jetT','voidT','haste','kills','deaths','ix','iy','bsel','sword','jet','grap','shield','sdx','sdy','tiny','giant','glide'];
 const r1=v=>Math.round(v*10)/10, r2=v=>Math.round(v*100)/100;
 function packEntDyn(e){
   const o={x:r1(e.x),y:r1(e.y),z:r1(e.z),g:r2(e.ang),h:r1(e.hp),a:e.alive?1:0};
@@ -151,13 +152,13 @@ function unpackEntDyn(e,p){
 }
 const DYN_SKIP=new Set(['owner','hit','target','wp']);
 function packDyn(list){
-  const out=[]; for(const o of list.slice(0,60)){ if(!o._id) o._id=++NET.ids; const p={_id:o._id}; for(const k in o){ if(k[0]==='_'||DYN_SKIP.has(k)||typeof o[k]==='function'||typeof o[k]==='object'&&o[k]!==null&&!Array.isArray(o[k])) continue; p[k]=o[k]; } if(o.owner){ const i=ents.indexOf(o.owner); if(i>=0) p.oi=i; } out.push(R2(p)); }
+  const out=[]; for(const o of list.slice(0,60)){ if(!o._id) o._id=++NET.ids; const p={_id:o._id}; for(const k in o){ if(k[0]==='_'||DYN_SKIP.has(k)||typeof o[k]==='function'||typeof o[k]==='object'&&o[k]!==null&&!Array.isArray(o[k])) continue; p[k]=o[k]; } if(o.owner){ const i=ents.indexOf(o.owner); if(i>=0) p.oi=i; } if('rider' in o) p.ri=o.rider?ents.indexOf(o.rider):-1; out.push(R2(p)); }
   return out;
 }
 function netCommon(){
   return {t:'s',n:++NET.seq,gt:Math.round(game.t*100)/100,st:game.state,wt:game.winTeam,e:ents.map(packEntDyn),
     td:TD.map(t=>t.coreAlive?1:0),sp:spawners.map(s=>Object.values(s.types).map(t=>t.stock)),
-    pj:packDyn(projs),bm:packDyn(bombs),tr:packDyn(traps),gd:packDyn(guards),ch:packDyn(chickens),sh:packDyn(shields),hk:packDyn(hooks),pr:packDyn(pearls),sk:packDyn(sharks),dr:packDyn(drops),
+    pj:packDyn(projs),bm:packDyn(bombs),tr:packDyn(traps),gd:packDyn(guards),ch:packDyn(chickens),sh:packDyn(shields),hk:packDyn(hooks),pr:packDyn(pearls),sk:packDyn(sharks),dr:packDyn(drops),bt:packDyn(boats),
     ev:{c:EV.cur?{id:EV.cur.id,t:Math.round(EV.cur.t*10)/10,dur:EV.cur.dur}:null,rush:EV.rush,fog:Math.round(EV.fog*100)/100,dark:Math.round(EV.dark*100)/100}};
 }
 function netTileDiff(B){
@@ -184,7 +185,7 @@ function netHostTick(dt){
     // ton pirate : seulement les champs qui ont changé
     if(now-s.ownT>3000){ s.ownLast={}; s.ownT=now; }
     const d={}; for(const k in e){ if(ENT_SKIP.has(k)||typeof e[k]==='function'||e[k] instanceof Set) continue; const v=R2(e[k]), str=JSON.stringify(v); if(s.ownLast[k]!==str){ s.ownLast[k]=str; d[k]=v; } }
-    sn.own={i,d,ff:e._ff?1:0};
+    sn.own={i,d,ff:e._ff?1:0,rd:e.riding?1:0};
     const from=Math.max(0,s.fxPos-NET.fxBase); sn.fx=NET.fxLog.slice(Math.max(from,NET.fxLog.length-70)); s.fxPos=NET.fxBase+NET.fxLog.length;
     try{ s.conn.send(sn); }catch(err){}
   }
@@ -214,7 +215,10 @@ function netApplySnap(m){
     if(p.h<NET.lastHp-.05){ game.hurtFx=.4; shake=Math.max(shake,5+(NET.lastHp-p.h)); } NET.lastHp=p.h; }
   if(firstSnap){ NET.snapped=true; for(const [,mm] of entM) scene.remove(mm); entM.clear(); }
   projs=applyDyn(projs,m.pj); bombs=applyDyn(bombs,m.bm); traps=applyDyn(traps,m.tr); guards=applyDyn(guards,m.gd); chickens=applyDyn(chickens,m.ch);
-  shields=applyDyn(shields,m.sh); hooks=applyDyn(hooks,m.hk); pearls=applyDyn(pearls,m.pr); sharks=applyDyn(sharks,m.sk); drops=applyDyn(drops,m.dr);
+  shields=applyDyn(shields,m.sh); hooks=applyDyn(hooks,m.hk); pearls=applyDyn(pearls,m.pr); sharks=applyDyn(sharks,m.sk); drops=applyDyn(drops,m.dr); boats=applyDyn(boats,m.bt||[]);
+  for(const bt of boats){ bt.rider=bt.ri>=0?ents[bt.ri]:null; if(bt.rider) bt.rider.riding=bt; }
+  for(const e of ents) if(e.riding&&(!e.riding.rider||e.riding.rider!==e)) e.riding=null;
+  if(m.own){ const me=ents[m.own.i]; if(m.own.rd&&!me.riding) me.riding=boats.find(b=>b.rider===me)||{x:me.x,y:me.y}; if(!m.own.rd) me.riding=null; }
   EV.cur=m.ev.c; EV.rush=m.ev.rush; EV.fog=m.ev.fog; EV.dark=m.ev.dark;
   for(const f of m.fx) netPlayFx(f);
 }
@@ -245,7 +249,7 @@ function netClientFrame(dt){
   const li=netLocalInput(); const inp=NET.inp; inp.ix=li.ix; inp.iy=li.iy; inp.wx=aim.x; inp.wy=aim.y; inp.down=!!mouse.down; inp.sel=selId; if(mouse.clicked) inp.clk=1;
   if(game.state==='play'){
     if(!me.bar.includes(selId)) selId='sword'; me.held=selId; if(me.alive&&me.slip<=0) me.ang=Math.atan2(aim.y-me.y,aim.x-me.x);
-    if(me.alive&&me.frozen<=0&&me.bubble<=0&&me.root<=0&&!me.pull&&!NET.ff){ const sp=speedOf(me); moveEnt(me,li.ix*sp*dt,li.iy*sp*dt); }
+    if(me.alive&&me.frozen<=0&&me.bubble<=0&&me.root<=0&&!me.pull&&!NET.ff&&!me.riding){ const sp=speedOf(me); moveEnt(me,li.ix*sp*dt,li.iy*sp*dt); }
     if(shopOpen&&(!me.alive||!nearBase(me))) toggleShop(false);
   }
   mouse.clicked=false;
@@ -253,16 +257,16 @@ function netClientFrame(dt){
   for(const e of ents){ if(e._tx===undefined) continue;
     if(e===player){ const ex=NET.hostX-e.x, ey=NET.hostY-e.y, d=Math.hypot(ex,ey);
       // l'invité pilote sa position (réactif) ; on ne se recale sur l'hôte que s'il y a une vraie correction (recul, gel, mort…)
-      if(NET.ff||!e.alive){ const kk=Math.min(1,dt*14); e.x+=ex*kk; e.y+=ey*kk; } else if(d>170){ const kk=Math.min(1,dt*8); e.x+=ex*kk; e.y+=ey*kk; } }
+      if(NET.ff||!e.alive||e.riding){ const kk=Math.min(1,dt*14); e.x+=ex*kk; e.y+=ey*kk; } else if(d>170){ const kk=Math.min(1,dt*8); e.x+=ex*kk; e.y+=ey*kk; } }
     else { e.x+=(e._tx-e.x)*k; e.y+=(e._ty-e.y)*k; }
     if(e._tz!==undefined) e.z+=(e._tz-e.z)*Math.min(1,dt*20); }
-  for(const L of [projs,bombs,traps,guards,chickens,sharks,drops,pearls]) for(const o of L){ if(o._tx!==undefined){ o.x+=(o._tx-o.x)*k; o.y+=(o._ty-o.y)*k; } }
+  for(const L of [projs,bombs,traps,guards,chickens,sharks,drops,pearls,boats]) for(const o of L){ if(o._tx!==undefined){ o.x+=(o._tx-o.x)*k; o.y+=(o._ty-o.y)*k; } }
   NET.sendT-=dt; if(NET.sendT<=0){ NET.sendT=1/30; netSend({t:'in',ix:inp.ix,iy:inp.iy,wx:Math.round(inp.wx),wy:Math.round(inp.wy),down:inp.down,sel:inp.sel,clk:inp.clk,px:Math.round(me.x*10)/10,py:Math.round(me.y*10)/10}); inp.clk=0; }
 }
 /* hôte : la position d'un invité est pilotée par lui (validée), sauf en cas de force extérieure */
 function netFollow(e,dt,q){
   e._follow=false; e._ff=0; if(q.px===undefined||!e.alive) return;
-  if(Math.hypot(e.vx,e.vy)>40||e.pull||e.frozen>0||e.bubble>0||e.root>0||e.jetT>0||e.slip>0||e.inv>1.5){ e._ff=1; return; }
+  if(e.riding||Math.hypot(e.vx,e.vy)>40||e.pull||e.frozen>0||e.bubble>0||e.root>0||e.jetT>0||e.slip>0||e.inv>1.5){ e._ff=1; return; }
   const dx=q.px-e.x, dy=q.py-e.y, d=Math.hypot(dx,dy);
   if(d>150){ e._ff=1; return; }
   const kk=Math.min(1,dt*22); moveEnt(e,dx*kk,dy*kk); e._follow=true;

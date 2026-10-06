@@ -129,7 +129,7 @@ function animatePirate(e,m,dt){
   u.legs[0].rotation.z=sw; u.legs[1].rotation.z=-sw; u.armL.rotation.z=-sw*.9;
   if(air>2){ u.legs[0].rotation.z=.6; u.legs[1].rotation.z=-.5; u.armL.rotation.z=-1.1; }
   const bob=moving?Math.abs(Math.sin(e.stepPh*1.15))*.07:Math.sin(t*3)*.012; u.body.position.y=.07+bob; const sq=e.squash;
-  const bs=u.base; m.scale.set(bs*(1+sq*.28),bs*(1-sq*.32),bs*(1+sq*.28));
+  u.sz=(u.sz||1)+((e.tiny>0?.6:e.giant>0?1.45:1)-(u.sz||1))*.15; const bs=u.base*u.sz; m.scale.set(bs*(1+sq*.28),bs*(1-sq*.32),bs*(1+sq*.28));
   u.head.rotation.z=Math.sin(t*2.2)*.05+(moving?Math.sin(e.stepPh*1.15)*.06:0)+(e.slip>0?Math.sin(game.t*20)*.35:0); u.head.rotation.x=e.slip>0?Math.sin(game.t*17)*.2:0;
   u.hat.rotation.z=-.1+Math.sin(t*3)*.03;
   const blink=((game.t+u.blink)%3.6)<.13, big=e.flash>0||e.hp<maxhp(e)*.3;

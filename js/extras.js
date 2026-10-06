@@ -140,7 +140,7 @@ const EVENTS={
 };
 const EV_FREQ=[{n:'Désactivés',v:0},{n:'Rares',v:1.7},{n:'Normaux',v:1},{n:'Fréquents',v:.55}];
 let EV={cur:null,next:60,last:'',rush:false,fog:0,dark:0,tick:0,wind:0}, sharks=[], drops=[];
-function resetEvents(){ delayed=[]; sharks=[]; drops=[]; const f=EV_FREQ[game.opts.evf]||EV_FREQ[2]; EV={cur:null,next:(40+Math.random()*30)*(f.v||1),last:'',rush:false,fog:0,dark:0,tick:0,wind:0}; }
+function resetEvents(){ delayed=[]; sharks=[]; drops=[]; boats=[]; const f=EV_FREQ[game.opts.evf]||EV_FREQ[2]; EV={cur:null,next:(40+Math.random()*30)*(f.v||1),last:'',rush:false,fog:0,dark:0,tick:0,wind:0}; }
 function islandTile(){ const il=ISLANDS[Math.floor(Math.random()*ISLANDS.length)]; for(let k=0;k<12;k++){ const x=il.x+Math.floor(rnd(-il.r,il.r+1)), y=il.y+Math.floor(rnd(-il.r,il.r+1)); if(fl(x,y)>0&&!wl(x,y)) return [x,y]; } return null; }
 function entTile(){ const l=ents.filter(e=>e.alive); if(!l.length) return null; const o=l[Math.floor(Math.random()*l.length)]; return [o.x+rnd(-1.5*T,1.5*T),o.y+rnd(-1.5*T,1.5*T)]; }
 function startEvent(id){
@@ -155,7 +155,7 @@ function strike(x,y,warn,dm){ ring(x,y,T*1.6,'#fde047',warn); bombs.push({x,y,tx
 function updateEvents(dt){
   // minuteurs des effets différés et statuts
   for(const d of delayed) d.t-=dt; for(const d of delayed) if(d.t<=0) d.fn(); delayed=delayed.filter(d=>d.t>0);
-  for(const e of ents){ if(e.plate>0) e.plate-=dt; if(e.rage>0) e.rage-=dt; if(e.curse>0){ e.curse-=dt; if(Math.random()<dt*8) parts.push({x:e.x+rnd(-8,8),y:e.y,z:rnd(0,20),vz:rnd(20,60),vx:0,vy:0,life:.6,max:.6,col:'#a855f7',size:3}); } }
+  for(const e of ents){ if(e.glide>0) e.glide-=dt; if(e.tiny>0) e.tiny-=dt; if(e.giant>0) e.giant-=dt; if(e.plate>0) e.plate-=dt; if(e.rage>0) e.rage-=dt; if(e.curse>0){ e.curse-=dt; if(Math.random()<dt*8) parts.push({x:e.x+rnd(-8,8),y:e.y,z:rnd(0,20),vz:rnd(20,60),vx:0,vy:0,life:.6,max:.6,col:'#a855f7',size:3}); } }
   updateSharks(dt); updateDrops(dt);
   // météo douce
   const tgDark=(EV.cur&&(EV.cur.id==='storm'))?1:(EV.cur&&EV.cur.id==='fog')?.4:0, tgFog=(EV.cur&&EV.cur.id==='fog')?1:(EV.cur&&EV.cur.id==='storm')?.5:0;
@@ -200,6 +200,7 @@ function updateSharks(dt){
     if(Math.random()<dt*14) parts.push({x:s.x,y:s.y,z:2,vz:rnd(5,25),vx:rnd(-10,10),vy:rnd(-10,10),life:.5,max:.5,col:'#ffffff',size:3});
     if(s.cd<=0){
       for(const o of ents){ if(!o.alive||o.team===s.team||o.z>26) continue; const d=Math.hypot(o.x-s.x,o.y-s.y); if(d<1.7*T){ s.cd=1.2; s.bite=.3; hurt(o,4,s.owner,(o.x-s.x)/d*380,(o.y-s.y)/d*380); o.vz=Math.max(o.vz,260); sfx('hit',s.x,s.y); splash(s.x,s.y); floatTxt(o.x,o.y-36,'CHOMP !','#93c5fd',16); break; } }
+      if(s.cd<=0){ for(const bt of boats){ if(bt.team!==s.team&&Math.hypot(bt.x-s.x,bt.y-s.y)<1.8*T){ hitBoat(bt,3,s.owner); s.cd=1; s.bite=.3; } } }
       if(s.cd<=0){ // ronge les ponts voisins
         for(let ty=Math.floor(s.y/T)-1;ty<=Math.floor(s.y/T)+1;ty++)for(let tx=Math.floor(s.x/T)-1;tx<=Math.floor(s.x/T)+1;tx++){ if(inb(tx,ty)&&floorT[idx(tx,ty)]>=2&&(!s.owner||ownF[idx(tx,ty)]!==s.team)){ damageTile(tx,ty,14,s.owner,1); s.cd=.9; s.bite=.25; } }
       }

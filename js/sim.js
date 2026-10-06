@@ -250,14 +250,14 @@ function spawnEnt(e){
   const td=TD[e.team]; let ox=0,oy=0; if(game.opts.mode==='duo'){ const k=(e.slot?1:-1)*11; ox=-td.dir[1]*k; oy=td.dir[0]*k; } e.x=(td.spawnTile[0]+.5)*T+ox; e.y=(td.spawnTile[1]+.5)*T+oy;
   const i=idx(td.spawnTile[0],td.spawnTile[1]); if(wallT[i]){wallT[i]=0;}
   if(floorT[i]===0){floorT[i]=1;}
-  e.hp=maxhp(e); e.alive=true; e.inv=2; e.vx=e.vy=0; e.z=60; e.vz=0; e.voidT=0; e.jetT=0; e.pull=null; e.grace=0; e.hook=null;
+  e.hp=maxhp(e); e.alive=true; e.inv=2; e.vx=e.vy=0; e.z=60; e.vz=0; e.voidT=0; e.jetT=0; e.pull=null; e.grace=0; e.hook=null; e.riding=null; e.tkH=0; e.glide=0; e.tiny=0; e.giant=0;
   e.frozen=0; e.slip=0; e.burn=0; e.bubble=0; e.cloak=0;
   beams.push({x:e.x,y:e.y,t:0,col:TEAMS[e.team].light}); ring(e.x,e.y,T*2,TEAMS[e.team].col,.6);
   burst(e.x,e.y,TEAMS[e.team].light,14,160,.6,3);
   if(e.ai){e.ai.mode='home'; e.ai.leaveAt=e.ai.t+rnd(12,22)*(getD().leave[0]/40);}
 }
 const maxhp=e=>(e.isBot?getD().hp:20)+6*e.up.hp+cv(e,'hp');
-const speedOf=e=>(e.rage>0?1.2:1)*(e.curse>0?.75:1)*cv(e,'spd')*138*(1+.08*e.up.sp)*(e.jetT>0?1.3:1)*(e.isBot?getD().speed:1)*(e.slip>0?1.35:1)*(e.haste>0?1.5:1)*(e.slow>0?.55:1)*(e.flagBuff>0?1.2:1);
+const speedOf=e=>(e.tiny>0?1.25:1)*(e.giant>0?.9:1)*(e.rage>0?1.2:1)*(e.curse>0?.75:1)*cv(e,'spd')*138*(1+.08*e.up.sp)*(e.jetT>0?1.3:1)*(e.isBot?getD().speed:1)*(e.slip>0?1.35:1)*(e.haste>0?1.5:1)*(e.slow>0?.55:1)*(e.flagBuff>0?1.2:1);
 function msg(txt,col){feed.push({txt,col:col||'#dbe4ff',t:7}); if(feed.length>4)feed.shift();}
 function announce(txt,col){banner.txt=txt;banner.col=col||'#fff';banner.t=banner.max;sfx('fanfare');}
 
@@ -308,7 +308,7 @@ function inShield(x,y,team){
 function hurt(e,amount,by,kx,ky){
   if(!e.alive||e.inv>0||e.aegis>0) return;
   if(by&&by.isBot&&!e.isBot) amount*=getD().dmg;
-  amount*=(1-.12*e.up.ar)*cv(e,'def')*(e.plate>0?.4:1)*(e.curse>0?1.3:1)*(by&&by.rage>0?1.5:1); kx*=cv(e,'kb'); ky*=cv(e,'kb');
+  amount*=(1-.12*e.up.ar)*cv(e,'def')*(e.plate>0?.4:1)*(e.curse>0?1.3:1)*(by&&by.rage>0?1.5:1)*(e.tiny>0?1.3:1)*(e.giant>0?.85:1)*(by&&by.giant>0?1.3:1); kx*=cv(e,'kb'); ky*=cv(e,'kb');
   e.hp-=amount; e.vx+=kx; e.vy+=ky; e.lastBy=by; e.lastByT=5; e.sinceHurt=0;
   if(amount>0){
     e.flash=.15; burst(e.x,e.y-e.z,'#ff6b6b',5,120,.4,3);
@@ -331,7 +331,8 @@ function die(e,by,sea){
     for(const k in e.res){killer.res[k]+=e.res[k]; if(killer===player&&e.res[k]>0) floatTxt(e.x,e.y-40-k.length*0,'+'+e.res[k]+' '+RESNAME[k],RESCOL[k],15);}
     msg(`${killer.name} a éliminé ${e.name}`,TEAMS[killer.team].light);
     if(killer===player){ announce('ÉLIMINATION !','#fde68a'); flashScreen('#fff',.15); }
-  } else msg(`${e.name} est tombé à la mer`,'#9aa7cf');
+  } else msg(e.fallDeath?`${e.name} s'est écrasé au sol`:`${e.name} est tombé à la mer`,'#9aa7cf');
+  if(e.riding){ e.riding.rider=null; e.riding=null; }
   // mort hors de sa base : on perd tout son équipement (les améliorations de base sont conservées)
   if(!nearBase(e)){
     const had=Object.keys(e.own).length+Object.values(e.am).filter(v=>v>0).length+e.grap+e.jet+e.bomb+e.repel+e.shield+(e.pick>0?1:0)+(e.sword>0?1:0)+totalBlocks(e);
@@ -464,7 +465,7 @@ function damageTile(tx,ty,dmg,src,layer){
 function doSword(e){
   if(e.cd.atk>0) return; e.cd.atk=e.isBot?getD().meleeCd:.42; e.swing=.2; e.swingMax=.2; sfx('swing',e.x,e.y);
   const ax=Math.cos(e.ang),ay=Math.sin(e.ang), dmg=SWORDS[e.sword].d*cv(e,'melee');
-  hitGuards(e,e.x+ax*T,e.y+ay*T,T*1.3,dmg);
+  hitGuards(e,e.x+ax*T,e.y+ay*T,T*1.3,dmg); for(const bt of boats) if(bt.team!==e.team&&Math.hypot(bt.x-(e.x+ax*T),bt.y-(e.y+ay*T))<T*1.5) hitBoat(bt,dmg,e);
   for(const o of ents){
     if(!o.alive||o.team===e.team) continue;
     const dx=o.x-e.x,dy=o.y-e.y,d=Math.hypot(dx,dy);
@@ -508,7 +509,7 @@ function fireGun(e,id){
   sfx(id==='gun'?'shot':id==='rocket'?'whoosh':id==='bow'?'bow':id==='woolgun'?'woof':id,e.x,e.y);
   for(let i=0;i<g.pel;i++){
     const a=e.ang+(g.pel>1?rnd(-spr,spr):(Math.random()*2-1)*spr*.7+Math.sin(s.n*1.7)*s.b*.45);
-    projs.push({x:e.x+Math.cos(e.ang)*14,y:e.y+Math.sin(e.ang)*14,z:12,vx:Math.cos(a)*g.sp,vy:Math.sin(a)*g.sp,team:e.team,owner:e,life:g.life,dmg:g.dmg*cv(e,'gun'),kb:g.kb,kind:g.kind||'bullet',col:g.col,pierce:g.pierce,hit:g.pierce?[]:null,short:g.short});
+    projs.push({x:e.x+Math.cos(e.ang)*14,y:e.y+Math.sin(e.ang)*14,z:12,vx:Math.cos(a)*g.sp,vy:Math.sin(a)*g.sp,team:e.team,owner:e,life:g.life,dmg:g.dmg*cv(e,'gun'),kb:g.kb,kind:g.kind||'bullet',col:g.col,pierce:g.pierce,hit:g.pierce?[]:null,short:g.short,lift:g.lift});
   }
   e.vx-=Math.cos(e.ang)*g.rec; e.vy-=Math.sin(e.ang)*g.rec;
   if(id!=='flame'&&id!=='bow'){ burst(e.x+Math.cos(e.ang)*16,e.y+Math.sin(e.ang)*16,g.col,4,120,.15,3); if(e===player) shake=Math.max(shake,id==='shotgun'||id==='sniper'||id==='rocket'?6:2); }
@@ -556,7 +557,7 @@ function useGrapple(e){
   hooks.push(e.hook);
 }
 function jump(e,power){
-  if(e.bubble>0||e.root>0||e.z>groundH(e)+1||e.vz>0||e.pull||e.frozen>0) return;
+  if(e.bubble>0||e.root>0||e.z>groundH(e)+1||e.vz>0||e.pull||e.frozen>0||e.riding) return;
   if(fl(Math.floor(e.x/T),Math.floor(e.y/T))===0&&e.jetT<=0){ if(e.waterJumps>=1) return; e.waterJumps=(e.waterJumps||0)+1; } // un seul saut de rattrapage au-dessus de l'eau
   sfx('jump',e.x,e.y); e.vz=(power||(e.springT>0?540:320))*cv(e,'jump'); e.squash=-.5; burst(e.x,e.y+6-e.z,'#e5e7eb',6,70,.3,3);
 }
@@ -716,7 +717,7 @@ function explode(b){
         damageTile(tx,ty,dmg,b.owner,0);
       } else if(floorT[i]>=2) damageTile(tx,ty,dmg,b.owner,1);
     }
-    hitGuards(b.owner,cx,cy,R,10*(b.dm||10)/10);
+    hitGuards(b.owner,cx,cy,R,10*(b.dm||10)/10); hitBoats(cx,cy,R,b.dm||10,b.team);
     for(const o of ents){
       if(!o.alive||(o.team===b.team&&o!==b.owner)) continue;
       const dx=o.x-cx,dy=o.y-cy,d=Math.hypot(dx,dy); if(d>R*1.25) continue;
@@ -921,12 +922,14 @@ function updateEnt(e,dt){
   const gh=groundH(e);
   if(e.bubble>0){ e.vz=0; e.z+=(55-e.z)*Math.min(1,dt*4); }
   else if(e.z>gh||e.vz>0){
-    e.vz-=1000*dt; e.z+=e.vz*dt;
-    if(e.z<=gh&&e.vz<=0){ const imp=-e.vz; e.z=gh; e.vz=0; if(e.springT>0&&imp>380){ ring(e.x,e.y,T*2,'#4ade80',.4,true); shake=Math.max(shake,e===player?7:3); for(const o of ents) if(o.alive&&o.team!==e.team&&Math.hypot(o.x-e.x,o.y-e.y)<T*2) hurt(o,3,e,(o.x-e.x)*6,(o.y-e.y)*6); }
+    e.vz-=1000*dt; if(e.glide>0&&e.vz<-80) e.vz=-80; e.z+=e.vz*dt;
+    if(e.z<=gh&&e.vz<=0){ const imp=-e.vz; e.z=gh; e.vz=0;
+      { const drop=(e.tkH||0)-gh; e.tkH=gh; if(drop>56&&!(e.glide>0)&&!(e.springT>0)&&!e.riding){ const fd=(drop-56)*.12; floatTxt(e.x,e.y-34,'AÏE !','#fca5a5',15); sfx('hit',e.x,e.y); e.fallDeath=true; hurt(e,fd,null,0,0); e.fallDeath=false; } } if(e.springT>0&&imp>380){ ring(e.x,e.y,T*2,'#4ade80',.4,true); shake=Math.max(shake,e===player?7:3); for(const o of ents) if(o.alive&&o.team!==e.team&&Math.hypot(o.x-e.x,o.y-e.y)<T*2) hurt(o,3,e,(o.x-e.x)*6,(o.y-e.y)*6); }
       if(imp>180){e.squash=Math.min(1,imp/550); burst(e.x,e.y+6-gh,'#e5e7eb',8,110,.35,3); ring(e.x,e.y+8-gh,T*.6,'#ffffff',.25);} }
-  } else e.z=gh;
+  } else { e.z=gh; e.tkH=gh; }
   // mouvement
-  if(e.pull){
+  if(e.riding){ e.vx=e.vy=0; e.z=0; }
+  else if(e.pull){
     const p=e.pull; p.t+=dt; const dx=p.x-e.x,dy=p.y-e.y,d=Math.hypot(dx,dy);
     if(d<10||p.t>1.3){e.pull=null;e.grace=.9;}
     else{
@@ -948,10 +951,10 @@ function updateEnt(e,dt){
   const fx=Math.floor(e.x/T),fy=Math.floor(e.y/T);
   if(fl(fx,fy)>0&&wl(fx,fy)===0&&e.z<=gh+1&&!e.pull) e.lastSafe={x:(fx+.5)*T,y:(fy+.5)*T};
   { // plafond de sécurité : impossible de rester plus de ~1,7 s sans sol (peu importe les sauts)
-    const sup=floorSupport(e.x,e.y)||e.jetT>0||e.pull||e.grace>0||e.bubble>0;
+    const sup=floorSupport(e.x,e.y)||e.jetT>0||e.pull||e.grace>0||e.bubble>0||e.riding;
     if(sup){ e.supT=(e.supT||0)+dt; if(e.supT>.3) e.unsT=0; } else { e.supT=0; e.unsT=(e.unsT||0)+dt; if(e.unsT>2&&e.alive){ die(e,e.lastByT>0?e.lastBy:null,true); return; } }
   }
-  if(!floorSupport(e.x,e.y)&&e.jetT<=0&&!e.pull&&e.grace<=0&&e.z<1){
+  if(!floorSupport(e.x,e.y)&&e.jetT<=0&&!e.pull&&e.grace<=0&&e.z<1&&!e.riding){
     e.voidT+=dt;
     if(e.voidT>.4){
       if((e.am.buoy||0)>0&&e.lastSafe){ e.am.buoy--; splash(e.x,e.y); e.x=e.lastSafe.x; e.y=e.lastSafe.y; e.z=50; e.vz=0; e.vx=e.vy=0; e.voidT=0; e.inv=1.2; e.grace=.4; floatTxt(e.x,e.y-44,'REPÊCHÉ !','#fb923c',17); ring(e.x,e.y,T*1.5,'#fb923c',.5,true); sfx('buy'); }
@@ -1012,6 +1015,7 @@ function updateProj(dt){
         p.life=0;break;
       }
       if(nearestShieldBlocking(p.x,p.y,p.team)){p.life=0;burst(p.x,p.y,'#7dd3fc',5,80,.3,2);break;}
+      for(const bt of boats){ if(bt.team!==p.team&&Math.hypot(bt.x-p.x,bt.y-p.y)<20&&p.dmg>0){ hitBoat(bt,p.dmg,p.owner); if(!p.pierce){ p.life=0; } } }
       for(const g of guards){ if(g.team!==p.team&&Math.hypot(g.x-p.x,g.y-p.y)<12){ g.hp-=p.dmg||2; burst(p.x,p.y,'#fff',4,90,.2,3); if(p.kind==='rocket'){explode({x:p.x,y:p.y,team:p.team,owner:p.owner,kind:'bomb',R:2.2*T,dm:9,bd:.8});} if(!p.pierce){p.life=0;} } }
       if(p.life<=0) break;
       for(const o of ents){
@@ -1020,7 +1024,7 @@ function updateProj(dt){
         if(Math.hypot(o.x-p.x,o.y-p.y)<12){
           if(p.kind==='rocket'){ explode({x:p.x,y:p.y,team:p.team,owner:p.owner,kind:'bomb',R:2.2*T,dm:9,bd:.8}); p.life=0; break; }
           const sp_=Math.hypot(p.vx,p.vy)||1;
-          hurt(o,p.dmg,p.owner,p.vx/sp_*p.kb,p.vy/sp_*p.kb);
+          hurt(o,p.dmg,p.owner,p.vx/sp_*p.kb,p.vy/sp_*p.kb); if(p.lift) o.vz=Math.max(o.vz,p.lift);
           if(p.kind==='wool'){ o.slow=2.2; burst(o.x,o.y-8,'#fbcfe8',10,140,.5,4); floatTxt(o.x,o.y-40,'EMMÊLÉ !','#f9a8d4',15); }
           if(p.kind==='bubble'){ o.bubble=2.2; ring(o.x,o.y-10,T*1.3,'#bfdbfe',.4,true); burst(o.x,o.y-10,'#e0f2fe',12,130,.5,3); floatTxt(o.x,o.y-44,'BULLE !','#bfdbfe',16); }
           if(p.kind==='ice'){ o.frozen=p.short?.9:1.6; ring(o.x,o.y,T,'#7dd3fc',.4,true); burst(o.x,o.y,'#e0f2fe',12,120,.5,3); floatTxt(o.x,o.y-36,'GELÉ !','#7dd3fc',16); }
@@ -1207,7 +1211,7 @@ function update(dt){
       }
       updateEnt(e,dt);
     }
-    updateEvents(dt); updateSpawners(dt); updateProj(dt); updateBombs(dt); updateShields(dt); updateHooks(dt); updateTraps(dt); updateChickens(dt); updatePearls(dt); updateGuards(dt);
+    updateEvents(dt); updateBoats(dt); updateSpawners(dt); updateProj(dt); updateBombs(dt); updateShields(dt); updateHooks(dt); updateTraps(dt); updateChickens(dt); updatePearls(dt); updateGuards(dt);
   }
   updateFx(dt);
   syncBar(player); if(!player.bar.includes(selId)) selId='sword';

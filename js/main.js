@@ -15,7 +15,7 @@ addEventListener('keydown',ev=>{
   if(/^Digit[0-9]$/.test(ev.code)) d=+ev.code.slice(5)||10; else if(/^Numpad[0-9]$/.test(ev.code)) d=+ev.code.slice(6)||10; else if(DIGIT[k]) d=DIGIT[k]; else if(k==='à') d=10;
   if(d){ const l=hotList(player); if(l[d-1]){ if(selId==='block'&&l[d-1].id==='block') actCycle(); setSel(l[d-1].id); } }
   else if(k==='Tab'){ ev.preventDefault(); if(player.alive) actSwap(); }
-  else if(k==='e') toggleShop();
+  else if(k==='e'){ if(!actBoat()) toggleShop(); }
   else if(k==='r'){ if(player.alive) actReload(); }
   else if(k==='c') actCycle();
   else if(k==='g') setQuality((Q.level+2)%3,true);
