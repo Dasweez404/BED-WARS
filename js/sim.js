@@ -64,7 +64,7 @@ const DIFFS={
   hard:{n:'Difficile',react:.2,noise:.1,dmg:1.1,speed:1.02,hp:24,engage:8,meleeCd:.5,gunCd:1,likeP:1,use:2.2,aggr:1.7,buyT:.4,leave:[18,30],income:.75,strafe:true,dodge:.5,desc:'Bots rapides et précis qui achètent et utilisent toutes les armes et tous les gadgets.'}
 };
 const getD=()=>DIFFS[game.diff||'normal'];
-const ER=6; // rayon du corps d'un personnage (px)
+const ER=5; // rayon du corps d'un personnage (px)
 const hash=(x,y)=>(((x*73856093)^(y*19349663))>>>0);
 function shade(hex,k){
   const n=parseInt(hex.slice(1),16); let r=n>>16,g=(n>>8)&255,b=n&255;
@@ -103,7 +103,7 @@ const MODES={solo:{n:'Chacun pour soi',d:'4 équipages, 1 pirate chacun.'},duo:{
 const OPT_RES=[{n:'Lentes',v:.7},{n:'Normales',v:1},{n:'Rapides',v:1.5}];
 const OPT_START=[{n:'Aucun',r:{}},{n:'Petit pécule',r:{bronze:40,silver:10}},{n:'Butin de départ',r:{bronze:120,silver:40,gold:6,diamond:3}}];
 const OPT_CORE=[{n:'Fragiles',v:.6},{n:'Normaux',v:1},{n:'Solides',v:1.7}];
-let game={state:'menu',diff:'normal',cls:'matelot',look:{skin:0,hat:0,hair:0,face:0,patch:1},pname:'Toi',opts:{mode:'solo',map:'classic',res:1,start:0,core:1,roster:20,evf:2,ev:{coins:1,curse:1,shark:1,storm:1,volcano:1,fog:1,kraken:1,rush:1}},t:0,win:false,hurtFx:0,hitmark:0,flash:0,flashCol:'#fff'};
+let game={state:'menu',diff:'normal',cls:'matelot',look:{skin:0,hat:0,hair:0,face:0,patch:1},pname:'Toi',opts:{mode:'solo',map:'classic',res:1,start:0,core:1,stack:3,roster:20,evf:2,ev:{coins:1,curse:1,shark:1,storm:1,volcano:1,fog:1,kraken:1,rush:1}},t:0,win:false,hurtFx:0,hitmark:0,flash:0,flashCol:'#fff'};
 let player=null;
 let shake=0, banner={txt:'',col:'#fff',t:0,max:3};
 let selId='block', selAnim=0;
@@ -169,7 +169,10 @@ const wl=(x,y)=>inb(x,y)?wallT[y*W+x]:0;
 const rnd=(a,b)=>a+Math.random()*(b-a);
 const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-const groundH=e=>wl(Math.floor(e.x/T),Math.floor(e.y/T))>0?WH:0;
+const MAXH=()=>Math.max(1,Math.min(4,(game.opts&&game.opts.stack)|0||3));
+const wallLayers=i=>{ const w=wallT[i]; return w===0?0:w===CORE?1:Math.max(1,Math.ceil(hpW[i]/BHP[w]-1e-6)); };
+const wallTop=(tx,ty)=>{ if(!inb(tx,ty)||wallT[idx(tx,ty)]===0) return 0; return WH*wallLayers(idx(tx,ty)); };
+const groundH=e=>wallTop(Math.floor(e.x/T),Math.floor(e.y/T));
 
 /* =====================  GÉNÉRATION  ===================== */
 function island(cx,cy,r,cut,reg){
@@ -270,9 +273,8 @@ function flashScreen(col,a){game.flash=a;game.flashCol=col;}
 
 /* =====================  PHYSIQUE  ===================== */
 function hitWall(x,y,z){
-  if(z>=WH-1) return false;
   const r=ER, x0=Math.floor((x-r)/T),x1=Math.floor((x+r)/T),y0=Math.floor((y-r)/T),y1=Math.floor((y+r)/T);
-  for(let ty=y0;ty<=y1;ty++)for(let tx=x0;tx<=x1;tx++) if(wl(tx,ty)>0) return true;
+  for(let ty=y0;ty<=y1;ty++)for(let tx=x0;tx<=x1;tx++) if(wl(tx,ty)>0&&z<wallTop(tx,ty)-1) return true;
   return false;
 }
 function moveEnt(e,dx,dy){
@@ -351,10 +353,14 @@ function spawnerAt(tx,ty){for(const s of spawners) if(s.x===tx&&s.y===ty) return
 
 /* =====================  ACTIONS  ===================== */
 function totalBlocks(e){return e.blocks[2]+e.blocks[3]+e.blocks[4]+e.blocks[5];}
-function canPlace(e,tx,ty){
+function canPlace(e,tx,ty,type){
   if(!inb(tx,ty)) return false;
   const f=fl(tx,ty), w=wl(tx,ty);
-  if(w>0) return false;
+  if(w>0){ // empiler un bloc identique de son équipe sur un mur existant
+    const i=idx(tx,ty); if(!type||w!==type||w===CORE||ownW[i]!==e.team||wallLayers(i)>=MAXH()) return false;
+    if(Math.hypot((tx+.5)*T-e.x,(ty+.5)*T-e.y)>3.7*T||protectedTile(tx,ty,e.team)) return false;
+    return !wallBlockedByEnt((tx+.5)*T,(ty+.5)*T);
+  }
   if(Math.hypot((tx+.5)*T-e.x,(ty+.5)*T-e.y)>3.7*T) return false;
   if(protectedTile(tx,ty,e.team)) return false;
   if(f===0){ return fl(tx+1,ty)>0||fl(tx-1,ty)>0||fl(tx,ty+1)>0||fl(tx,ty-1)>0; }
@@ -365,9 +371,10 @@ function doPlace(e,tx,ty,type){
   if(e.cd.place>0) return false;
   type=type||e.bsel;
   if(!e.blocks[type]){ type=[2,3,4,5].find(t=>e.blocks[t]>0); if(!type) return false; if(e===player) e.bsel=type; }
-  if(!canPlace(e,tx,ty)) return false;
+  if(!canPlace(e,tx,ty,type)) return false;
   const i=idx(tx,ty), col=blockColor(type,e.team)[0];
   if(floorT[i]===0){ floorT[i]=type; hpF[i]=BHP[type]; ownF[i]=e.team; }
+  else if(wallT[i]===type){ hpW[i]+=BHP[type]; }
   else { wallT[i]=type; hpW[i]=BHP[type]; ownW[i]=e.team; }
   pop[i]=1;
   if(Math.random()>=cv(e,'free')) e.blocks[type]--; e.cd.place=e.isBot?.32:.14; e.swing=.12; e.swingMax=.12;
@@ -377,7 +384,8 @@ function doPlace(e,tx,ty,type){
 function placeTarget(e,wx,wy){
   const dx=wx-e.x,dy=wy-e.y,d=Math.hypot(dx,dy)||1,ux=dx/d,uy=dy/d;
   const ctx_=Math.floor(wx/T),cty=Math.floor(wy/T);
-  if(canPlace(e,ctx_,cty)) return [ctx_,cty];
+  const bt=e.blocks[e.bsel]?e.bsel:[2,3,4,5].find(t=>e.blocks[t]>0);
+  if(canPlace(e,ctx_,cty,bt)) return [ctx_,cty];
   for(let s=Math.min(d,3.6*T);s>=T*.5;s-=T*.2){
     const tx=Math.floor((e.x+ux*s)/T),ty=Math.floor((e.y+uy*s)/T);
     if(fl(tx,ty)===0&&canPlace(e,tx,ty)) return [tx,ty];
@@ -912,6 +920,10 @@ function updateEnt(e,dt){
   if(e.jetT>0&&Math.random()<.7) parts.push({x:e.x-Math.cos(e.ang)*6+rnd(-3,3),y:e.y+8,z:Math.max(0,e.z-4),vz:-60,vx:rnd(-30,30),vy:rnd(40,100),life:.35,max:.35,col:Math.random()<.5?'#fb923c':'#fde047',size:4});
   const fx=Math.floor(e.x/T),fy=Math.floor(e.y/T);
   if(fl(fx,fy)>0&&wl(fx,fy)===0&&e.z<=gh+1&&!e.pull) e.lastSafe={x:(fx+.5)*T,y:(fy+.5)*T};
+  { // plafond de sécurité : impossible de rester plus de ~1,7 s sans sol (peu importe les sauts)
+    const sup=floorSupport(e.x,e.y)||e.jetT>0||e.pull||e.grace>0||e.bubble>0;
+    if(sup){ e.supT=(e.supT||0)+dt; if(e.supT>.3) e.unsT=0; } else { e.supT=0; e.unsT=(e.unsT||0)+dt; if(e.unsT>2&&e.alive){ die(e,e.lastByT>0?e.lastBy:null,true); return; } }
+  }
   if(!floorSupport(e.x,e.y)&&e.jetT<=0&&!e.pull&&e.grace<=0&&e.z<1){
     e.voidT+=dt;
     if(e.voidT>.4){

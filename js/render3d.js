@@ -176,8 +176,9 @@ function rebuildWorld(){
     if(w){
       let c;
       if(w===CORE) c=new THREE.Color('#6b4423'); else { const bc=blockColor(w,ownW[i]); c=new THREE.Color(bc[0]); if(w===WOOL) c.lerp(new THREE.Color(TEAMS[ownW[i]].col),.2); }
-      const dm=hpW[i]/BHP[w]; if(dm<1) c.lerp(new THREE.Color('#222'),(1-dm)*.5);
-      put(iWall,nw++,tx+.5,(w===CORE?WHu*.3:WHu/2)+lift*.3,ty+.5,w===CORE?1:.97,WHu*(w===CORE?.6:1),w===CORE?1:.97,c);
+      const dm=(hpW[i]-(wallLayers(i)-1)*BHP[w])/BHP[w]; if(dm<1) c.lerp(new THREE.Color('#222'),(1-dm)*.5);
+      if(w===CORE) put(iWall,nw++,tx+.5,WHu*.3+lift*.3,ty+.5,1,WHu*.6,1,c);
+      else { const L=wallLayers(i); for(let k=0;k<L&&nw<CAP-1;k++) put(iWall,nw++,tx+.5,(k+.5)*WHu+lift*.3,ty+.5,.97,WHu*.99,.97,k===L-1?c:c.clone().lerp(new THREE.Color('#ffffff'),.04*(L-1-k))); }
       if(w!==CORE) put(iBand,nb++,tx+.5,.07,ty+.5,1.02,.12,1.02,new THREE.Color(TEAMS[ownW[i]].col));
     }
   }

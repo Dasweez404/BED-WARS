@@ -163,7 +163,7 @@ function netCommon(){
 function netTileDiff(B){
   const tl=[];
   for(let i=0;i<floorT.length;i++){
-    const hf=Math.round(hpF[i]*2)/2, hw=Math.round(hpW[i]*2)/2;
+    const hf=Math.round(hpF[i]*2)/2, hw=Math.ceil(hpW[i]*2)/2;
     if(floorT[i]!==B.f[i]||wallT[i]!==B.w[i]||hf!==B.hf[i]||hw!==B.hw[i]||ownF[i]!==B.of[i]||ownW[i]!==B.ow[i]){
       tl.push(i,floorT[i],wallT[i],hf,hw,ownF[i],ownW[i]); B.f[i]=floorT[i]; B.w[i]=wallT[i]; B.hf[i]=hf; B.hw[i]=hw; B.of[i]=ownF[i]; B.ow[i]=ownW[i];
     }

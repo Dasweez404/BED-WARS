@@ -114,7 +114,7 @@ function createPirate(td,opts){
   for(const z of [-.13,.13]){ const piv=new THREE.Group(); piv.position.set(0,.3,z); body.add(piv); mesh(PG.leg,piv,0,0,0); u.legs.push(piv); }
   const bub=new THREE.Mesh(GEO.sphere,new THREE.MeshStandardMaterial({color:0xbfe3ff,transparent:true,opacity:.35,roughness:.1})); bub.scale.setScalar(1.15); bub.position.y=.75; bub.visible=false; g.add(bub); u.bubble=bub;
   const ice=new THREE.Mesh(GEO.box,new THREE.MeshStandardMaterial({color:0xbfeaff,transparent:true,opacity:.45,roughness:.2})); ice.scale.set(1,1.8,1); ice.position.y=.8; ice.visible=false; g.add(ice); u.ice=ice;
-  u.base=opts.scale||.46; u.blink=Math.random()*3; g.userData=u; g.scale.setScalar(u.base);
+  u.base=opts.scale||.42; u.blink=Math.random()*3; g.userData=u; g.scale.setScalar(u.base);
   return g;
 }
 const TINT={frozen:new THREE.Color('#9ad8f5'),root:new THREE.Color('#d6dde6'),slow:new THREE.Color('#d8dee9'),none:new THREE.Color('#ffffff')};

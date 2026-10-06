@@ -298,7 +298,7 @@ function createShark(){
 function updateSharkM(s,m){ m.position.set(s.x*U,-1.0,s.y*U); m.rotation.y=-s.ang; m.userData.tail.rotation.y=Math.sin(s.ph*1.4)*.5; m.rotation.z=s.bite>0?-.35:0; m.rotation.x=Math.sin(s.ph*.7)*.05; }
 function createDrop(d){ const col={bronze:'#cd7f32',silver:'#d6dde6',gold:'#fbbf24'}[d.kind]; const m=new THREE.Mesh(GEO.cyl,new THREE.MeshStandardMaterial({color:col,metalness:.6,roughness:.3,emissive:col,emissiveIntensity:.25})); m.scale.set(.26,.05,.26); m.rotation.x=Math.PI/2; const g=new THREE.Group(); g.add(m); g.userData={m}; return g; }
 function updateDropM(d,g){ g.position.set(d.x*U,.3+d.h*U+Math.sin(d.ph)*.05,d.y*U); g.userData.m.rotation.y=0; g.rotation.y=d.ph*1.5; g.visible=d.t>2||Math.floor(game.t*8)%2===0; }
-function createGuard(g){ return createPirate({light:TEAMS[g.team].light,col:TEAMS[g.team].col,dark:TEAMS[g.team].dark},{scale:.36,neutral:true}); }
+function createGuard(g){ return createPirate({light:TEAMS[g.team].light,col:TEAMS[g.team].col,dark:TEAMS[g.team].dark},{scale:.33,neutral:true}); }
 function updateGuardM(g,m){
   const u=m.userData; m.position.set(g.x*U,0,g.y*U); m.rotation.y=-(g.ang||0);
   const mv=Math.hypot(g.vx||0,g.vy||0)>5; const sw=Math.sin(g.ph*1.4)*(mv?.9:0); u.legs[0].rotation.z=sw; u.legs[1].rotation.z=-sw; u.armL.rotation.z=-sw*.9;
