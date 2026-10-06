@@ -121,7 +121,7 @@ function makeRoster(){
   const shuf=a=>{ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
   const bycat=c=>ids.filter(id=>SHOPMAP[id].cat===c);
   // garanties : au moins 3 armes à distance, 3 objets de défense, 3 gadgets offensifs
-  const mn=Math.max(3,Math.round(n/7)); pick.push('boat'); for(const c of ['Armes','Défense','Gadgets','Outils']) pick.push(...shuf(bycat(c)).filter(x=>!pick.includes(x)).slice(0,mn));
+  const mn=Math.max(3,Math.round(n/7)); for(const g of ['boat','trampo','launcher']) if(poolIds_set.has(g)&&!pick.includes(g)) pick.push(g); for(const c of ['Armes','Défense','Gadgets','Outils']) pick.push(...shuf(bycat(c)).filter(x=>!pick.includes(x)).slice(0,mn));
   for(const id of shuf(ids)){ if(pick.length>=n) break; if(!pick.includes(id)) pick.push(id); }
   ROSTER=new Set(pick.slice(0,Math.max(n,4*mn+1)));
 }

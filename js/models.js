@@ -63,19 +63,16 @@ const DEF_LOOK={skin:0,hat:0,hair:0,face:0,patch:1,shape:1,brow:1};
 const lookOf=l=>Object.assign({},DEF_LOOK,l||{});
 const lookKey=l=>l.skin+'.'+l.hat+'.'+l.hair+'.'+l.face+'.'+l.patch+'.'+l.shape+'.'+l.brow;
 function randomLook(){ const r=n=>Math.floor(Math.random()*n); return {skin:r(SKINS.length),hat:r(HATS.length),hair:r(HAIRS.length),face:r(3),patch:Math.random()<.5?1:0,shape:Math.random()<.7?1:0,brow:r(4)}; }
-function headGeo(l){
-  const key='h'+lookKey(l); if(PG[key]) return PG[key];
-  const S=GEO.sphere, Cy=GEO.cyl, skin=SKINS[l.skin], hair=HAIRS[l.hair], smile=new THREE.TorusGeometry(.085,.017,5,10,Math.PI);
-  const sq=l.shape===1, fx=sq?.4:.37;
-  const P=[sq?{geo:GEO.box,pos:[0,0,0],scale:[.8,.74,.8],color:skin}:{geo:S,pos:[0,0,0],scale:[.42,.38,.42],color:skin},
-    {geo:S,pos:[.37,-.12,.25],scale:[.05,.045,.09],color:'#ff98ae'},{geo:S,pos:[.37,-.12,-.25],scale:[.05,.045,.09],color:'#ff98ae'},
-    {geo:S,pos:[.43,-.03,0],scale:[.05,.05,.05],color:'#ffab94'},
-    {geo:smile,pos:[.41,-.12,0],rot:[0,Math.PI/2,Math.PI],color:'#7a2a1a'},
-    {geo:S,pos:[.18,.36,.1],scale:[.1,.07,.1],color:'#e8b04a'},{geo:S,pos:[-.3,-.1,0],scale:[.08,.12,.08],color:hair}];
-  if(l.brow>0){ const th=.035+.035*l.brow; for(const z of [-1,1]) if(!(l.patch&&z<0)) P.push({geo:GEO.box,pos:[fx+.01,.2,z*.17],scale:[.03,th,.2],rot:[z*.12,0,0],color:'#2a1a12'}); }
-  if(l.patch){ P.push({geo:S,pos:[fx,.06,-.17],scale:[.045,.12,.12],color:'#15121a'},{geo:Cy,pos:[0,.1,0],scale:[.41,.014,.41],rot:[0,0,.35],color:'#15121a'}); }
-  if(l.face===1) P.push({geo:S,pos:[.3,-.27,0],scale:[.26,.17,.3],color:hair},{geo:S,pos:[.43,-.2,0],scale:[.06,.07,.1],color:hair});
-  if(l.face===2) P.push({geo:S,pos:[.43,-.065,.07],scale:[.045,.03,.09],color:hair},{geo:S,pos:[.43,-.065,-.07],scale:[.045,.03,.09],color:hair});
+function headGeo(l,td){
+  const key='h'+lookKey(l)+td.col; if(PG[key]) return PG[key];
+  const B=GEO.box, hair=HAIRS[l.hair], skin=td.col, light=td.light, dk='#15121a';
+  const P=[{geo:B,pos:[0,0,0],scale:[.82,.78,.82],color:skin},
+    {geo:B,pos:[.41,-.08,.27],scale:[.02,.09,.1],color:light},{geo:B,pos:[.41,-.08,-.27],scale:[.02,.09,.1],color:light},
+    {geo:B,pos:[.415,-.2,0],scale:[.02,.035,.15],color:'#3a1f16'}];
+  if(l.brow>0){ const th=.03+.03*l.brow; for(const z of [-1,1]) if(!(l.patch&&z<0)) P.push({geo:B,pos:[.415,.2,z*.2],scale:[.03,th,.24],rot:[z*.1,0,0],color:'#1b1512'}); }
+  if(l.patch){ P.push({geo:B,pos:[.415,.07,-.2],scale:[.03,.2,.21],color:dk},{geo:B,pos:[0,.18,0],scale:[.84,.045,.84],rot:[0,0,.2],color:dk}); }
+  if(l.face===1) P.push({geo:B,pos:[.33,-.31,0],scale:[.2,.2,.7],color:hair},{geo:B,pos:[.435,-.17,0],scale:[.03,.05,.3],color:hair});
+  if(l.face===2) P.push({geo:B,pos:[.425,-.115,.08],scale:[.04,.05,.15],color:hair},{geo:B,pos:[.425,-.115,-.08],scale:[.04,.05,.15],color:hair});
   return PG[key]=mergeParts(P);
 }
 function hatParts(kind,hatc,trim,light,hair){
@@ -92,11 +89,9 @@ function pirateVariant(td,neutral,look){
   const l=lookOf(look), key=(neutral?'n':'t')+td.col+'|'+lookKey(l); if(PG[key]) return PG[key];
   const B=GEO.box, S=GEO.sphere, Cy=GEO.cyl, shirt=neutral?'#f1ece0':td.col, trim=neutral?td.col:'#ffffff', hatc=td.col, light=td.light;
   const v={};
-  v.body=mergeParts([{geo:B,pos:[0,.5,0],scale:[.46,.38,.5],color:shirt},{geo:B,pos:[0,.42,0],scale:[.475,.06,.525],color:trim},{geo:B,pos:[0,.56,0],scale:[.475,.06,.525],color:trim},
-    {geo:B,pos:[0,.33,0],scale:[.5,.06,.54],color:'#3b2a1c'},{geo:B,pos:[.26,.33,0],scale:[.03,.07,.1],color:'#fbbf24'},{geo:S,pos:[-.27,.5,0],scale:[.16,.16,.2],color:shirt}]);
-  v.hat=mergeParts(hatParts(l.hat,hatc,trim,light,HAIRS[l.hair]));
-  const arm=[{geo:Cy,pos:[0,-.09,0],scale:[.075,.2,.075],color:shirt},{geo:Cy,pos:[0,-.2,0],scale:[.08,.03,.08],color:trim},{geo:S,pos:[0,-.26,0],scale:[.075,.075,.075],color:SKINS[l.skin]}];
-  v.arm=mergeParts(arm);
+  v.body=mergeParts([{geo:B,pos:[0,.28,0],scale:[.46,.5,.38],color:td.dark},{geo:B,pos:[0,.07,0],scale:[.475,.07,.395],color:td.col},{geo:B,pos:[.2,.4,0],scale:[.08,.08,.2],color:td.light}]);
+  v.hat=mergeParts(hatParts(l.hat,td.dark,'#ffffff',light,HAIRS[l.hair]));
+  v.arm=mergeParts([{geo:B,pos:[0,-.2,0],scale:[.2,.2,.2],color:td.light},{geo:B,pos:[0,-.2,0],scale:[.21,.05,.21],color:td.col}]);
   return PG[key]=v;
 }
 function buildPirateGeos(){
@@ -110,14 +105,15 @@ function createPirate(td,opts){
   const mat=new THREE.MeshStandardMaterial({vertexColors:true,flatShading:true,roughness:.75}); const u={mats:{shirt:mat,skin:mat,dark:mat,hat:mat,band:mat},mat,legs:[],eyes:[]};
   const mesh=(geo,par,x,y,z)=>{ const m=new THREE.Mesh(geo,mat); m.position.set(x,y,z); m.castShadow=true; par.add(m); return m; };
   const body=new THREE.Group(); body.position.y=.07; g.add(body); u.body=body; mesh(v.body,body,0,0,0);
-  const head=new THREE.Group(); head.position.set(.03,.84,0); body.add(head); u.head=head; mesh(headGeo(lk),head,0,0,0);
-  const ex=lk.shape===1?.4:.37; u.eyes=[mesh(PG.eye,head,ex,.06,.17)]; if(!lk.patch) u.eyes.push(mesh(PG.eye,head,ex,.06,-.17)); u.eyes.forEach(q=>q.castShadow=false);
-  const hat=mesh(v.hat,head,0,.36,0); hat.rotation.z=-.1; hat.position.x=-.02; u.hat=hat;
-  for(const z of [-1,1]){ const piv=new THREE.Group(); piv.position.set(0,.65,z*.29); body.add(piv); mesh(v.arm,piv,0,0,0); if(z>0){ u.armR=piv; const an=new THREE.Group(); an.position.set(.0,-.26,0); an.scale.setScalar(1.6); piv.add(an); u.anchor=an; } else u.armL=piv; }
-  for(const z of [-.13,.13]){ const piv=new THREE.Group(); piv.position.set(0,.3,z); body.add(piv); mesh(PG.leg,piv,0,0,0); u.legs.push(piv); }
-  const bub=new THREE.Mesh(GEO.sphere,new THREE.MeshStandardMaterial({color:0xbfe3ff,transparent:true,opacity:.35,roughness:.1})); bub.scale.setScalar(1.15); bub.position.y=.75; bub.visible=false; g.add(bub); u.bubble=bub;
-  const ice=new THREE.Mesh(GEO.box,new THREE.MeshStandardMaterial({color:0xbfeaff,transparent:true,opacity:.45,roughness:.2})); ice.scale.set(1,1.8,1); ice.position.y=.8; ice.visible=false; g.add(ice); u.ice=ice;
-  u.base=opts.scale||.42; u.blink=Math.random()*3; g.userData=u; g.scale.setScalar(u.base);
+  const head=new THREE.Group(); head.position.set(0,.9,0); body.add(head); u.head=head; mesh(headGeo(lk,td),head,0,0,0);
+  const ex=.405; u.eyes=[mesh(PG.eye,head,ex,.07,.2)]; if(!lk.patch) u.eyes.push(mesh(PG.eye,head,ex,.07,-.2)); u.eyes.forEach(q=>q.castShadow=false);
+  const hat=mesh(v.hat,head,0,.37,0); hat.rotation.z=-.08; u.hat=hat;
+  for(const z of [-1,1]){ const piv=new THREE.Group(); piv.position.set(0,.46,z*.35); body.add(piv); mesh(v.arm,piv,0,0,0); if(z>0){ u.armR=piv; const an=new THREE.Group(); an.position.set(.0,-.2,0); an.scale.setScalar(1.6); piv.add(an); u.anchor=an; } else u.armL=piv; }
+  for(let k=0;k<2;k++){ const piv=new THREE.Group(); body.add(piv); u.legs.push(piv); }
+  { const sh=new THREE.Mesh(GEO.disc,new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:.28,depthWrite:false})); sh.position.y=.01; sh.scale.setScalar(.42); g.add(sh); u.sh=sh; }
+  const bub=new THREE.Mesh(GEO.sphere,new THREE.MeshStandardMaterial({color:0xbfe3ff,transparent:true,opacity:.35,roughness:.1})); bub.scale.setScalar(1.15); bub.position.y=.85; bub.visible=false; g.add(bub); u.bubble=bub;
+  const ice=new THREE.Mesh(GEO.box,new THREE.MeshStandardMaterial({color:0xbfeaff,transparent:true,opacity:.45,roughness:.2})); ice.scale.set(1,1.8,1); ice.position.y=.85; ice.visible=false; g.add(ice); u.ice=ice;
+  u.base=opts.scale||.46; u.blink=Math.random()*3; g.userData=u; g.scale.setScalar(u.base);
   return g;
 }
 const TINT={frozen:new THREE.Color('#9ad8f5'),root:new THREE.Color('#d6dde6'),slow:new THREE.Color('#d8dee9'),none:new THREE.Color('#ffffff')};
@@ -220,3 +216,6 @@ function renderPreview(t){
   for(let y=0;y<H;y++){ let si=(H-1-y)*W*4, di=y*W*4; for(let x=0;x<W;x++,si+=4,di+=4){ dst[di]=_LUT[src[si]]; dst[di+1]=_LUT[src[si+1]]; dst[di+2]=_LUT[src[si+2]]; dst[di+3]=255; } }
   PV.ctx.putImageData(PV.img,0,0);
 }
+
+const _heldAnimCube=heldAnim;
+heldAnim=function(e,m){ _heldAnimCube(e,m); const u=m.userData; if(u.sh){ const air=Math.max(0,e.z-groundH(e)); u.sh.position.y=.01-(air*U)/(m.scale.y||1); u.sh.scale.setScalar(.42*(1-Math.min(.45,air*U*.25))); } };

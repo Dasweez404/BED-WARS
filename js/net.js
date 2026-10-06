@@ -174,7 +174,7 @@ function packDyn(list){
 function netCommon(){
   return {t:'s',n:++NET.seq,gt:Math.round(game.t*100)/100,st:game.state,wt:game.winTeam,e:ents.map(packEntDyn),
     td:TD.map(t=>t.coreAlive?1:0),sp:spawners.map(s=>Object.values(s.types).map(t=>t.stock)),
-    pj:packDyn(projs),bm:packDyn(bombs),tr:packDyn(traps),gd:packDyn(guards),ch:packDyn(chickens),sh:packDyn(shields),hk:packDyn(hooks),pr:packDyn(pearls),sk:packDyn(sharks),dr:packDyn(drops),bt:packDyn(boats),
+    pj:packDyn(projs),bm:packDyn(bombs),tr:packDyn(traps),gd:packDyn(guards),ch:packDyn(chickens),sh:packDyn(shields),hk:packDyn(hooks),pr:packDyn(pearls),sk:packDyn(sharks),dr:packDyn(drops),bt:packDyn(boats),cn:packDyn(cannons),
     ev:{c:EV.cur?{id:EV.cur.id,t:Math.round(EV.cur.t*10)/10,dur:EV.cur.dur}:null,rush:EV.rush,fog:Math.round(EV.fog*100)/100,dark:Math.round(EV.dark*100)/100}};
 }
 function netTileDiff(B){
@@ -231,7 +231,7 @@ function netApplySnap(m){
     if(p.h<NET.lastHp-.05){ game.hurtFx=.4; shake=Math.max(shake,5+(NET.lastHp-p.h)); } NET.lastHp=p.h; }
   if(firstSnap){ NET.snapped=true; for(const [,mm] of entM) scene.remove(mm); entM.clear(); }
   projs=applyDyn(projs,m.pj); bombs=applyDyn(bombs,m.bm); traps=applyDyn(traps,m.tr); guards=applyDyn(guards,m.gd); chickens=applyDyn(chickens,m.ch);
-  shields=applyDyn(shields,m.sh); hooks=applyDyn(hooks,m.hk); pearls=applyDyn(pearls,m.pr); sharks=applyDyn(sharks,m.sk); drops=applyDyn(drops,m.dr); boats=applyDyn(boats,m.bt||[]);
+  shields=applyDyn(shields,m.sh); hooks=applyDyn(hooks,m.hk); pearls=applyDyn(pearls,m.pr); sharks=applyDyn(sharks,m.sk); drops=applyDyn(drops,m.dr); boats=applyDyn(boats,m.bt||[]); cannons=applyDyn(cannons,m.cn||[]);
   for(const bt of boats){ bt.rider=bt.ri>=0?ents[bt.ri]:null; if(bt.rider) bt.rider.riding=bt; }
   for(const e of ents) if(e.riding&&(!e.riding.rider||e.riding.rider!==e)) e.riding=null;
   if(m.own){ const me=ents[m.own.i]; if(m.own.rd&&!me.riding) me.riding=boats.find(b=>b.rider===me)||{x:me.x,y:me.y}; if(!m.own.rd) me.riding=null; }
@@ -276,7 +276,7 @@ function netClientFrame(dt){
       if(NET.ff||!e.alive||e.riding){ const kk=Math.min(1,dt*14); e.x+=ex*kk; e.y+=ey*kk; } else if(d>170){ const kk=Math.min(1,dt*8); e.x+=ex*kk; e.y+=ey*kk; } }
     else { e.x+=(e._tx-e.x)*k; e.y+=(e._ty-e.y)*k; }
     if(e._tz!==undefined) e.z+=(e._tz-e.z)*Math.min(1,dt*20); }
-  for(const L of [projs,bombs,traps,guards,chickens,sharks,drops,pearls,boats]) for(const o of L){ if(o._tx!==undefined){ o.x+=(o._tx-o.x)*k; o.y+=(o._ty-o.y)*k; } }
+  for(const L of [projs,bombs,traps,guards,chickens,sharks,drops,pearls,boats,cannons]) for(const o of L){ if(o._tx!==undefined){ o.x+=(o._tx-o.x)*k; o.y+=(o._ty-o.y)*k; } }
   NET.sendT-=dt; if(NET.sendT<=0){ NET.sendT=1/30; netSend({t:'in',ix:inp.ix,iy:inp.iy,wx:Math.round(inp.wx),wy:Math.round(inp.wy),down:inp.down,sel:inp.sel,clk:inp.clk,px:Math.round(me.x*10)/10,py:Math.round(me.y*10)/10}); inp.clk=0; }
 }
 /* hôte : la position d'un invité est pilotée par lui (validée), sauf en cas de force extérieure */

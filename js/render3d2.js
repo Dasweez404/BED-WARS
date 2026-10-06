@@ -1,11 +1,11 @@
 'use strict';
 /* =====================  RENDU 3D : navire, îles, objets dynamiques, effets, caméra  ===================== */
-const entM=new Map(), guardM=new Map(), chickM=new Map(), projM=new Map(), bombM=new Map(), trapM=new Map(), shieldM=new Map(), hookM=new Map(), pearlM=new Map(), pullM=new Map(), sharkM=new Map(), dropM=new Map(), boatM=new Map();
+const entM=new Map(), guardM=new Map(), chickM=new Map(), projM=new Map(), bombM=new Map(), trapM=new Map(), shieldM=new Map(), hookM=new Map(), pearlM=new Map(), pullM=new Map(), sharkM=new Map(), dropM=new Map(), boatM=new Map(), cannonM=new Map();
 let coreM=[], propM=[], propInst=[], ringPool=[], beamPool=[], playerRing=null, ghostMesh=null, shipGroup=null, jrTex=null, ambient=null, syncFrame=0, frameN=0;
 let padInst=null, padList=[];
 
 function clearDynamic(){
-  for(const mp of [entM,guardM,chickM,projM,bombM,trapM,shieldM,hookM,pearlM,pullM,sharkM,dropM,boatM]){ for(const [,m] of mp) scene.remove(m); mp.clear(); }
+  for(const mp of [entM,guardM,chickM,projM,bombM,trapM,shieldM,hookM,pearlM,pullM,sharkM,dropM,boatM,cannonM]){ for(const [,m] of mp) scene.remove(m); mp.clear(); }
   for(const m of coreM) scene.remove(m); coreM=[];
   for(const g of propM) scene.remove(g.m); propM=[];
   for(const m of propInst) scene.remove(m); propInst=[];
@@ -445,7 +445,7 @@ function render3d(dt){
   qualityTick(dt); frameN++;
   sigTick++; if(sigTick%3===0||popActive){ const sig=(popActive&&sigTick%2)?worldSig:worldSignature(); if(sig!==worldSig||(popActive&&sigTick%2===0)){ rebuildWorld(); worldSig=sig; renderer.shadowMap.needsUpdate=true; } }
   updateSea(game.t); updateShip(); updateAmbient(dt); syncEnts(dt); syncCores(); syncPads(); syncProps();
-  sync(boatM,boats,createBoat,updateBoatM); sync(sharkM,sharks,createShark,updateSharkM); sync(dropM,drops,createDrop,updateDropM);
+  sync(boatM,boats,createBoat,updateBoatM); sync(cannonM,cannons,createCannonM,updateCannonM); sync(sharkM,sharks,createShark,updateSharkM); sync(dropM,drops,createDrop,updateDropM);
   sync(guardM,guards,createGuard,updateGuardM); sync(chickM,chickens,createCrab,updateCrabM);
   sync(projM,projs,createProj,updateProjM); sync(bombM,bombs,createBomb,updateBombM); sync(trapM,traps,createTrap,updateTrapM);
   sync(shieldM,shields,createShield,updateShieldM); sync(hookM,hooks,createHook,updateHookM); sync(pearlM,pearls,createPearl,(p,m)=>{ m.position.set(p.x*U,.5,p.y*U); m.rotation.y=game.t*6; });

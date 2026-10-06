@@ -27,7 +27,7 @@ const ITEMS=[
   {id:'sniper',n:'Mousquet long',ico:'🎯',col:'#a5f3fc'},{id:'rocket',n:'Canon de poche',ico:'🧨',col:'#f87171'},{id:'woolgun',n:'Lance-filet',ico:'🕸️',col:'#d6dde6'},
   {id:'boomerang',n:'Hache de lancer',ico:'🪓',col:'#fbbf24'},{id:'bubble',n:'Lance-écume',ico:'🧼',col:'#bfdbfe'},{id:'ice',n:'Harpon givré',ico:'❄️',col:'#7dd3fc'},{id:'flame',n:'Torche cracheuse',ico:'🔥',col:'#fb923c'},
   {id:'grap',n:'Grappin d\'abordage',ico:'🪝',col:'#fde68a'},{id:'jet',n:'Perroquet porteur',ico:'🦜',col:'#4ade80'},{id:'dash',n:'Élan du flibustier',ico:'💨',col:'#e0f2fe'},
-  {id:'trampo',n:'Hamac rebondissant',ico:'🛏️',col:'#f472b6'},{id:'tp',n:'Boussole ensorcelée',ico:'🧭',col:'#c084fc'},{id:'bridge',n:'Planche d\'abordage',ico:'🪵',col:'#b98a52'},
+  {id:'trampo',n:'Trampoline (hamac)',ico:'🛏️',col:'#f472b6'},{id:'tp',n:'Boussole ensorcelée',ico:'🧭',col:'#c084fc'},{id:'bridge',n:'Planche d\'abordage',ico:'🪵',col:'#b98a52'},
   {id:'springs',n:'Bottes de mousse',ico:'👢',col:'#4ade80'},{id:'cloak',n:'Brume magique',ico:'🌫️',col:'#e5e7eb'},{id:'haste',n:'Rhum de contrebande',ico:'🍾',col:'#38bdf8'},
   {id:'storm',n:'Orage',ico:'🌩️',col:'#fde047'},{id:'barrage',n:'Salve de canons',ico:'🎇',col:'#f87171'},{id:'cluster',n:'Baril à grappes',ico:'🎆',col:'#16a34a'},{id:'bomb',n:'Baril de poudre',ico:'🛢️',col:'#92400e'},{id:'repel',n:'Vague scélérate',ico:'🌊',col:'#38bdf8'},
   {id:'vortex',n:'Maelström',ico:'🌀',col:'#7c3aed'},{id:'kraken',n:'Tentacule du kraken',ico:'🐙',col:'#34d399'},{id:'anchor',n:'Ancre',ico:'⚓',col:'#9ca3af'},{id:'chicken',n:'Crabe kamikaze',ico:'🦀',col:'#ef4444'},{id:'heal',n:'Ration de bord',ico:'🍖',col:'#ef4444'},
@@ -102,9 +102,10 @@ function applyClass(e){
 }
 const MODES={solo:{n:'Chacun pour soi',d:'4 équipages, 1 pirate chacun.'},duo:{n:'Équipes de 2',d:'Tu es accompagné d\'un coéquipier bot. 2 pirates par équipage, un coffre partagé.'}};
 const OPT_RES=[{n:'Lentes',v:.7},{n:'Normales',v:1},{n:'Rapides',v:1.5}];
-const OPT_START=[{n:'Aucun',r:{}},{n:'Petit pécule',r:{bronze:40,silver:10}},{n:'Butin de départ',r:{bronze:120,silver:40,gold:6,diamond:3}}];
+const DIA_INT=[Infinity,45,26,15];
+const OPT_START=[{n:'Aucun',r:{}},{n:'Laboratoire (test)',r:{bronze:400,silver:200,gold:40,diamond:80}},{n:'Petit pécule',r:{bronze:40,silver:10}},{n:'Butin de départ',r:{bronze:120,silver:40,gold:6,diamond:3}}];
 const OPT_CORE=[{n:'Fragiles',v:.6},{n:'Normaux',v:1},{n:'Solides',v:1.7}];
-let game={state:'menu',diff:'normal',cls:'matelot',look:{skin:0,hat:0,hair:0,face:0,patch:1},pname:'Toi',opts:{style:'2d',mode:'solo',map:'classic',res:1,start:0,core:1,stack:3,roster:40,evf:2,ev:{coins:1,curse:1,shark:1,storm:1,volcano:1,fog:1,kraken:1,rush:1}},t:0,win:false,hurtFx:0,hitmark:0,flash:0,flashCol:'#fff'};
+let game={state:'menu',diff:'normal',cls:'matelot',look:{skin:0,hat:0,hair:0,face:0,patch:1},pname:'Toi',opts:{style:'3d',mode:'solo',map:'classic',res:1,start:0,core:1,stack:3,roster:40,evf:2,ev:{coins:1,curse:1,shark:1,storm:1,volcano:1,fog:1,kraken:1,rush:1}},t:0,win:false,hurtFx:0,hitmark:0,flash:0,flashCol:'#fff'};
 let player=null;
 let shake=0, banner={txt:'',col:'#fff',t:0,max:3};
 let selId='block', selAnim=0;
@@ -196,7 +197,7 @@ function makeEnt(team,isBot,name){
   return {team,isBot,name,x:0,y:0,z:0,vx:0,vy:0,vz:0,ix:0,iy:0,ang:0,hp:20,alive:false,elim:false,resp:0,inv:0,flash:0,
     res:{bronze:0,silver:0,gold:0,diamond:0},blocks:{2:8,3:0,4:0,5:0},bsel:2,pick:0,sword:0,ws:{},slow:0,
     grap:0,jet:0,bomb:0,repel:0,shield:0,own:{},am:{},held:'sword',
-    up:{fb:0,fs:0,hp:0,sp:0,ar:0,gold:0,core:0},
+    up:{fb:0,fs:0,hp:0,sp:0,ar:0,gold:0,core:0,jmp:0,reg:0,vamp:0,rel:0,dmg:0,loot:0,dia:0},
     cd:{atk:0,mine:0,place:0,bow:0,gad:0},jetT:0,voidT:0,pull:null,grace:0,swing:0,swingMax:.2,kills:0,deaths:0,
     root:0,flagBuff:0,lastSafe:null,lastSafeT:0,bubble:0,cloak:0,haste:0,springT:0,frozen:0,slip:0,sdx:0,sdy:0,squash:0,muzzle:0,stepPh:0,stepT:0,burn:0,
     lastBy:null,lastByT:0,sinceHurt:99,ai:null,hook:null,aegis:0,slot:0,bar:[],pack:[],cls:'matelot',look:null};
@@ -233,7 +234,8 @@ function newGame(){
     spawners.push({x:td.padTile[0],y:td.padTile[1],kind:'base',team:i,types:{
       bronze:{t:0,stock:0,cap:Infinity,int:()=>FB_INT[U().fb]*(td.ent.isBot?getD().income:1)},
       silver:{t:0,stock:0,cap:Infinity,int:()=>FS_INT[U().fs]*(td.ent.isBot?getD().income:1)},
-      gold:{t:0,stock:0,cap:Infinity,int:()=>GOLD_INT[U().gold]}}});
+      gold:{t:0,stock:0,cap:Infinity,int:()=>GOLD_INT[U().gold]},
+      diamond:{t:0,stock:0,cap:Infinity,int:()=>DIA_INT[U().dia]}}});
   });
   player=ents[0]; resetEvents(); makeRoster();
   for(const e of ents){ if(e===player){ e.cls=CLASSES[game.cls]?game.cls:'matelot'; e.look=Object.assign({},game.look); e.name=(game.pname||'Toi').slice(0,14); } else { e.cls=CLS_IDS[Math.floor(Math.random()*CLS_IDS.length)]; e.look=randomLook(); }
@@ -309,8 +311,9 @@ function inShield(x,y,team){
 function hurt(e,amount,by,kx,ky){
   if(!e.alive||e.inv>0||e.aegis>0) return;
   if(by&&by.isBot&&!e.isBot) amount*=getD().dmg;
+  if(by&&by.up&&by.up.dmg) amount*=1+.08*by.up.dmg;
   amount*=(1-.12*e.up.ar)*cv(e,'def')*(e.plate>0?.4:1)*(e.curse>0?1.3:1)*(by&&by.rage>0?1.5:1)*(e.tiny>0?1.3:1)*(e.giant>0?.85:1)*(by&&by.giant>0?1.3:1); kx*=cv(e,'kb'); ky*=cv(e,'kb');
-  e.hp-=amount; e.vx+=kx; e.vy+=ky; e.lastBy=by; e.lastByT=5; e.sinceHurt=0;
+  e.hp-=amount; if(by&&by!==e&&by.up&&by.up.vamp) by.hp=Math.min(maxhp(by),by.hp+amount*.08*by.up.vamp); e.vx+=kx; e.vy+=ky; e.lastBy=by; e.lastByT=5; e.sinceHurt=0;
   if(amount>0){
     e.flash=.15; burst(e.x,e.y-e.z,'#ff6b6b',5,120,.4,3);
     if(amount>=.9) floatTxt(e.x+rnd(-8,8),e.y-26-e.z,'-'+Math.round(amount),e===player?'#ff6b6b':'#fff',amount>6?18:14);
@@ -498,7 +501,7 @@ function doHammer(e){
   }
 }
 function wst(e,id){ return e.ws[id]||(e.ws[id]={a:GUNS[id].mag,r:0,cd:0,b:0,n:0,last:-9}); }
-function startReload(e,id){ const g=GUNS[id],s=wst(e,id); if(s.r>0||s.a>=g.mag) return false; s.r=g.reload*(e.haste>0?.8:1)*cv(e,'rel'); sfx('reload',e.x,e.y); return true; }
+function startReload(e,id){ const g=GUNS[id],s=wst(e,id); if(s.r>0||s.a>=g.mag) return false; s.r=g.reload*(e.haste>0?.8:1)*cv(e,'rel')*(1-.12*(e.up.rel||0)); sfx('reload',e.x,e.y); return true; }
 function fireGun(e,id){
   const g=GUNS[id]; if(!g||!e.own[id]) return false;
   const s=wst(e,id);
@@ -561,7 +564,7 @@ function jump(e,power){
   if(e.plume>0&&e.z>groundH(e)+3&&e.vz<=140&&!e.pull&&e.bubble<=0&&e.frozen<=0&&!e.riding&&e.alive){ e.plume--; e.vz=320; e.squash=-.3; sfx('jump',e.x,e.y); burst(e.x,e.y+6-e.z,'#bbf7d0',8,90,.5,3); ring(e.x,e.y+8-e.z,T*.7,'#4ade80',.25); floatTxt(e.x,e.y-40,'×'+e.plume,'#4ade80',13); return; }
   if(e.bubble>0||e.root>0||e.z>groundH(e)+1||e.vz>0||e.pull||e.frozen>0||e.riding) return;
   if(fl(Math.floor(e.x/T),Math.floor(e.y/T))===0&&e.jetT<=0){ if(e.waterJumps>=1) return; e.waterJumps=(e.waterJumps||0)+1; } // un seul saut de rattrapage au-dessus de l'eau
-  sfx('jump',e.x,e.y); e.vz=(power||(e.springT>0?540:320))*cv(e,'jump'); e.squash=-.5; burst(e.x,e.y+6-e.z,'#e5e7eb',6,70,.3,3);
+  sfx('jump',e.x,e.y); e.vz=(power||(e.springT>0?540:320))*cv(e,'jump')*(1+.1*(e.up.jmp||0)); e.squash=-.5; burst(e.x,e.y+6-e.z,'#e5e7eb',6,70,.3,3);
 }
 function useGadget(e,id,wx,wy){
   if(e.cd.gad>0||(e.am[id]||0)<=0) return false;
@@ -803,7 +806,7 @@ const SHOP=[
   mk('grap','Gadgets',e=>({name:'Grappin d\'abordage ×3',desc:'Accroche un bloc ou un ennemi et te tire (portée 11 cases).',cost:{silver:8}}),e=>e.grap+=3),
   mk('jet','Gadgets',e=>({name:'Perroquet porteur ×1',desc:'Vol stationnaire 4 s : traverse la mer.',cost:{gold:2}}),e=>e.jet+=1),
   gadItem('dash','Élan du flibustier','Fonce en avant, sans tomber pendant l\'élan.',{bronze:25},3),
-  gadItem('trampo','Hamac rebondissant','Pose un trampoline qui te propulse très haut.',{silver:6},2),
+  gadItem('trampo','Trampoline (hamac)','Pose un trampoline qui te propulse très haut.',{silver:6},2),
   gadItem('tp','Boussole ensorcelée','Lance-la : tu te téléportes là où elle tombe.',{gold:1},1),
   gadItem('bridge','Planche d\'abordage','Construit instantanément 8 blocs de pont devant toi.',{silver:10},1),
   mk('bomb','Gadgets',e=>({name:'Baril de poudre ×1',desc:'Explose après 1,7 s. Détruit blocs et ponts.',cost:{silver:6}}),e=>e.bomb+=1),
@@ -846,6 +849,13 @@ const SHOP=[
   upItem('sp','Agilité',3,[3,5,8],['+8% vitesse','+8% vitesse','+8% vitesse']),
   upItem('ar','Armure',3,[3,5,8],['-12% dégâts','-12% dégâts','-12% dégâts']),
   upItem('core','Blindage du coffre',3,[4,6,9],['Le coffre au trésor subit -20% de dégâts','-35% de dégâts','-50% de dégâts'],null),
+  upItem('jmp','Ressorts aux bottes',3,[3,5,8],['Sauts +10 %','Sauts +20 %','Sauts +30 %']),
+  upItem('reg','Régénération',3,[3,5,8],['Soin plus rapide : +0,5 PV/s, délai −1,1 s','+1 PV/s, délai −2,2 s','+1,5 PV/s, délai −3,3 s']),
+  upItem('vamp','Vampirisme',3,[4,6,9],['Tu récupères 8 % des dégâts infligés','16 % des dégâts infligés','24 % des dégâts infligés']),
+  upItem('rel','Rechargement express',3,[3,5,8],['Recharge des armes −12 %','−24 %','−36 %']),
+  upItem('dmg','Force du capitaine',3,[4,6,9],['+8 % de dégâts infligés','+16 % de dégâts infligés','+24 % de dégâts infligés']),
+  upItem('loot','Poches profondes',3,[3,5,8],['+15 % de ressources ramassées','+30 %','+45 %']),
+  upItem('dia','Forge de diamants',3,[5,8,12],['Ta base produit un diamant toutes les 45 s','…toutes les 26 s','…toutes les 15 s']),
   upItem('gold','Forge d\'or',2,[6,12],['Ta base produit de l\'or (1 / 14 s)','L\'or arrive plus vite (1 / 8 s)']),
   mk('wall','Défense',e=>({name:'Mur d\'obsidienne',desc:'Entoure ton coffre au trésor d\'obsidienne.',cost:{diamond:5}}),e=>wallRing(e))
 ];
@@ -918,13 +928,13 @@ function updateEnt(e,dt){
   e.slow=Math.max(0,e.slow-dt); e.root=Math.max(0,e.root-dt); e.flagBuff=Math.max(0,e.flagBuff-dt); e.cloak=Math.max(0,e.cloak-dt); e.haste=Math.max(0,e.haste-dt); e.springT=Math.max(0,e.springT-dt);
   e.frozen=Math.max(0,e.frozen-dt); e.muzzle=Math.max(0,e.muzzle-dt); e.squash*=Math.exp(-9*dt);
   if(e.burn>0){ e.burn-=dt; if(Math.random()<dt*10) parts.push({x:e.x+rnd(-6,6),y:e.y,z:rnd(0,10),vz:rnd(50,120),vx:0,vy:0,life:.4,max:.4,col:'#fb923c',size:4}); if(Math.random()<dt*4) hurt(e,.5,e.burnBy,0,0); }
-  if(e.sinceHurt>5&&e.hp<maxhp(e)) e.hp=Math.min(maxhp(e),e.hp+.5*dt);
+  if(e.sinceHurt>5-1.1*(e.up.reg||0)&&e.hp<maxhp(e)) e.hp=Math.min(maxhp(e),e.hp+(.5+.5*(e.up.reg||0))*dt);
   unstick(e);
   // hauteur (saut)
   const gh=groundH(e);
   if(e.bubble>0){ e.vz=0; e.z+=(55-e.z)*Math.min(1,dt*4); }
   else if(e.z>gh||e.vz>0){
-    e.vz-=1000*dt; if(e.glide>0&&e.vz<-80) e.vz=-80; e.z+=e.vz*dt;
+    e.vz-=1000*dt; { const gcl=e.flight>0?-42:-80; if(e.glide>0&&e.vz<gcl) e.vz=gcl; } e.z+=e.vz*dt;
     if(e.z<=gh&&e.vz<=0){ const imp=-e.vz; e.z=gh; e.vz=0;
       { const drop=(e.tkH||0)-gh; e.tkH=gh; if(drop>56&&!(e.glide>0)&&!(e.springT>0)&&!e.riding){ const fd=(drop-56)*.12; floatTxt(e.x,e.y-34,'AÏE !','#fca5a5',15); sfx('hit',e.x,e.y); e.fallDeath=true; hurt(e,fd,null,0,0); e.fallDeath=false; } } if(e.springT>0&&imp>380){ ring(e.x,e.y,T*2,'#4ade80',.4,true); shake=Math.max(shake,e===player?7:3); for(const o of ents) if(o.alive&&o.team!==e.team&&Math.hypot(o.x-e.x,o.y-e.y)<T*2) hurt(o,3,e,(o.x-e.x)*6,(o.y-e.y)*6); }
       if(imp>180){e.squash=Math.min(1,imp/550); burst(e.x,e.y+6-gh,'#e5e7eb',8,110,.35,3); ring(e.x,e.y+8-gh,T*.6,'#ffffff',.25);} }
@@ -984,9 +994,9 @@ function updateSpawners(dt){
       for(const r in sp.types){
         const ty=sp.types[r];
         if(ty.stock>0){
-          e.res[r]+=Math.round(ty.stock*cv(e,'loot'));
+          e.res[r]+=Math.round(ty.stock*cv(e,'loot')*(1+.15*(e.up.loot||0)));
           if(e===player){
-            if(sp.kind!=='base'||r!=='bronze') sfx('coin'); if(sp.kind!=='base') { floatTxt(e.x,e.y-34,`+${ty.stock} ${RESNAME[r]}`,RESCOL[r],15); burst(e.x,e.y-8,RESCOL[r],8,110,.5,3); ring(e.x,e.y,T*.9,RESCOL[r],.3); }
+            if(sp.kind!=='base'||r!=='bronze') sfx('coin'); if(sp.kind!=='base'||r==='diamond') { floatTxt(e.x,e.y-34,`+${ty.stock} ${RESNAME[r]}`,RESCOL[r],15); burst(e.x,e.y-8,RESCOL[r],8,110,.5,3); ring(e.x,e.y,T*.9,RESCOL[r],.3); }
             else if(r!=='bronze'||Math.random()<.15) parts.push({x:cx,y:cy,z:12,vz:60,vx:(e.x-cx)*1.6,vy:(e.y-cy)*1.6,life:.6,max:.6,col:RESCOL[r],size:5});
           }
           ty.stock=0;
@@ -1265,6 +1275,7 @@ function playerControl(e,dt){
 function controlEnt(e,dt,inp){ // commandes d'un pirate humain (local ou distant)
   let ix=inp.ix, iy=inp.iy; const m=Math.hypot(ix,iy)||1; e.ix=ix/m; e.iy=iy/m;
   const wx=inp.wx, wy=inp.wy; if(e.slip<=0) e.ang=Math.atan2(wy-e.y,wx-e.x);
+  if(e.riding&&e.riding.cannon){ e.ix=e.iy=0; e.held='sword'; if(inp.clicked) cannonFire(e,e.riding.c,inp); return; }
   e.held=inp.sel;
   if(!(inp.down||inp.clicked)||e.frozen>0) return;
   const id=inp.sel, click=inp.clicked;

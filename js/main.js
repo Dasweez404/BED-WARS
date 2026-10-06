@@ -56,7 +56,7 @@ const OPTDEF=[
   {k:'start',t:'Départ',list:()=>OPT_START.map((o,i)=>({v:i,n:o.n,d:'Ressources de départ de chaque pirate.'}))},
   {k:'roster',t:'Roster',list:()=>[10,15,20,30,40,50,60,0].map(v=>({v,n:v?v+' objets':'Tous',d:'Objets disponibles en boutique : tirés au hasard à chaque partie ('+(v?v:'tous')+').'}))},
   {k:'evf',t:'Événements',list:()=>EV_FREQ.map((o,i)=>({v:i,n:o.n,d:'Fréquence des événements aléatoires (pluie de pièces, requin, tempête…).'}))},
-  {k:'style',t:'Style',list:()=>[{v:'2d',n:'Sprites 2D',d:'Personnages, objets, herbe et mouettes dessinés en 2D (style cartoon).'},{v:'3d',n:'Modèles 3D',d:'Anciens modèles 3D bas-polygones.'}],apply:true},
+  {k:'style',t:'Style',list:()=>[{v:'2d',n:'Sprites 2D',d:'Personnages, objets, herbe et mouettes dessinés en 2D (style cartoon).'},{v:'3d',n:'Cubes 3D',d:'Pirates cubiques chibi en 3D, aux couleurs de leur équipe.'}],apply:true},
   {k:'stack',t:'Hauteur max',list:()=>[1,2,3,4].map(v=>({v,n:v+(v>1?' blocs':' bloc'),d:'Nombre de blocs empilables : empile des blocs identiques sur tes murs (un mur de 2+ ne se saute plus !).'}))},
   {k:'core',t:'Coffres',list:()=>OPT_CORE.map((o,i)=>({v:i,n:o.n,d:'Résistance des coffres au trésor.'}))}
 ];
@@ -66,9 +66,9 @@ function renderChar(){
   el.innerHTML=`<div class="orow"><span class="olab">Nom</span><input id="pname" maxlength="14" value="${(game.pname||'').replace(/"/g,'')}"></div>
   <div class="cls">${CLS_IDS.map(id=>`<button class="cbtn ${game.cls===id?'on':''}" data-cls="${id}">${CLASSES[id].ico} ${CLASSES[id].n}</button>`).join('')}</div>
   <div id="clsInfo"><b>${ci.n}</b> — ${ci.d}<br>${ci.pros.map(x=>`<span class="p">＋ ${x}</span>`).join(' · ')}${ci.cons.length?'<br>':''}${ci.cons.map(x=>`<span class="c">－ ${x}</span>`).join(' · ')}</div>
-  <div class="orow"><span class="olab">Peau</span>${sw(SKINS,'skin')}<span class="olab" style="width:auto;margin-left:10px">Cheveux</span>${sw(HAIRS,'hair')}</div>
+  <div class="orow"><span class="olab">Cheveux</span>${sw(HAIRS,'hair')}<span style="color:#d9c49a;font-size:12px;margin-left:8px">(barbe, moustache) · la peau a la couleur de ton équipe</span></div>
   <div class="orow"><span class="olab">Chapeau</span>${bt(HATS,'hat')}</div>
-  <div class="orow"><span class="olab">Tête</span>${bt(SHAPES,'shape')}<span class="olab" style="width:auto;margin-left:10px">Sourcils</span>${bt(BROWS,'brow')}</div>
+  <div class="orow"><span class="olab">Sourcils</span>${bt(BROWS,'brow')}</div>
   <div class="orow"><span class="olab">Visage</span>${bt(FACES,'face')}<button class="obtn ${L.patch?'on':''}" data-lk="patch" data-v="${L.patch?0:1}">Cache-œil</button></div>`;
   el.querySelector('#pname').oninput=ev=>{ game.pname=ev.target.value; saveChar(); };
   el.querySelectorAll('[data-cls]').forEach(b=>b.onclick=()=>{ game.cls=b.dataset.cls; saveChar(); renderChar(); });
@@ -119,7 +119,7 @@ function frame(now){
 function boot(){
   initRender(); initUI(); bindMouse(document.getElementById('ui'));
   document.querySelectorAll('#diff .dbtn').forEach(b=>b.onclick=()=>selectDiff(b.dataset.d));
-  try{ const o=JSON.parse(localStorage.getItem('pirates_opts')||'null'); if(o){ for(const k in game.opts) if(o[k]!==undefined) game.opts[k]=o[k]; if(!(o.rv>=2)){ game.opts.roster=40; } game.opts.rv=2; } }catch(e){}
+  try{ const o=JSON.parse(localStorage.getItem('pirates_opts')||'null'); if(o){ for(const k in game.opts) if(o[k]!==undefined) game.opts[k]=o[k]; if(!(o.rv>=2)){ game.opts.roster=40; } if(!(o.rv>=3)){ game.opts.style='3d'; } game.opts.rv=3; } }catch(e){}
   for(const k of Object.keys(EVENTS)) if(game.opts.ev[k]===undefined) game.opts.ev[k]=1;
   if(!MAPS[game.opts.map]) game.opts.map='classic'; if(!MODES[game.opts.mode]) game.opts.mode='solo'; renderOpts();
   try{ const c=JSON.parse(localStorage.getItem('pirates_char')||'null'); if(c){ if(CLASSES[c.cls]) game.cls=c.cls; if(c.look) game.look=lookOf(c.look); if(typeof c.pname==='string') game.pname=c.pname; } }catch(e){}
