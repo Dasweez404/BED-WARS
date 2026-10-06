@@ -233,6 +233,15 @@ function overlayWorld(){
   ctx.globalAlpha=1;
 }
 let miniT=0;
+function drawSpy(){ // perroquet espion : flèches vers tous les ennemis
+  if(!(player.spy>0)||!player.alive) return; ctx.save();
+  for(const o of ents){ if(!o.alive||o.team===player.team) continue; const s=w2s(o.x,o.y,o.z+30); let [sx,sy]=s; const m=34, inside=s[2]&&sx>m&&sx<VW-m&&sy>m&&sy<VH-m-60, col=TEAMS[o.team].col;
+    if(inside){ ctx.fillStyle=col; ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(sx,sy-14); ctx.lineTo(sx-8,sy-26); ctx.lineTo(sx+8,sy-26); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+    else { const cx=VW/2, cy=VH/2; let dx=sx-cx, dy=sy-cy; if(!s[2]){ dx=-dx; dy=-dy; } const k=Math.min((VW/2-m)/Math.abs(dx||1),(VH/2-m-50)/Math.abs(dy||1)); const px=cx+dx*k, py=cy+dy*k, a=Math.atan2(dy,dx);
+      ctx.translate(px,py); ctx.rotate(a); ctx.fillStyle=col; ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(13,0); ctx.lineTo(-9,-9); ctx.lineTo(-9,9); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.rotate(-a); ctx.translate(-px,-py); }
+  }
+  ctx.restore();
+}
 function drawMini(){
   const S=150,mx=VW-S-10,my=10, d=miniImg.data;
   if(--miniT<=0){ miniT=8;
@@ -249,7 +258,9 @@ function drawMini(){
   panel(mx-5,my-5,S+10,S+10,12);
   ctx.save(); rr(mx,my,S,S,8); ctx.clip(); ctx.imageSmoothingEnabled=false; ctx.drawImage(miniCv,mx,my,S,S); ctx.restore(); ctx.imageSmoothingEnabled=true;
   const cx=cam3.x/T/W*S+mx, cy=cam3.y/T/H*S+my; ctx.strokeStyle='rgba(255,255,255,.6)'; ctx.lineWidth=1; ctx.strokeRect(cx-9,cy-7,18,14);
-  for(const e of ents){ if(!e.alive) continue; ctx.fillStyle=TEAMS[e.team].col; ctx.strokeStyle='#fff'; const px=mx+e.x/T/W*S,py=my+e.y/T/H*S; ctx.beginPath();ctx.arc(px,py,e===player?3.5:2.5,0,6.3);ctx.fill();if(e===player)ctx.stroke(); }
+  for(const b of boats){ ctx.fillStyle=TEAMS[Math.max(0,b.team)].col; ctx.fillRect(mx+b.x/T/W*S-2,my+b.y/T/H*S-1.5,4,3); }
+  const spy=player.spy>0;
+  for(const e of ents){ if(!e.alive) continue; if(e.team!==player.team&&!spy&&(Math.hypot(e.x-player.x,e.y-player.y)>26*T||e.cloak>0)) continue; ctx.fillStyle=TEAMS[e.team].col; ctx.strokeStyle='#fff'; const px=mx+e.x/T/W*S,py=my+e.y/T/H*S; ctx.beginPath();ctx.arc(px,py,e===player?3.5:2.5,0,6.3);ctx.fill();if(e===player)ctx.stroke(); }
 }
 function drawHud(){
   ctx.setTransform(DPR,0,0,DPR,0,0); ctx.clearRect(0,0,VW,VH); ctx.textAlign='left'; ctx.textBaseline='alphabetic';
@@ -337,7 +348,7 @@ function drawHud(){
   if(nearBase(e)&&!shopOpen&&e.alive){ const w=300,pp=1+.03*Math.sin(game.t*5); ctx.save(); ctx.translate(VW/2,hb.y-114); ctx.scale(pp,pp); panel(-w/2,-15,w,30,15,'#fde68a'); ctx.fillStyle='#fde68a'; ctx.font='bold 15px '+FONT; ctx.fillText('[E]  Ouvrir la boutique',0,5); ctx.restore(); }
   ctx.textAlign='left'; ctx.fillStyle='rgba(20,40,90,.8)'; ctx.font='13px '+FONT; ctx.lineWidth=3; ctx.strokeStyle='rgba(255,255,255,.7)'; const hint='Espace saut · R recharger · Tab réserve · E boutique'; ctx.globalAlpha=.7; ctx.strokeText(hint,12,VH-12); ctx.fillText(hint,12,VH-12); ctx.globalAlpha=1;
   if(EV.cur){ const E=EVENTS[EV.cur.id], w=210; panel(VW/2-w/2,52,w,30,12,'rgba(253,230,138,.6)'); ctx.textAlign='left'; ctx.font='bold 14px '+FONT; ctx.fillStyle='#fde68a'; ctx.fillText(E.ico+' '+E.n,VW/2-w/2+12,72); ctx.textAlign='right'; ctx.fillStyle='#fff'; ctx.fillText(Math.ceil(EV.cur.t)+' s',VW/2+w/2-12,72); ctx.fillStyle='rgba(253,230,138,.8)'; ctx.fillRect(VW/2-w/2+10,79,(w-20)*Math.max(0,EV.cur.t/EV.cur.dur),2); ctx.textAlign='center'; }
-  drawMini();
+  drawMini(); drawSpy();
   if(banner.t>0){
     const p=1-banner.t/banner.max, s=p<.12?1.6-p/.12*.6:1, a=Math.min(1,banner.t*1.5,p*8);
     ctx.save(); ctx.translate(VW/2,VH*.2); ctx.scale(s,s); ctx.globalAlpha=a; ctx.textAlign='center';
