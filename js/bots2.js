@@ -77,3 +77,72 @@ const pers=b=>b.ai&&b.ai.pers;
     return _bg(b,foe,fd,nearCore,r,dt);
   };
 }
+
+/* =====================  REPLI ET DÉFENSE  =====================
+   Un bot qui attaque sans succès (trop de dégâts reçus, aucun coup porté, morts répétées) rentre se refaire une santé,
+   achète de l'équipement, puis repart. Si son coffre est attaqué (ou des ennemis rôdent chez lui), les bots proches rentrent et fortifient. */
+let UPD=0;
+{ const _h=hurt;
+  hurt=function(e,a,by,kx,ky){
+    const hp0=e.hp; _h(e,a,by,kx,ky); const d=hp0-e.hp;
+    if(d>0){
+      if(e.ai&&!e.remote){ (e.ai.taken=e.ai.taken||[]).push([game.t,d]); if(e.ai.taken.length>40) e.ai.taken.shift(); }
+      if(by&&by!==e&&by.ai&&!by.remote){ by.ai.dealtT=game.t; }
+    }
+  };
+  const _d=die;
+  die=function(e,by,sea){
+    const ai=e.ai, mode=ai&&ai.mode, was=e.alive; _d(e,by,sea);
+    if(was&&!e.alive&&ai&&!e.remote){ if(mode==='raid'||mode==='hunt') ai.fails=(ai.fails||0)+1; ai.taken=[]; }
+    if(was&&by&&by.ai&&!by.remote&&by!==e){ by.ai.fails=0; by.ai.dealtT=game.t; }
+  };
+  const _dt=damageTile;
+  damageTile=function(tx,ty,dmg,src,layer){
+    if(src&&src.ai&&!src.remote&&inb(tx,ty)&&wallT[idx(tx,ty)]===CORE&&ownW[idx(tx,ty)]!==src.team){ src.ai.dealtT=game.t; src.ai.fails=0; }
+    return _dt(tx,ty,dmg,src,layer);
+  };
+  const _u=updateEvents;
+  updateEvents=function(dt){
+    _u(dt); UPD++; if(game.state!=='play'||game.tut) return;
+    for(const td of TD){ const ci=idx(td.bx,td.by), hp=wallT[ci]===CORE?hpW[ci]:0; if(td.hpSeen!==undefined&&hp<td.hpSeen-.05) td.underAtkT=game.t; td.hpSeen=hp;
+      let n=0; const cx=(td.bx+.5)*T, cy=(td.by+.5)*T; for(const o of ents) if(o.alive&&o.team!==td.id&&Math.hypot(o.x-cx,o.y-cy)<11*T) n++; td.threat=n; if(n) td.threatT=game.t; }
+  };
+}
+function botRetreat(b,why){
+  const ai=b.ai, t=game.t; ai.mode='home'; ai.bounty=false; ai.foe=null; ai.leaveAt=ai.t+rnd(24,38)*(1+(ai.fails||0)*.35); ai.stuffT=t+34; ai.retreatCd=t+40; ai.buyT=0; ai.taken=[];
+  floatTxt(b.x,b.y-46,why==='def'?'Défense !':'Repli !',why==='def'?'#93c5fd':'#fde68a',15);
+}
+{ const _bt=botThink;
+  botThink=function(b,dt){
+    const ai=b.ai;
+    if(ai&&b.alive&&!game.tut&&!b.remote&&b.hp!==undefined){
+      const t=game.t, td=TD[b.team], mhp=maxhp(b), away=ai.mode==='raid'||ai.mode==='hunt'||ai.mode==='res';
+      // 1) attaque sans succès -> repli
+      if((ai.mode==='raid'||ai.mode==='hunt')&&!(ai.retreatCd>t)&&TD[b.team].coreAlive){
+        let taken=0; if(ai.taken) for(const [tt,d] of ai.taken) if(t-tt<12) taken+=d;
+        const stale=t-(ai.dealtT||-99)>9, kam=ai.pers==='kamikaze', bat=ai.pers==='batisseur';
+        if(((taken>mhp*(bat?.5:.7)&&stale&&!kam)||(ai.fails||0)>=(kam?3:2)||(b.hp<mhp*.35&&stale&&!kam))) botRetreat(b,'atk');
+      }
+      // 2) coffre attaqué ou ennemis chez nous -> les bots proches rentrent défendre
+      const pressed=t-(td.underAtkT||-99)<10||(td.threat>=2&&t-(td.threatT||-99)<4);
+      if(pressed&&!(ai.defendT>ai.t)){
+        const dd=Math.hypot(b.x-(td.bx+.5)*T,b.y-(td.by+.5)*T)/T;
+        if(ai.mode==='home'){ ai.defendT=ai.t+30; ai.buyT=0; }
+        else if(dd<28&&!(ai.pers==='kamikaze'&&dd>12)){ botRetreat(b,'def'); ai.defendT=ai.t+30; ai.leaveAt=ai.t+34; }
+      }
+    }
+    _bt(b,dt);
+  };
+  const _bb=botBuy;
+  botBuy=function(b){
+    const ai=b.ai;
+    if(ai&&nearBase(b)&&(ai.stuffT>game.t||ai.defendT>ai.t)){
+      const def=ai.defendT>ai.t, list=def?['wall','shield','turret2','turret','guard','net','mine','stone','obs','ar','core']:['sword','pick','hp','ar','dmg','heal','bomb','sp'];
+      const cap={bomb:3,heal:3,turret:1,turret2:1,guard:2,net:2,mine:3};
+      for(const id of list){ const it=SHOPMAP[id]; if(!it||!inRoster(id)) continue;
+        if(id==='wall'&&b.walled) continue; if(cap[id]&&((b.am[id]||0)>=cap[id]||(id==='bomb'&&b.bomb>=cap[id]))) continue; if(id==='stone'&&b.blocks[4]>=20) continue; if(id==='obs'&&b.blocks[5]>=8) continue;
+        const inf=it.info(b); if(inf.ok===false||!canAfford(b,inf.cost)) continue; buy(b,id); if(id==='wall') b.walled=true; return; }
+    }
+    _bb(b);
+  };
+}
