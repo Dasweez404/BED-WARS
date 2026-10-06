@@ -26,11 +26,22 @@ class LocalPeer extends Emitter{
   connect(id){ const cid=Math.random().toString(36).slice(2); const c=new LocalConn(this,id,cid); this.conns[cid]=c; this.bus.postMessage({k:'conn',to:id,from:this.id,cid}); setTimeout(()=>{ if(!c.open) this.emit('error',{type:'peer-unavailable'}); },1500); return c; }
   destroy(){ try{this.bus.close();}catch(e){} }
 }
+const NET_VER=2;
+function netLog(t){ const d=new Date(), p=n=>String(n).padStart(2,'0'); NET.log=NET.log||[]; NET.log.push(`${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())} ${t}`); if(NET.log.length>120) NET.log.shift(); const el=document.getElementById('mpLog'); if(el){ el.textContent=NET.log.join('\n'); el.scrollTop=el.scrollHeight; } }
+function netWatch(conn,who){ // surveille l'état ICE (diagnostic)
+  const hook=()=>{ const pc=conn.peerConnection; if(!pc||conn._w) return; conn._w=1; pc.addEventListener('iceconnectionstatechange',()=>netLog(who+' ICE: '+pc.iceConnectionState)); pc.addEventListener('connectionstatechange',()=>netLog(who+' lien: '+pc.connectionState)); };
+  hook(); setTimeout(hook,300); setTimeout(hook,1500);
+}
 function netMakePeer(id,local){
   if(local) return new LocalPeer(id);
   const q=new URLSearchParams(location.search), o={debug:0};
   if(q.get('peerhost')){ o.host=q.get('peerhost'); o.port=+(q.get('peerport')||443); o.path=q.get('peerpath')||'/'; o.secure=q.get('peersecure')!=='0'; }
-  return new Peer(id,o);
+  o.config={iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:global.stun.twilio.com:3478'},{urls:'stun:stun.cloudflare.com:3478'},
+    {urls:['turn:openrelay.metered.ca:80','turn:openrelay.metered.ca:443','turn:openrelay.metered.ca:443?transport=tcp'],username:'openrelayproject',credential:'openrelayproject'}]};
+  const peer=new Peer(id,o); netLog(`PeerJS ${typeof Peer} · courtier ${o.host||'0.peerjs.com (public)'} · version réseau ${NET_VER}`);
+  peer.on('disconnected',()=>{ netLog('courtier déconnecté → reconnexion'); try{ peer.reconnect(); }catch(e){} });
+  peer.on('close',()=>netLog('peer fermé'));
+  return peer;
 }
 const netCode=()=>{ const a='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let s=''; for(let i=0;i<5;i++) s+=a[Math.floor(Math.random()*a.length)]; return s; };
 const netPeerId=code=>'pirates-bw-'+code.replace(/^L-/,'');
@@ -42,10 +53,12 @@ function netHost(local){
   if(typeof Peer==='undefined'&&!local){ netStatus('Bibliothèque PeerJS introuvable.'); return; }
   netStatus('Connexion au courtier…');
   const peer=NET.peer=netMakePeer(netPeerId(NET.code),local);
-  peer.on('open',()=>netStatus('Salon ouvert. Donne le code à tes amis.'));
-  peer.on('error',e=>{ netStatus('Erreur réseau : '+(e&&e.type||e)); });
+  peer.on('open',id=>{ netLog('hôte: salon ouvert '+id); netStatus('Salon ouvert. Donne le code à tes amis.'); });
+  peer.on('error',e=>{ netLog('hôte: erreur '+(e&&e.type||e)); netStatus('Erreur réseau : '+(e&&e.type||e)); });
   peer.on('connection',conn=>{
-    conn.on('open',()=>{
+    netLog('hôte: un invité se connecte…'); netWatch(conn,'hôte'); const to=setTimeout(()=>{ if(!conn.open){ netLog('hôte: liaison directe impossible (pare-feu / NAT ?)'); netStatus('Un invité n\'arrive pas à se connecter en direct (pare-feu / VPN ?).'); } },15000);
+    conn.on('error',e=>netLog('hôte: erreur lien '+(e&&e.type||e)));
+    conn.on('open',()=>{ clearTimeout(to); netLog('hôte: invité connecté');
       const used=Object.keys(NET.slots).map(Number), free=[1,2,3].filter(t=>!used.includes(t));
       if(NET.started||!free.length){ conn.send({t:'full'}); setTimeout(()=>conn.close&&conn.close(),300); return; }
       const team=free[0]; NET.slots[team]={conn,name:'Pirate',cls:'matelot',look:null,team}; conn.send({t:'welcome',team}); netLobbyBroadcast();
@@ -61,7 +74,7 @@ function netLobbyBroadcast(){
   if(NET.onLobby) NET.onLobby();
 }
 function netHostData(team,m){
-  const s=NET.slots[team]; if(!s||!m) return;
+  const s=NET.slots[team]; if(!s||!m) return; if(m.t==='hello'||m.t==='buy') netLog('← invité '+team+': '+m.t); else if(m.t==='in'&&!s.gotIn){ s.gotIn=1; netLog('← premières commandes de l\'invité '+team); }
   if(m.t==='hello'){ s.name=String(m.name||'Pirate').slice(0,14); s.cls=m.cls; s.look=m.look; netLobbyBroadcast(); return; }
   const e=ents.find(o=>o.remote&&o.team===team); if(!e||!NET.started) return;
   if(m.t==='in'){ const q=e.inp; q.ix=+m.ix||0; q.iy=+m.iy||0; q.wx=+m.wx||0; q.wy=+m.wy||0; q.down=!!m.down; q.sel=String(m.sel||'sword'); if(m.clk>0) q.clicked=true; if(m.px!==undefined){ q.px=+m.px; q.py=+m.py; } }
@@ -81,7 +94,7 @@ function netHostDrop(team){
   const e=ents.find(o=>o.remote&&o.team===team); if(e){ e.remote=false; e.isBot=true; e.ai=makeBotAI(); msg(`${e.name} a quitté la partie (un bot prend la relève).`,'#fca5a5'); }
 }
 function netHostStart(){
-  if(NET.role!=='host'||NET.started) return;
+  if(NET.role!=='host'||NET.started) return; netLog('hôte: lancement de la partie ('+Object.keys(NET.slots).length+' invité(s))'); NET.gotS=0;
   NET.started=true; NETON=true; NETCLIENT=false;
   NETSLOTS={}; for(const s of Object.values(NET.slots)) NETSLOTS[s.team]={name:s.name,cls:s.cls,look:s.look};
   newGame(); NET.fxLog=[]; NET.fxBase=0; NET.seq=0; NET.sendT=0;
@@ -99,16 +112,19 @@ function netJoin(code,local){
   const peer=NET.peer=netMakePeer(null,NET.local);
   if(NET.local) peer.id='G'+netCode();
   const go=()=>{
-    const conn=NET.hostConn=peer.connect(netPeerId(code),NET.local?undefined:{reliable:true,serialization:'json'});
-    conn.on('open',()=>{ netStatus('Connecté. En attente de l\'hôte…'); conn.send({t:'hello',name:game.pname||'Pirate',cls:game.cls,look:game.look}); });
+    netLog('invité: connexion au salon '+code); const conn=NET.hostConn=peer.connect(netPeerId(code),NET.local?undefined:{reliable:true,serialization:'json'}); netWatch(conn,'invité');
+    const to=setTimeout(()=>{ if(!conn.open){ netLog('invité: pas de réponse de l\'hôte (15 s)'); netStatus('Pas de réponse : code faux, hôte hors ligne, ou pare-feu/VPN bloquant la liaison directe.'); } },15000);
+    conn.on('error',e=>netLog('invité: erreur lien '+(e&&e.type||e)));
+    conn.on('open',()=>{ clearTimeout(to); netLog('invité: connecté à l\'hôte'); netStatus('Connecté. En attente de l\'hôte…'); conn.send({t:'hello',name:game.pname||'Pirate',cls:game.cls,look:game.look}); });
     conn.on('data',netGuestData);
     conn.on('close',()=>{ if(NET.role==='guest'){ netStatus('Connexion perdue.'); if(NET.started&&NET.onEnd) NET.onEnd('L\'hôte a quitté la partie.'); else netLeave(false); } });
   };
-  if(NET.local) setTimeout(go,50); else peer.on('open',go);
+  if(NET.local) setTimeout(go,50); else peer.on('open',id=>{ netLog('invité: courtier OK ('+id+')'); go(); });
+  peer.on('error',e=>netLog('invité: erreur '+(e&&e.type||e)));
   peer.on('error',e=>netStatus(e&&e.type==='peer-unavailable'?'Salon introuvable : vérifie le code.':'Erreur réseau : '+(e&&e.type||e)));
 }
 function netGuestData(m){
-  if(!m) return;
+  if(!m) return; if(m.t!=='s') netLog('← '+m.t); else if(!NET.gotS){ NET.gotS=1; netLog('← premier instantané de jeu'); }
   if(m.t==='lobby'){ NET.lobby=m.players; if(NET.onLobby) NET.onLobby(); }
   else if(m.t==='welcome'){ NET.myTeam=m.team; netStatus('Connecté (équipe '+(m.team+1)+'). En attente de l\'hôte…'); }
   else if(m.t==='full'){ netStatus('Salon complet ou partie déjà lancée.'); }

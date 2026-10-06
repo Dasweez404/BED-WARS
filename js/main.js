@@ -86,6 +86,7 @@ function bindMp(){
   el('mpHost').onclick=()=>{ netHost(el('mpLocal').checked); renderMp(); };
   el('mpJoin').onclick=()=>{ const c=el('mpCode').value.trim(); if(!c){ NET.status='Entre le code du salon.'; renderMp(); return; } netJoin(c,el('mpLocal').checked); renderMp(); };
   el('mpStart').onclick=()=>netHostStart();
+  el('mpCopy').onclick=()=>{ const t=(NET.log||[]).join('\n'); try{ navigator.clipboard.writeText(t); NET.status='Journal copié !'; }catch(e){ const r=document.createRange(); r.selectNodeContents(el('mpLog')); const s=getSelection(); s.removeAllRanges(); s.addRange(r); } renderMp(); };
   el('mpLeave').onclick=()=>{ netLeave(false); renderMp(); };
   renderMp();
 }

@@ -67,6 +67,14 @@ Les commandes sont les mêmes qu'en solo (ZQSD, Espace, souris, 1-0, Tab, E pour
 | « Salon complet ou partie déjà lancée » | Maximum 3 invités, et personne ne peut rejoindre après le lancement. |
 | Comportements bizarres, objets manquants | Les versions ne correspondent pas : rechargez tous la page (Ctrl+F5) ou re-téléchargez le jeu. |
 
+## 6 bis. Le journal réseau (diagnostic)
+
+Dans la section *Multijoueur en ligne* du menu, déplie **« Journal réseau (diagnostic) »** : il montre chaque étape (courtier joint, invité connecté, état de la liaison WebRTC `ICE`, premiers messages reçus…). Clique sur **Copier le journal** et envoie-le-moi si la connexion échoue : il indique exactement où ça bloque.
+
+- *« courtier OK » puis « pas de réponse de l'hôte »* : mauvais code, hôte hors ligne, ou liaison directe bloquée (pare-feu / VPN).
+- *« ICE: failed »* : NAT trop strict. Le jeu essaie aussi un relais TURN public gratuit, mais il peut être saturé ; change de réseau si possible.
+- *Rien après « Connexion au courtier »* : le courtier PeerJS est inaccessible depuis ton réseau.
+
 ## 7. Avancé
 
 - **Courtier personnel** (si le public est bloqué ou instable) : sur une machine accessible, lance `npx peerjs --port 9000`, puis ouvre le jeu avec  
