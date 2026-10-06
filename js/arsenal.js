@@ -65,24 +65,46 @@ function doSword2(e,id){
 }
 /* ---------- fusée téléguidée ---------- */
 let MIS=[];
-{ const it={id:'rocketpilot',n:'Fusée téléguidée',ico:'🚀',col:'#f43f5e'}; ITEMS.push(it); ITEMMAP.rocketpilot=it;
-  TIPS2.rocketpilot='Lance une fusée : pilote-la à la souris (clic pour exploser) — ou tir à distance selon l\'option';
-  SHOP.push(gadItem('rocketpilot','Fusée téléguidée','Tu montes dans une fusée que tu diriges à la souris pendant 5 s (invulnérable, tu rentres ensuite) : elle explose au contact ou au clic (dégâts de zone importants). Option « Missile à distance » : un simple tir vers la cible.',{gold:4,diamond:1},1,'Gadgets'));
+{ const it={id:'rocketpilot',n:'Rampe à fusées',ico:'🚀',col:'#f43f5e'}; ITEMS.push(it); ITEMMAP.rocketpilot=it;
+  TIPS2.rocketpilot='Pose une rampe à fusées (E pour t\'y mettre, clic pour tirer, 3 fusées)';
+  SHOP.push(gadItem('rocketpilot','Rampe à fusées','Pose une rampe sur ton île, comme un canon : E pour t\'y mettre, clic pour tirer (3 fusées, rechargement 6 s). Pilotée : souris = cap, Z/S = vitesse, clic = exploser (invulnérable en vol, 7 s). Option « Missile à distance » : tir direct vers la cible.',{gold:4,diamond:1},1,'Gadgets'));
   SHOP.forEach(s=>SHOPMAP[s.id]=s); if(typeof H_THROW!=='undefined') H_THROW.push('rocketpilot'); }
 const pilotMissile=e=>MIS.find(m=>m.owner===e);
+function pilotInput(o){
+  if(o===player){ const up=keys.KeyW||keys['k:z']||keys.ArrowUp, dn=keys.KeyS||keys['k:s']||keys.ArrowDown, lf=keys.KeyA||keys['k:q']||keys.ArrowLeft, rt=keys.KeyD||keys['k:d']||keys.ArrowRight; let ix=(rt?1:0)-(lf?1:0), iy=(dn?1:0)-(up?1:0); if(typeof TOUCH!=='undefined'&&TOUCH.on&&!ix&&!iy){ ix=TOUCH.ix; iy=TOUCH.iy; } return {ix,iy}; }
+  return o.inp?{ix:o.inp.ix||0,iy:o.inp.iy||0}:{ix:0,iy:0};
+}
 function missileBoom(m){
   const o=m.owner; MIS=MIS.filter(q=>q!==m); explode({x:m.x,y:m.y,team:m.team,owner:o,kind:'bomb',R:2.9*T,dm:16,bd:1.4}); ring(m.x,m.y,T*3.2,'#fb7185',.5,true); ring(m.x,m.y,T*2,'#fff',.35); burst(m.x,m.y,'#fb923c',30,300,.7,5); smoke(m.x,m.y,10,14,1.2); sfx('boom',m.x,m.y);
-  if(o){ o.pilot=0; o.inv=Math.max(o.inv,1.2); o.grace=Math.max(o.grace,.6); o.flash=.25; ring(o.x,o.y,T*1.6,'#fff',.5,true); burst(o.x,o.y,'#fecdd3',14,160,.6,3); if(o===player){ flashScreen('#fff',.5); JUICE.kick(.9); } }
+  if(o){ o.pilot=0; if(m.ramp){ o.x=m.ramp.x+T*.9; o.y=m.ramp.y; o.z=0; o.vx=o.vy=0; } o.inv=Math.max(o.inv,1.2); o.grace=Math.max(o.grace,.6); o.flash=.25; ring(o.x,o.y,T*1.6,'#fff',.5,true); burst(o.x,o.y,'#fecdd3',14,160,.6,3); if(o===player){ flashScreen('#fff',.5); JUICE.kick(.9); } }
 }
-function rocketFire(e,wx,wy){
-  const remote=game.opts.rocket===1||e.isBot; const ax=Math.cos(e.ang), ay=Math.sin(e.ang);
-  if(remote){ const dx=wx-e.x, dy=wy-e.y, d=Math.min(Math.hypot(dx,dy),24*T), k=d/(Math.hypot(dx,dy)||1), tx=e.x+dx*k, ty=e.y+dy*k;
-    bombs.push({x:e.x,y:e.y,tx,ty,fuse:Math.max(.4,d/520),team:e.team,owner:e,kind:'bomb',R:2.9*T,dm:16,bd:1.4,shell:true,h:14}); ring(tx,ty,T*2.9,'#fb7185',Math.max(.4,d/520)); sfx('whoosh',e.x,e.y); burst(e.x+ax*16,e.y+ay*16,'#fb923c',10,160,.4,3); return true; }
-  if(e.pilot) return false;
-  e.pilot=1; MIS.push({x:e.x+ax*22,y:e.y+ay*22,a:e.ang,owner:e,team:e.team,t:0,spd:260}); sfx('whoosh',e.x,e.y); ring(e.x,e.y,T*1.5,'#fb7185',.5,true); burst(e.x,e.y,'#fecdd3',14,170,.6,3);
-  if(e===player) announce('🚀 FUSÉE LANCÉE ! Dirige-la à la souris','#fda4af'); return true;
+function rocketRemote(e,wx,wy,from){
+  const ox=from?from.x:e.x, oy=from?from.y:e.y, dx=wx-ox, dy=wy-oy, d=Math.min(Math.hypot(dx,dy),26*T), k=d/(Math.hypot(dx,dy)||1), tx=ox+dx*k, ty=oy+dy*k, f=Math.max(.4,d/520);
+  bombs.push({x:ox,y:oy,tx,ty,fuse:f,team:e.team,owner:e,kind:'bomb',R:2.9*T,dm:16,bd:1.4,shell:true,h:14}); ring(tx,ty,T*2.9,'#fb7185',f); sfx('whoosh',ox,oy); burst(ox,oy,'#fb923c',12,170,.45,3); return true;
 }
-{ const _u=useGadget2; useGadget2=function(e,id,wx,wy,ax,ay){ if(id==='rocketpilot') return rocketFire(e,wx,wy); return _u(e,id,wx,wy,ax,ay); };
+function rampLaunch(e,c,inp){ // tir depuis une rampe à fusées
+  if(c.cd>0||c.ammo<=0) return false; const wx=inp.wx, wy=inp.wy, a=Math.atan2(wy-c.y,wx-c.x); c.ang=a; c.ammo--; c.cd=6; smoke(c.x,c.y,8,10,.8); ring(c.x,c.y,T*1.5,'#fb7185',.4,true);
+  if(game.opts.rocket===1){ rocketRemote(e,wx,wy,c); floatTxt(c.x,c.y-44,'🚀 ×'+c.ammo,'#fb7185',14); }
+  else { c.rider=null; e.riding=null; e.pilot=1; e.x=c.x; e.y=c.y; MIS.push({x:c.x+Math.cos(a)*30,y:c.y+Math.sin(a)*30,a,owner:e,team:e.team,t:0,spd:240,ramp:c}); sfx('whoosh',c.x,c.y); burst(c.x,c.y,'#fecdd3',16,200,.6,3); if(e===player) announce('🚀 EN VOL ! Souris = cap · Z/S = vitesse · clic = exploser','#fda4af'); }
+  if(c.ammo<=0){ floatTxt(c.x,c.y-48,'Plus de fusées !','#fecaca',14); c.dead=true; }
+  return true;
+}
+function placeRamp(e,wx,wy){
+  const tx=Math.floor(wx/T), ty=Math.floor(wy/T);
+  if(fl(tx,ty)<=0||wl(tx,ty)>0||spawnerAt(tx,ty)||Math.hypot((tx+.5)*T-e.x,(ty+.5)*T-e.y)>3.7*T){ floatTxt(e.x,e.y-34,'Pose-la sur le sol près de toi','#fde68a',14); return false; }
+  const mine=cannons.filter(c=>c.kind==='rocket'&&c.team===e.team); if(mine.length>=2){ const o=mine[0]; if(o.rider){ o.rider.riding=null; } cannons=cannons.filter(c=>c!==o); }
+  cannons.push({x:(tx+.5)*T,y:(ty+.5)*T,ang:e.ang,team:e.team,owner:e,rider:null,cd:0,hp:14,kind:'rocket',ammo:3}); ring((tx+.5)*T,(ty+.5)*T,T*1.4,'#fb7185',.5,true); chunks((tx+.5)*T,(ty+.5)*T,'#7c4a21',6); floatTxt((tx+.5)*T,(ty+.5)*T-40,'E : monter · 3 fusées','#fecdd3',14); return true;
+}
+{ const _u=useGadget2; useGadget2=function(e,id,wx,wy,ax,ay){ if(id==='rocketpilot'){ if(e.isBot) return rocketRemote(e,wx,wy); return placeRamp(e,wx,wy); } return _u(e,id,wx,wy,ax,ay); };
+  const _cf=cannonFire; cannonFire=function(e,c,inp){ if(c.kind==='rocket') return rampLaunch(e,c,inp); return _cf(e,c,inp); };
+  const _uc=updateCannons; updateCannons=function(dt){ _uc(dt); if(cannons.some(c=>c.dead&&!c.rider&&!(c.t0))){ for(const c of cannons) if(c.dead&&!c.t0) c.t0=1.2; } for(const c of cannons) if(c.t0){ c.t0-=dt; if(c.t0<=0){ chunks(c.x,c.y,'#7c4a21',8); burst(c.x,c.y,'#fb923c',10,150,.5,3); c.gone=true; } } cannons=cannons.filter(c=>!c.gone); };
+  const _cc=createCannonM; createCannonM=function(c){ if(c.kind!=='rocket') return _cc(c);
+    const g=new THREE.Group(), tc=TEAMS[Math.max(0,c.team)].col; const base=new THREE.Mesh(GEO.box,new THREE.MeshStandardMaterial({color:0x6b4423,flatShading:true})); base.scale.set(.95,.16,.85); base.position.y=.1; g.add(base);
+    const strip=new THREE.Mesh(GEO.box,new THREE.MeshStandardMaterial({color:tc,flatShading:true})); strip.scale.set(.98,.04,.88); strip.position.y=.2; g.add(strip);
+    const rack=new THREE.Group(); rack.position.y=.42; g.add(rack); for(const z of [-.24,0,.24]){ const r=new THREE.Mesh(GEO.cyl,new THREE.MeshStandardMaterial({color:0xf8fafc,flatShading:true,metalness:.3})); r.scale.set(.1,.7,.1); r.rotation.z=Math.PI/2; r.position.set(.3,0,z); rack.add(r); const n=new THREE.Mesh(GEO.cone,new THREE.MeshStandardMaterial({color:0xef4444,flatShading:true})); n.scale.set(.1,.24,.1); n.rotation.z=-Math.PI/2; n.position.set(.72,0,z); rack.add(n); }
+    const rail=new THREE.Mesh(GEO.box,new THREE.MeshStandardMaterial({color:0x374151,flatShading:true})); rail.scale.set(.9,.05,.7); rail.position.set(.25,-.1,0); rack.add(rail); g.userData={bar:rack,rocket:true}; return g; };
+  const _um=updateCannonM; updateCannonM=function(c,m){ _um(c,m); if(c.kind==='rocket'){ m.userData.bar.rotation.z=c.rider?.7:.5; m.userData.bar.children.forEach((q,i)=>{ if(i<6&&c.ammo!==undefined){ const k=Math.floor(i/2); q.visible=k<c.ammo; } }); } };
+
   const _h=hurt; hurt=function(e,a,by,kx,ky){ if(e.pilot) return; _h(e,a,by,kx,ky); };
   const _ev=updateEvents;
   updateEvents=function(dt){
@@ -90,11 +112,12 @@ function rocketFire(e,wx,wy){
     for(const m of MIS.slice()){
       const o=m.owner; if(!o||!o.alive||game.state!=='play'){ MIS=MIS.filter(q=>q!==m); if(o) o.pilot=0; continue; }
       m.t+=dt; let wx=aim.x, wy=aim.y, click=!!o.pClick; o.pClick=0; if(o===player){ click=click||mouse.clicked; } else if(o.inp){ wx=o.inp.wx; wy=o.inp.wy; }
-      let da=Math.atan2(wy-m.y,wx-m.x)-m.a; while(da>Math.PI) da-=6.283; while(da<-Math.PI) da+=6.283; m.a+=clamp(da,-3.6*dt,3.6*dt);
-      m.spd=Math.min(430,m.spd+230*dt); const nx=m.x+Math.cos(m.a)*m.spd*dt, ny=m.y+Math.sin(m.a)*m.spd*dt;
+      const pin=pilotInput(o); let da=Math.atan2(wy-m.y,wx-m.x)-m.a; while(da>Math.PI) da-=6.283; while(da<-Math.PI) da+=6.283;
+      m.a+=clamp(da,-4.6*dt,4.6*dt)+pin.ix*2.2*dt; // la souris donne le cap, Q/D l'affine
+      const want=pin.iy<-.3?560:pin.iy>.3?130:300; m.spd+=clamp(want-m.spd,-520*dt,420*dt); const nx=m.x+Math.cos(m.a)*m.spd*dt, ny=m.y+Math.sin(m.a)*m.spd*dt;
       o.ix=o.iy=0; o.grace=Math.max(o.grace,.4); o.vx=o.vy=0;
       for(let k=0;k<2;k++) parts.push({x:m.x-Math.cos(m.a)*10,y:m.y-Math.sin(m.a)*10,z:22,vx:rnd(-20,20),vy:rnd(-20,20),vz:rnd(0,30),life:.5,max:.5,col:k?'#fb923c':'#e5e7eb',size:k?4:6,smoke:!k});
-      m.x=nx; m.y=ny; let boom=m.t>5.2||(click&&m.t>.45)||m.x<0||m.y<0||m.x>W*T||m.y>H*T;
+      m.x=nx; m.y=ny; let boom=m.t>7||(click&&m.t>.45)||m.x<0||m.y<0||m.x>W*T||m.y>H*T;
       if(!boom){ const tx=Math.floor(m.x/T), ty=Math.floor(m.y/T); if(inb(tx,ty)&&wallT[idx(tx,ty)]>0) boom=true; }
       if(!boom) for(const q of ents){ if(!q.alive||q.team===m.team||q.inv>1.2) continue; if(Math.hypot(q.x-m.x,q.y-m.y)<T*.9&&q.z<60){ boom=true; break; } }
       if(!boom&&BOSS&&BOSS.on&&Math.hypot(BOSS.x-m.x,BOSS.y-m.y)<BOSS.rad+T*.4) { bossHit(18,o); boom=true; }
@@ -102,7 +125,7 @@ function rocketFire(e,wx,wy){
     }
   };
   const _cam=updateCamera;
-  updateCamera=function(dt){ _cam(dt); if(game.state==='menu'||!player||!player.pilot) return; const m=pilotMissile(player); if(!m) return; const k=Math.min(1,dt*9); cam3.x+=(m.x-cam3.x)*k; cam3.y+=(m.y-cam3.y)*k; camPlace(13.2,8.6,.3); camera3.rotation.z+=Math.sin(game.t*40)*.003; };
+  updateCamera=function(dt){ _cam(dt); if(game.state==='menu'||!player||!player.pilot) return; const m=pilotMissile(player); if(!m) return; const k=Math.min(1,dt*9); cam3.x+=(m.x-cam3.x)*k; cam3.y+=(m.y-cam3.y)*k; camPlace(12.6+Math.min(2.6,(m.spd-130)/170),8.2+Math.min(1.8,(m.spd-130)/240),.3); camera3.rotation.z+=Math.sin(game.t*40)*.003; };
   const _ng=newGame; newGame=function(){ MIS=[]; _ng(); };
   // réseau
   const _nc=netCommon; netCommon=function(){ const c=_nc(); if(MIS.length) c.ms=MIS.map(m=>[Math.round(m.x),Math.round(m.y),Math.round(m.a*100)/100,ents.indexOf(m.owner)]); return c; };
@@ -126,7 +149,7 @@ const rocketM=new Map();
   drawHud=function(){ _dh(); if(game.state==='menu'||!ctx||!player) return;
     if(player.pilot){ const m=pilotMissile(player); ctx.save(); ctx.setTransform(DPR,0,0,DPR,0,0); ctx.textAlign='center';
       const g=ctx.createRadialGradient(VW/2,VH/2,Math.min(VW,VH)*.3,VW/2,VH/2,Math.max(VW,VH)*.72); g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(30,0,10,.55)'); ctx.fillStyle=g; ctx.fillRect(0,0,VW,VH);
-      const t=m?Math.max(0,5.2-m.t):0; ctx.font='bold 16px '+FONT; ctx.fillStyle='#fecdd3'; ctx.lineWidth=4; ctx.strokeStyle='rgba(40,0,10,.9)'; const txt='🚀 Fusée pilotée · clic = exploser · '+t.toFixed(1)+' s'; ctx.strokeText(txt,VW/2,VH-70); ctx.fillText(txt,VW/2,VH-70);
-      ctx.fillStyle='rgba(255,255,255,.2)'; ctx.fillRect(VW/2-110,VH-60,220,6); ctx.fillStyle='#fb7185'; ctx.fillRect(VW/2-110,VH-60,220*t/5.2,6); ctx.strokeStyle='rgba(251,113,133,.85)'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(VW/2,VH/2,22,0,6.283); ctx.moveTo(VW/2-30,VH/2); ctx.lineTo(VW/2-12,VH/2); ctx.moveTo(VW/2+12,VH/2); ctx.lineTo(VW/2+30,VH/2); ctx.stroke(); ctx.restore(); }
+      const t=m?Math.max(0,7-m.t):0; ctx.font='bold 16px '+FONT; ctx.fillStyle='#fecdd3'; ctx.lineWidth=4; ctx.strokeStyle='rgba(40,0,10,.9)'; const txt='🚀 Souris : cap · Z/S : vitesse ('+Math.round(m?m.spd:0)+') · Q/D : affiner · clic : exploser · '+t.toFixed(1)+' s'; ctx.strokeText(txt,VW/2,VH-70); ctx.fillText(txt,VW/2,VH-70);
+      ctx.fillStyle='rgba(255,255,255,.2)'; ctx.fillRect(VW/2-110,VH-60,220,6); ctx.fillStyle='#fb7185'; ctx.fillRect(VW/2-110,VH-60,220*t/7,6); ctx.strokeStyle='rgba(251,113,133,.85)'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(VW/2,VH/2,22,0,6.283); ctx.moveTo(VW/2-30,VH/2); ctx.lineTo(VW/2-12,VH/2); ctx.moveTo(VW/2+12,VH/2); ctx.lineTo(VW/2+30,VH/2); ctx.stroke(); ctx.restore(); }
   };
 }
