@@ -66,8 +66,8 @@ function doSword2(e,id){
 /* ---------- fusée téléguidée ---------- */
 let MIS=[];
 { const it={id:'rocketpilot',n:'Rampe à fusées',ico:'🚀',col:'#f43f5e'}; ITEMS.push(it); ITEMMAP.rocketpilot=it;
-  TIPS2.rocketpilot='Pose une rampe à fusées : E pour t\'y mettre · clic gauche : lancer la fusée seule · clic droit : monter dedans';
-  SHOP.push(gadItem('rocketpilot','Rampe à fusées','Pose une rampe sur ton île, comme un canon : E pour t\'y mettre. Clic gauche : lance la fusée toute seule vers la cible. Clic droit : monte dedans et pilote-la (souris = cap, Z/S = vitesse, clic = exploser ; ton pirate reste immobile et VULNÉRABLE pendant 7 s). 3 fusées, rechargement 6 s.',{gold:4,diamond:1},1,'Gadgets'));
+  TIPS2.rocketpilot='Pose une rampe à fusées : E pour t\'y mettre · clic gauche : missile téléguidé · clic droit : missile téléguidé où tu montes dedans (tu atterris avec)';
+  SHOP.push(gadItem('rocketpilot','Rampe à fusées','Pose une rampe sur ton île, comme un canon : E pour t\'y mettre. Clic gauche : missile téléguidé (souris = cap, Z/S = vitesse, clic = exploser), ton pirate reste à la rampe, exposé. Clic droit : même missile mais tu montes dedans et tu atterris avec lui à l\'impact. 3 fusées, rechargement 6 s.',{gold:4,diamond:1},1,'Gadgets'));
   SHOP.forEach(s=>SHOPMAP[s.id]=s); if(typeof H_THROW!=='undefined') H_THROW.push('rocketpilot'); }
 const pilotMissile=e=>MIS.find(m=>m.owner===e);
 function pilotInput(o){
@@ -76,17 +76,18 @@ function pilotInput(o){
 }
 function missileBoom(m){
   const o=m.owner; MIS=MIS.filter(q=>q!==m); explode({x:m.x,y:m.y,team:m.team,owner:o,kind:'bomb',R:2.9*T,dm:16,bd:1.4}); ring(m.x,m.y,T*3.2,'#fb7185',.5,true); ring(m.x,m.y,T*2,'#fff',.35); burst(m.x,m.y,'#fb923c',30,300,.7,5); smoke(m.x,m.y,10,14,1.2); sfx('boom',m.x,m.y);
-  if(o){ o.pilot=0; if(o===player){ flashScreen('#fff',.35); JUICE.kick(.9); } }
+  if(o){ o.pilot=0; if(m.ride){ o.z=34; o.vz=0; o.glide=Math.max(o.glide||0,2.8); o.inv=Math.max(o.inv,.7); o.grace=Math.max(o.grace,.9); o.tkH=groundH(o); o.squash=.4; ring(o.x,o.y,T*1.6,'#fff',.5,true); burst(o.x,o.y,'#fecdd3',14,160,.6,3); floatTxt(o.x,o.y-48,'ATTERRISSAGE !','#fda4af',16); } if(o===player){ flashScreen('#fff',.35); JUICE.kick(.9); } }
 }
 function rocketRemote(e,wx,wy,from){
   const ox=from?from.x:e.x, oy=from?from.y:e.y, dx=wx-ox, dy=wy-oy, d=Math.min(Math.hypot(dx,dy),26*T), k=d/(Math.hypot(dx,dy)||1), tx=ox+dx*k, ty=oy+dy*k, f=Math.max(.4,d/520);
   bombs.push({x:ox,y:oy,tx,ty,fuse:f,team:e.team,owner:e,kind:'bomb',R:2.9*T,dm:16,bd:1.4,shell:true,h:14}); ring(tx,ty,T*2.9,'#fb7185',f); sfx('whoosh',ox,oy); burst(ox,oy,'#fb923c',12,170,.45,3); return true;
 }
-function rampLaunch(e,c,inp,pilot){ // tir depuis une rampe : clic gauche = fusée seule, clic droit = on monte dedans
-  if(c.cd>0||c.ammo<=0) return false; const wx=inp.wx, wy=inp.wy, a=Math.atan2(wy-c.y,wx-c.x); c.ang=a; c.ammo--; c.cd=6; smoke(c.x,c.y,8,10,.8); ring(c.x,c.y,T*1.5,'#fb7185',.4,true);
-  if(!pilot){ rocketRemote(e,wx,wy,c); floatTxt(c.x,c.y-44,'🚀 ×'+c.ammo,'#fb7185',14); }
-  else { c.rider=null; e.riding=null; e.pilot=1; MIS.push({x:c.x+Math.cos(a)*30,y:c.y+Math.sin(a)*30,a,owner:e,team:e.team,t:0,spd:240,ramp:c}); sfx('whoosh',c.x,c.y); burst(c.x,c.y,'#fecdd3',16,200,.6,3); if(e===player) announce('🚀 EN VOL ! (ton pirate est exposé) Souris = cap · Z/S = vitesse · clic = exploser','#fda4af'); }
-  if(c.ammo<=0){ floatTxt(c.x,c.y-48,'Plus de fusées !','#fecaca',14); c.dead=true; if(e.riding&&e.riding.c===c){ e.riding=null; c.rider=null; } }
+function rampLaunch(e,c,inp,ride){ // clic gauche : missile téléguidé (on reste à la rampe) · clic droit : missile téléguidé dans lequel on monte et on atterrit
+  if(c.cd>0||c.ammo<=0||e.pilot) return false; const a=Math.atan2(inp.wy-c.y,inp.wx-c.x); c.ang=a; c.ammo--; c.cd=6; smoke(c.x,c.y,8,10,.8); ring(c.x,c.y,T*1.5,'#fb7185',.4,true);
+  c.rider=null; e.riding=null; e.pilot=1; if(ride){ e.x=c.x; e.y=c.y; e.z=26; e.vz=0; }
+  MIS.push({x:c.x+Math.cos(a)*30,y:c.y+Math.sin(a)*30,a,owner:e,team:e.team,t:0,spd:240,ramp:c,ride:!!ride}); sfx('whoosh',c.x,c.y); burst(c.x,c.y,'#fecdd3',16,200,.6,3);
+  if(e===player) announce(ride?'🚀 TU ES DANS LA FUSÉE ! Tu atterriras avec elle':'🚀 MISSILE TÉLÉGUIDÉ ! Ton pirate reste exposé','#fda4af');
+  if(c.ammo<=0){ floatTxt(c.x,c.y-48,'Plus de fusées !','#fecaca',14); c.dead=true; }
   return true;
 }
 function placeRamp(e,wx,wy){
@@ -96,7 +97,7 @@ function placeRamp(e,wx,wy){
   cannons.push({x:(tx+.5)*T,y:(ty+.5)*T,ang:e.ang,team:e.team,owner:e,rider:null,cd:0,hp:14,kind:'rocket',ammo:3}); ring((tx+.5)*T,(ty+.5)*T,T*1.4,'#fb7185',.5,true); chunks((tx+.5)*T,(ty+.5)*T,'#7c4a21',6); floatTxt((tx+.5)*T,(ty+.5)*T-40,'E : monter dessus · 3 fusées','#fecdd3',14); return true;
 }
 { const _u=useGadget2; useGadget2=function(e,id,wx,wy,ax,ay){ if(id==='rocketpilot'){ if(e.isBot) return rocketRemote(e,wx,wy); return placeRamp(e,wx,wy); } return _u(e,id,wx,wy,ax,ay); };
-  const _cf=cannonFire; cannonFire=function(e,c,inp){ if(c.kind==='rocket') return rampLaunch(e,c,inp); return _cf(e,c,inp); };
+  const _cf=cannonFire; cannonFire=function(e,c,inp){ if(c.kind==='rocket') return rampLaunch(e,c,inp,false); return _cf(e,c,inp); };
   const _uc=updateCannons; updateCannons=function(dt){ _uc(dt); if(cannons.some(c=>c.dead&&!c.rider&&!(c.t0))){ for(const c of cannons) if(c.dead&&!c.t0) c.t0=1.2; } for(const c of cannons) if(c.t0){ c.t0-=dt; if(c.t0<=0){ chunks(c.x,c.y,'#7c4a21',8); burst(c.x,c.y,'#fb923c',10,150,.5,3); c.gone=true; } } cannons=cannons.filter(c=>!c.gone); };
   const _cc=createCannonM; createCannonM=function(c){ if(c.kind!=='rocket') return _cc(c);
     const g=new THREE.Group(), tc=TEAMS[Math.max(0,c.team)].col; const base=new THREE.Mesh(GEO.box,new THREE.MeshStandardMaterial({color:0x6b4423,flatShading:true})); base.scale.set(.95,.16,.85); base.position.y=.1; g.add(base);
@@ -114,7 +115,7 @@ function placeRamp(e,wx,wy){
       const pin=pilotInput(o); let da=Math.atan2(wy-m.y,wx-m.x)-m.a; while(da>Math.PI) da-=6.283; while(da<-Math.PI) da+=6.283;
       m.a+=clamp(da,-4.6*dt,4.6*dt)+pin.ix*2.2*dt; // la souris donne le cap, Q/D l'affine
       const want=pin.iy<-.3?560:pin.iy>.3?130:300; m.spd+=clamp(want-m.spd,-520*dt,420*dt); const nx=m.x+Math.cos(m.a)*m.spd*dt, ny=m.y+Math.sin(m.a)*m.spd*dt;
-      o.ix=o.iy=0;
+      o.ix=o.iy=0; if(m.ride){ o.x=m.x; o.y=m.y; o.z=26; o.vz=0; o.vx=o.vy=0; o.grace=Math.max(o.grace,.5); o.ang=m.a; }
       for(let k=0;k<2;k++) parts.push({x:m.x-Math.cos(m.a)*10,y:m.y-Math.sin(m.a)*10,z:22,vx:rnd(-20,20),vy:rnd(-20,20),vz:rnd(0,30),life:.5,max:.5,col:k?'#fb923c':'#e5e7eb',size:k?4:6,smoke:!k});
       m.x=nx; m.y=ny; let boom=m.t>7||(click&&m.t>.45)||m.x<0||m.y<0||m.x>W*T||m.y>H*T;
       if(!boom){ const tx=Math.floor(m.x/T), ty=Math.floor(m.y/T); if(inb(tx,ty)&&wallT[idx(tx,ty)]>0) boom=true; }
@@ -148,7 +149,7 @@ const rocketM=new Map();
   drawHud=function(){ _dh(); if(game.state==='menu'||!ctx||!player) return;
     if(player.pilot){ const m=pilotMissile(player); ctx.save(); ctx.setTransform(DPR,0,0,DPR,0,0); ctx.textAlign='center';
       const g=ctx.createRadialGradient(VW/2,VH/2,Math.min(VW,VH)*.3,VW/2,VH/2,Math.max(VW,VH)*.72); g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(30,0,10,.55)'); ctx.fillStyle=g; ctx.fillRect(0,0,VW,VH);
-      const t=m?Math.max(0,7-m.t):0; ctx.font='bold 16px '+FONT; ctx.fillStyle='#fecdd3'; ctx.lineWidth=4; ctx.strokeStyle='rgba(40,0,10,.9)'; const txt='🚀 Souris : cap · Z/S : vitesse ('+Math.round(m?m.spd:0)+') · Q/D : affiner · clic : exploser · '+t.toFixed(1)+' s'; ctx.strokeText(txt,VW/2,VH-70); ctx.fillText(txt,VW/2,VH-70);
+      const t=m?Math.max(0,7-m.t):0; ctx.font='bold 16px '+FONT; ctx.fillStyle='#fecdd3'; ctx.lineWidth=4; ctx.strokeStyle='rgba(40,0,10,.9)'; const txt='🚀 '+(m&&m.ride?'À bord · ':'')+'Souris : cap · Z/S : vitesse ('+Math.round(m?m.spd:0)+') · Q/D : affiner · clic : exploser · '+t.toFixed(1)+' s'; ctx.strokeText(txt,VW/2,VH-70); ctx.fillText(txt,VW/2,VH-70);
       ctx.fillStyle='rgba(255,255,255,.2)'; ctx.fillRect(VW/2-110,VH-60,220,6); ctx.fillStyle='#fb7185'; ctx.fillRect(VW/2-110,VH-60,220*t/7,6); ctx.strokeStyle='rgba(251,113,133,.85)'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(VW/2,VH/2,22,0,6.283); ctx.moveTo(VW/2-30,VH/2); ctx.lineTo(VW/2-12,VH/2); ctx.moveTo(VW/2+12,VH/2); ctx.lineTo(VW/2+30,VH/2); ctx.stroke(); ctx.restore(); }
   };
 }
@@ -158,5 +159,5 @@ function rampOf(e){ return e&&e.riding&&e.riding.cannon&&e.riding.c&&e.riding.c.
 function rampRide(){ const e=player; if(!e||!e.alive||game.state!=='play'||game.paused) return false; const c=rampOf(e); if(!c) return false; if(NETCLIENT){ netSend({t:'act',a:'rr'}); return true; } if(c.cd>0){ floatTxt(c.x,c.y-40,'Rechargement…','#fde68a',14); return true; } rampLaunch(e,c,{wx:aim.x,wy:aim.y},true); return true; }
 { const ui=document.getElementById('ui'); ui.addEventListener('mousedown',ev=>{ if(ev.button===2&&rampOf(player)){ ev.preventDefault(); ev.stopImmediatePropagation(); rampRide(); } },true);
   const _nh=netHostData; netHostData=function(team,m){ if(m&&m.t==='act'&&m.a==='rr'){ const e=ents.find(o=>o.remote&&o.team===team); if(e&&e.alive&&NET.started){ const c=rampOf(e); if(c&&c.cd<=0&&e.inp) rampLaunch(e,c,{wx:e.inp.wx,wy:e.inp.wy},true); } return; } _nh(team,m); };
-  const _ci=cannonInteract; cannonInteract=function(e){ const was=!!rampOf(e), r=_ci(e); const c=rampOf(e); if(r&&c&&!was) floatTxt(e.x,e.y-60,'Clic gauche : lancer · Clic droit : monter dedans','#fecdd3',13); return r; };
+  const _ci=cannonInteract; cannonInteract=function(e){ const was=!!rampOf(e), r=_ci(e); const c=rampOf(e); if(r&&c&&!was) floatTxt(e.x,e.y-60,'Clic gauche : missile guidé · Clic droit : monter dedans','#fecdd3',13); return r; };
 }
