@@ -66,6 +66,9 @@ const OPTDEF=[
   {k:'evf',t:'Événements',list:()=>EV_FREQ.map((o,i)=>({v:i,n:o.n,d:'Fréquence des événements aléatoires (pluie de pièces, requin, tempête…).'}))},
   {k:'style',t:'Style',list:()=>[{v:'2d',n:'Sprites 2D',d:'Personnages, objets, herbe et mouettes dessinés en 2D (style cartoon).'},{v:'3d',n:'Cubes 3D',d:'Pirates cubiques chibi en 3D, aux couleurs de leur équipe.'}],apply:true},
   {k:'stack',t:'Hauteur max',list:()=>[1,2,3,4].map(v=>({v,n:v+(v>1?' blocs':' bloc'),d:'Nombre de blocs empilables : empile des blocs identiques sur tes murs (un mur de 2+ ne se saute plus !).'}))},
+  {k:'dn',t:'Cycle',list:()=>[{v:0,n:'Jour fixe',d:'Il fait toujours jour.'},{v:1,n:'Jour & nuit',d:'Le soleil se couche : nuits sombres éclairées par les halos des coffres et des pirates.'},{v:2,n:'Nuit',d:'Il fait nuit en permanence.'}]},
+  {k:'wth',t:'Météo',list:()=>[{v:0,n:'Aucune',d:'Ciel dégagé en permanence.'},{v:1,n:'Variable',d:'Pluie, brouillard et orages passent de temps en temps.'},{v:2,n:'Orageuse',d:'Souvent de la pluie, du brouillard et des orages.'}]},
+  {k:'pers',t:'Bots',list:()=>[{v:0,n:'Classiques',d:'Tous les bots se comportent de la même façon.'},{v:1,n:'Personnalités',d:'Les capitaines ont chacun un caractère : Rusé, Bâtisseur, Kamikaze, Chasseur de primes ou Pillard.'}]},
   {k:'core',t:'Coffres',list:()=>OPT_CORE.map((o,i)=>({v:i,n:o.n,d:'Résistance des coffres au trésor.'}))}
 ];
 function saveChar(){ if(typeof netHello==='function') netHello(); try{localStorage.setItem('pirates_char',JSON.stringify({cls:game.cls,look:game.look,pname:game.pname}));}catch(e){} }
@@ -129,6 +132,8 @@ function renderOpts(){
   const box=document.getElementById('opts'); let desc='';
   box.innerHTML=OPTDEF.map(o=>`<div class="orow"><span class="olab">${o.t}</span>${o.list().map(it=>`<button class="obtn ${game.opts[o.k]===it.v?'on':''}" data-k="${o.k}" data-v="${it.v}" title="${it.d}">${it.n}</button>`).join('')}</div>`).join('');
   box.insertAdjacentHTML('beforeend',`<div class="orow"><span class="olab">Activés</span>${Object.keys(EVENTS).map(k=>`<button class="obtn ${game.opts.ev[k]?'on':''}" data-ev="${k}" title="${EVENTS[k].d}">${EVENTS[k].ico} ${EVENTS[k].n}</button>`).join('')}</div>`);
+  box.insertAdjacentHTML('beforeend',`<div class="orow"><span class="olab">Mutateurs</span>${Object.keys(MUTS).map(k=>`<button class="obtn ${game.opts.mut&&game.opts.mut[k]?'on':''}" data-mut="${k}" title="${MUTS[k].d}">${MUTS[k].ico} ${MUTS[k].n}</button>`).join('')}</div>`);
+  box.querySelectorAll('[data-mut]').forEach(b=>b.onclick=()=>{ const k=b.dataset.mut; game.opts.mut=game.opts.mut||{}; game.opts.mut[k]=game.opts.mut[k]?0:1; saveOpts(); renderOpts(); document.getElementById('optDesc').textContent=MUTS[k].ico+' '+MUTS[k].n+' : '+MUTS[k].d+(game.opts.mut[k]?'':' (désactivé)'); });
   box.querySelectorAll('[data-ev]').forEach(b=>b.onclick=()=>{ const k=b.dataset.ev; game.opts.ev[k]=game.opts.ev[k]?0:1; saveOpts(); renderOpts(); document.getElementById('optDesc').textContent=EVENTS[k].ico+' '+EVENTS[k].n+' : '+EVENTS[k].d+(game.opts.ev[k]?'':' (désactivé)'); });
   box.querySelectorAll('.obtn[data-k]').forEach(b=>b.onclick=()=>{
     const k=b.dataset.k, def=OPTDEF.find(o=>o.k===k), it=def.list().find(x=>String(x.v)===b.dataset.v);
