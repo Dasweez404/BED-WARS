@@ -397,7 +397,7 @@ function doPlace(e,tx,ty,type){
   else if(wallT[i]===type){ hpW[i]+=BHP[type]; }
   else { wallT[i]=type; hpW[i]=BHP[type]; ownW[i]=e.team; }
   pop[i]=1;
-  if(Math.random()>=cv(e,'free')) e.blocks[type]--; e.cd.place=e.isBot?.56:.34; e.swing=.12; e.swingMax=.12;
+  if(Math.random()>=cv(e,'free')) e.blocks[type]--; e.cd.place=e.isBot?.5:.3; e.swing=.12; e.swingMax=.12;
   chunks((tx+.5)*T,(ty+.5)*T,col,4); ring((tx+.5)*T,(ty+.5)*T,T*.7,'#ffffff',.22); sfx('place',e.x,e.y);
   return true;
 }
@@ -412,7 +412,7 @@ function placeUnder(e){ // en saut : clic = bloc sous les pieds (pont au-dessus 
   else if(floorT[i]===0){ floorT[i]=type; hpF[i]=BHP[type]; ownF[i]=e.team; }
   else { if(e.z<WH-1) return false; wallT[i]=type; hpW[i]=BHP[type]; ownW[i]=e.team; }
   pop[i]=1; if(e===player&&!e.blocks[e.bsel]) e.bsel=type;
-  if(Math.random()>=cv(e,'free')) e.blocks[type]--; e.cd.place=e.isBot?.56:.34; e.swing=.12; e.swingMax=.12; e.squash=-.2;
+  if(Math.random()>=cv(e,'free')) e.blocks[type]--; e.cd.place=e.isBot?.5:.3; e.swing=.12; e.swingMax=.12; e.squash=-.2;
   chunks((tx+.5)*T,(ty+.5)*T,blockColor(type,e.team)[0],4); ring((tx+.5)*T,(ty+.5)*T,T*.7,'#ffffff',.22); sfx('place',e.x,e.y);
   return true;
 }
@@ -480,7 +480,9 @@ function doSword(e){
     if(d<T*1.9&&d>0&&(dx*ax+dy*ay)/d>.35){ hurt(o,dmg,e,ax*300,ay*300); burst(o.x,o.y-8,'#fff',5,140,.25,2); if(e===player) shake=Math.max(shake,3); }
   }
 }
-function hitGuards(e,cx,cy,R,dmg){ const tm=e?e.team:-1; for(const g of guards){ if(g.team===tm) continue; if(Math.hypot(g.x-cx,g.y-cy)<R){ g.hp-=dmg; burst(g.x,g.y,'#fff',5,120,.3,3); } } }
+/* objets posés (tourelles, pièges…) : ils ne disparaissent que détruits (ou déclenchés) */
+function hitTraps(team,cx,cy,R,dmg){ for(const t of traps){ if(t.hp===undefined||t.team===team||t.t<=0) continue; if(Math.hypot(t.x-cx,t.y-cy)<R+10){ t.hp-=dmg; burst(t.x,t.y,'#fff',4,100,.25,3); if(t.hp<=0){ t.t=-1; chunks(t.x,t.y,'#94a3b8',8); burst(t.x,t.y,'#fbbf24',8,150,.4,3); } } } }
+function hitGuards(e,cx,cy,R,dmg){ const tm=e?e.team:-1; hitTraps(tm,cx,cy,R,dmg); for(const g of guards){ if(g.team===tm) continue; if(Math.hypot(g.x-cx,g.y-cy)<R){ g.hp-=dmg; burst(g.x,g.y,'#fff',5,120,.3,3); } } }
 function doGlove(e){
   if(e.cd.atk>0) return; e.cd.atk=.9; e.swing=.35; e.swingMax=.35; sfx('swing',e.x,e.y);
   const ax=Math.cos(e.ang),ay=Math.sin(e.ang);
@@ -584,18 +586,18 @@ function useGadget(e,id,wx,wy){
     case 'trampo':{
       const tx=Math.floor(wx/T),ty=Math.floor(wy/T);
       if(fl(tx,ty)===0||wl(tx,ty)>0||Math.hypot((tx+.5)*T-e.x,(ty+.5)*T-e.y)>3.7*T) return false;
-      traps.push({kind:'trampo',x:(tx+.5)*T,y:(ty+.5)*T,t:25,age:0,team:e.team,anim:0});
+      traps.push({kind:'trampo',x:(tx+.5)*T,y:(ty+.5)*T,t:1e6,hp:8,age:0,team:e.team,anim:0});
       ring((tx+.5)*T,(ty+.5)*T,T,'#f472b6',.3); break;}
     case 'mine':
-      traps.push({kind:'mine',x:e.x,y:e.y,t:60,age:0,team:e.team,owner:e}); break;
+      traps.push({kind:'mine',x:e.x,y:e.y,t:1e6,hp:4,age:0,team:e.team,owner:e}); break;
     case 'banana':{
       const tx=Math.floor(wx/T),ty=Math.floor(wy/T);
       if(fl(tx,ty)===0||wl(tx,ty)>0||Math.hypot((tx+.5)*T-e.x,(ty+.5)*T-e.y)>3.7*T) return false;
-      traps.push({kind:'banana',x:(tx+.5)*T,y:(ty+.5)*T,t:40,age:0,team:e.team,owner:e}); break;}
+      traps.push({kind:'banana',x:(tx+.5)*T,y:(ty+.5)*T,t:1e6,hp:3,age:0,team:e.team,owner:e}); break;}
     case 'chicken':{
       chickens.push({x:e.x,y:e.y,vx:ax*220,vy:ay*220,team:e.team,owner:e,t:7,ph:0,arm:.5}); break;}
     case 'guard':{
-      for(let k=0;k<2;k++) guards.push({x:e.x+rnd(-18,18),y:e.y+rnd(-18,18),team:e.team,owner:e,hp:10,t:45,cd:.5,vx:0,vy:0,ph:rnd(0,6),ang:e.ang});
+      for(let k=0;k<2;k++) guards.push({x:e.x+rnd(-18,18),y:e.y+rnd(-18,18),team:e.team,owner:e,hp:10,t:1e6,cd:.5,vx:0,vy:0,ph:rnd(0,6),ang:e.ang});
       ring(e.x,e.y,T*1.6,'#fff',.4,true); burst(e.x,e.y,'#fff',14,160,.5,4); break;}
     case 'repair':{
       const td=TD[e.team],ci=idx(td.bx,td.by); if(!td.coreAlive||hpW[ci]>=BHP[CORE]-.5) return false;
@@ -603,7 +605,7 @@ function useGadget(e,id,wx,wy){
     case 'turret2':{
       const tx=Math.floor(wx/T),ty=Math.floor(wy/T);
       if(fl(tx,ty)===0||wl(tx,ty)>0||Math.hypot((tx+.5)*T-e.x,(ty+.5)*T-e.y)>3.7*T) return false;
-      traps.push({kind:'turret',ice:true,x:(tx+.5)*T,y:(ty+.5)*T,t:22,age:0,team:e.team,owner:e,cd:.8,ang:0});
+      traps.push({kind:'turret',ice:true,x:(tx+.5)*T,y:(ty+.5)*T,t:1e6,hp:14,age:0,team:e.team,owner:e,cd:.8,ang:0});
       ring((tx+.5)*T,(ty+.5)*T,T,'#7dd3fc',.3); break;}
     case 'tp':{
       const d=Math.min(Math.hypot(wx-e.x,wy-e.y),10*T);
@@ -620,7 +622,7 @@ function useGadget(e,id,wx,wy){
     case 'turret':{
       const tx=Math.floor(wx/T),ty=Math.floor(wy/T);
       if(fl(tx,ty)===0||wl(tx,ty)>0||Math.hypot((tx+.5)*T-e.x,(ty+.5)*T-e.y)>3.7*T) return false;
-      traps.push({kind:'turret',x:(tx+.5)*T,y:(ty+.5)*T,t:18,age:0,team:e.team,owner:e,cd:.6,ang:0});
+      traps.push({kind:'turret',x:(tx+.5)*T,y:(ty+.5)*T,t:1e6,hp:14,age:0,team:e.team,owner:e,cd:.6,ang:0});
       ring((tx+.5)*T,(ty+.5)*T,T,'#94a3b8',.3); break;}
     case 'vortex':{
       const dx=wx-e.x,dy=wy-e.y,d=Math.hypot(dx,dy)||1,m=Math.min(d,9*T);
@@ -641,7 +643,7 @@ function useGadget(e,id,wx,wy){
     case 'cluster':{
       const dx=wx-e.x,dy=wy-e.y,d=Math.hypot(dx,dy)||1,m=Math.min(d,9*T);
       bombs.push({x:e.x,y:e.y,tx:e.x+dx/d*m,ty:e.y+dy/d*m,fuse:1.1,team:e.team,owner:e,kind:'cluster',h:20}); break;}
-    case 'flag': traps.push({kind:'flag',x:e.x,y:e.y,t:12,age:0,team:e.team,owner:e}); ring(e.x,e.y,T*4,'#111827',.5,true); ring(e.x,e.y,T*4,'#fde68a',.7); break;
+    case 'flag': traps.push({kind:'flag',x:e.x,y:e.y,t:1e6,hp:10,age:0,team:e.team,owner:e}); ring(e.x,e.y,T*4,'#111827',.5,true); ring(e.x,e.y,T*4,'#fde68a',.7); break;
     case 'anchor':{
       const dx=wx-e.x,dy=wy-e.y,d=Math.hypot(dx,dy)||1,m=Math.min(d,8*T);
       bombs.push({x:e.x+dx/d*m,y:e.y+dy/d*m,tx:e.x+dx/d*m,ty:e.y+dy/d*m,fuse:.8,team:e.team,owner:e,kind:'anchor',drop:true,h:0}); break;}
@@ -656,7 +658,7 @@ function useGadget(e,id,wx,wy){
     case 'net':{
       const tx=Math.floor(wx/T),ty=Math.floor(wy/T);
       if(fl(tx,ty)===0||wl(tx,ty)>0||Math.hypot((tx+.5)*T-e.x,(ty+.5)*T-e.y)>3.7*T) return false;
-      traps.push({kind:'net',x:(tx+.5)*T,y:(ty+.5)*T,t:40,age:0,team:e.team,owner:e}); break;}
+      traps.push({kind:'net',x:(tx+.5)*T,y:(ty+.5)*T,t:1e6,hp:4,age:0,team:e.team,owner:e}); break;}
     case 'swap':{
       let best=null,bd=3.2*T; for(const o of ents){ if(!o.alive||o.team===e.team) continue; const d=Math.hypot(o.x-wx,o.y-wy); if(d<bd&&Math.hypot(o.x-e.x,o.y-e.y)<11*T){bd=d;best=o;} }
       if(!best) return false;
@@ -667,7 +669,7 @@ function useGadget(e,id,wx,wy){
       for(const o of ents){ if(!o.alive||o.team===e.team||Math.hypot(o.x-e.x,o.y-e.y)>3.6*T) continue; o.frozen=1.8; floatTxt(o.x,o.y-36,'GELÉ !','#7dd3fc',16); }
       break;}
     case 'decoy':
-      guards.push({x:e.x+ax*20,y:e.y+ay*20,team:e.team,owner:e,hp:32,t:30,cd:.5,vx:0,vy:0,ph:rnd(0,6),ang:e.ang}); ring(e.x,e.y,T*1.4,'#a3e635',.4,true); burst(e.x,e.y,'#bef264',14,160,.5,4); break;
+      guards.push({x:e.x+ax*20,y:e.y+ay*20,team:e.team,owner:e,hp:32,t:1e6,cd:.5,vx:0,vy:0,ph:rnd(0,6),ang:e.ang}); ring(e.x,e.y,T*1.4,'#a3e635',.4,true); burst(e.x,e.y,'#bef264',14,160,.5,4); break;
     case 'siren':{
       ring(e.x,e.y,T*6,'#c084fc',.8,true); ring(e.x,e.y,T*3,'#fff',.6); burst(e.x,e.y,'#e9d5ff',24,200,.8,4);
       for(const o of ents){ if(!o.alive||o.team===e.team) continue; const d=Math.hypot(o.x-e.x,o.y-e.y); if(d>6*T) continue; o.slow=3.5; o.vx+=(e.x-o.x)/(d||1)*380; o.vy+=(e.y-o.y)/(d||1)*380; floatTxt(o.x,o.y-36,'ENVOÛTÉ','#e9d5ff',15); }
@@ -699,7 +701,7 @@ function blastTiles(cx,cy,R,dmg,src,team){
   }
 }
 function explode(b){
-  const cx=b.x,cy=b.y;
+  const cx=b.x,cy=b.y; if(b.team!==undefined) hitTraps(b.team,cx,cy,(b.R||T),(b.dm||6));
   if(b.kind==='anchor'){
     const R=1.8*T; sfx('boom',cx,cy); ring(cx,cy,R,'#94a3b8',.45,true); ring(cx,cy,R*1.4,'#e2e8f0',.5); burst(cx,cy,'#cbd5e1',22,260,.6,4); chunks(cx,cy,'#6b7280',10); shake=Math.max(shake,10);
     blastTiles(cx,cy,R*.9,26,b.owner,b.team);
@@ -766,7 +768,7 @@ function upItem(id,name,max,costs,txt,extra){
   },e=>{e.up[id]++; if(extra) extra(e);});
 }
 function gunItem(id,name,desc,cost){
-  const g=GUNS[id], stat=`Chargeur ${g.mag} · recharge ${g.reload.toFixed(1)} s · munitions illimitées`;
+  const g=GUNS[id], stat=`Chargeur ${g.mag} · recharge ${g.reload.toFixed(1)} s`;
   return mk(id,'Armes',e=>e.own[id]?{name,desc:'Déjà possédé',cost:{},ok:false,tag:'OK'}:{name,desc:desc+' '+stat,cost},e=>{e.own[id]=true;});
 }
 function gadItem(id,name,desc,cost,n,cat){
@@ -820,8 +822,8 @@ const SHOP=[
   gadItem('bridge','Planche d\'abordage','Construit instantanément 8 blocs de pont devant toi.',{silver:10},1),
   mk('bomb','Gadgets',e=>({name:'Baril de poudre ×1',desc:'Explose après 1,7 s. Détruit blocs et ponts.',cost:{silver:6}}),e=>e.bomb+=1),
   mk('repel','Gadgets',e=>({name:'Vague scélérate ×1',desc:'Projette tout le monde loin (dans le vide !).',cost:{silver:5}}),e=>e.repel+=1),
-  gadItem('turret','Canon de pont','Tire seule sur les ennemis proches pendant 18 s.',{silver:14},1,'Défense'),
-  gadItem('turret2','Canon givrant','Gèle brièvement les ennemis proches pendant 22 s.',{silver:16},1,'Défense'),
+  gadItem('turret','Canon de pont','Tire seul sur les ennemis proches jusqu\'à ce qu\'il soit détruit.',{silver:14},1,'Défense'),
+  gadItem('turret2','Canon givrant','Gèle brièvement les ennemis proches jusqu\'à ce qu\'il soit détruit.',{silver:16},1,'Défense'),
   gadItem('guard','Matelots gardiens','Deux matelots gardiens défendent ta base pendant 45 s.',{silver:12},1,'Défense'),
   gadItem('repair','Réparation du coffre','Soigne ton coffre au trésor de 14 PV.',{silver:8},1,'Défense'),
   gadItem('vortex','Maelström','Aspire les ennemis vers son centre pendant 3,5 s.',{gold:2},1),
@@ -1037,6 +1039,7 @@ function updateProj(dt){
       }
       if(nearestShieldBlocking(p.x,p.y,p.team)){p.life=0;burst(p.x,p.y,'#7dd3fc',5,80,.3,2);break;}
       for(const bt of boats){ if(bt.team!==p.team&&Math.hypot(bt.x-p.x,bt.y-p.y)<20&&p.dmg>0){ hitBoat(bt,p.dmg,p.owner); if(!p.pierce){ p.life=0; } } }
+      if(p.dmg>0) hitTraps(p.team,p.x,p.y,6,p.dmg);
       for(const g of guards){ if(g.team!==p.team&&Math.hypot(g.x-p.x,g.y-p.y)<12){ g.hp-=p.dmg||2; burst(p.x,p.y,'#fff',4,90,.2,3); if(p.kind==='rocket'){explode({x:p.x,y:p.y,team:p.team,owner:p.owner,kind:'bomb',R:2.2*T,dm:9,bd:.8});} if(!p.pierce){p.life=0;} } }
       if(p.life<=0) break;
       for(const o of ents){

@@ -77,7 +77,7 @@ function useGadget2(e,id,wx,wy,ax,ay){
       for(let k=0;k<8;k++){ tx+=sx;ty+=sy; if(!inb(tx,ty)||wl(tx,ty)>0) break; const i=idx(tx,ty); if(floorT[i]===0){ floorT[i]=4; hpF[i]=BHP[4]; ownF[i]=e.team; pop[i]=1+k*.08; n++; } }
       if(!n) return false; burst(e.x,e.y,'#a7afb8',10,140,.4,3); return true; }
     case 'battery':{ const [px,py]=aimPoint(e,wx,wy,3.7*T), tx=Math.floor(px/T), ty=Math.floor(py/T), horiz=Math.abs(ax)>Math.abs(ay); let n=0;
-      for(const k of [-1,1]){ const x2=tx+(horiz?0:k),y2=ty+(horiz?k:0); if(fl(x2,y2)===0||wl(x2,y2)>0) continue; traps.push({kind:'turret',x:(x2+.5)*T,y:(y2+.5)*T,t:18,age:0,team:e.team,owner:e,cd:.6,ang:0}); ring((x2+.5)*T,(y2+.5)*T,T,'#94a3b8',.3); n++; }
+      for(const k of [-1,1]){ const x2=tx+(horiz?0:k),y2=ty+(horiz?k:0); if(fl(x2,y2)===0||wl(x2,y2)>0) continue; traps.push({kind:'turret',x:(x2+.5)*T,y:(y2+.5)*T,t:1e6,hp:14,age:0,team:e.team,owner:e,cd:.6,ang:0}); ring((x2+.5)*T,(y2+.5)*T,T,'#94a3b8',.3); n++; }
       return n>0; }
     case 'raid':{ for(let k=0;k<7;k++){ const d=(2+k*1.3)*T, x=e.x+ax*d, y=e.y+ay*d; bombs.push({x,y,tx:x,ty:y,fuse:.6+k*.18,team:e.team,owner:e,kind:'bomb',R:1.4*T,dm:6,bd:.7,shell:true,drop:true,h:0}); } return true; }
   }

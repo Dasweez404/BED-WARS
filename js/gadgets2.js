@@ -45,7 +45,7 @@ let rafts2=[], wreck=[]; // radeaux-bombes, tuiles détruites récemment (pour l
   useGadget2=function(e,id,wx,wy,ax,ay){
     switch(id){
       case 'anchortrap':{ const [tx,ty]=aimPoint(e,wx,wy,4*T), x=Math.floor(tx/T), y=Math.floor(ty/T); if(fl(x,y)<=0||wl(x,y)>0){ floatTxt(e.x,e.y-34,'Pose-le sur le sol ou un pont','#fde68a',14); return false; }
-        traps.push({kind:'anchortrap',x:(x+.5)*T,y:(y+.5)*T,t:45,age:0,team:e.team,owner:e,cd:0}); ring((x+.5)*T,(y+.5)*T,T*1.2,'#94a3b8',.4,true); chunks((x+.5)*T,(y+.5)*T,'#64748b',5); return true; }
+        traps.push({kind:'anchortrap',x:(x+.5)*T,y:(y+.5)*T,t:1e6,hp:6,age:0,team:e.team,owner:e,cd:0}); ring((x+.5)*T,(y+.5)*T,T*1.2,'#94a3b8',.4,true); chunks((x+.5)*T,(y+.5)*T,'#64748b',5); return true; }
       case 'parrotmsg':{ const o=nearestFoe(e,wx,wy,6*T); if(!o){ floatTxt(e.x,e.y-34,'Aucun ennemi près de la cible','#fde68a',14); return false; }
         const o2=ents.filter(q=>q.alive&&q.team!==e.team&&q!==o&&Math.hypot(q.x-o.x,q.y-o.y)<14*T).sort((a,b)=>Math.hypot(a.x-o.x,a.y-o.y)-Math.hypot(b.x-o.x,b.y-o.y))[0];
         for(const q of [o,o2]) if(q){ q.mark=8; q.markT=e.team+1; floatTxt(q.x,q.y-46,'🦜 MARQUÉ !','#4ade80',15); ring(q.x,q.y,T*1.3,'#4ade80',.5,true); }
