@@ -243,6 +243,7 @@ function drawSpy(){ // perroquet espion : flèches vers tous les ennemis
   }
   ctx.restore();
 }
+const MINI_RGB={};
 const miniSize=()=>(typeof TOUCH!=='undefined'&&TOUCH.on&&VH<560)?104:150;
 function drawMini(){
   const S=miniSize(),mx=VW-S-10,my=10, d=miniImg.data;
@@ -252,7 +253,7 @@ function drawMini(){
       if(w===CORE) c=TEAMS[ownW[i]].col; else if(w) c=(w===WOOL?TEAMS[ownW[i]].dark:BCOL[w][1]);
       else if(f===1){ const reg=region[i]; c=reg>=0&&reg<4?'#e9d9a8':reg===4?'#a97b47':'#d8c793'; if(reg>=0&&reg<4&&Math.abs(i%W-TD[reg].bx)<=2&&Math.abs(((i/W)|0)-TD[reg].by)<=2) c=TEAMS[reg].light; }
       else if(f>1) c=blockColor(f,ownF[i])[0]; else c=null;
-      if(!c){ r=30;g=100;b=150; } else { const n=parseInt(c.slice(1),16); r=n>>16; g=(n>>8)&255; b=n&255; }
+      if(!c){ r=30;g=100;b=150; } else { let n=MINI_RGB[c]; if(n===undefined) n=MINI_RGB[c]=parseInt(c.slice(1),16); r=n>>16; g=(n>>8)&255; b=n&255; }
       d[i*4]=r;d[i*4+1]=g;d[i*4+2]=b;d[i*4+3]=255;
     }
     miniCtx.putImageData(miniImg,0,0);
