@@ -161,7 +161,7 @@ let TOUCHSPEC=null;
 { let coresOld=null;
   const _u=updateEvents;
   updateEvents=function(dt){ _u(dt); if(game.state==='menu') return; if(!coresOld||coresOld.length!==TD.length) coresOld=TD.map(t=>t.coreAlive);
-    TD.forEach((t,i)=>{ if(coresOld[i]&&!t.coreAlive){ if(!NETON&&typeof JUICE!=='undefined'){ JUICE.slow=Math.max(JUICE.slow,.9); JUICE.kick(.8); } if(!KC.on&&!isSpec()) camFocusOn((t.bx+.5)*T,(t.by+.5)*T,1.9,1); } coresOld[i]=t.coreAlive; });
+    TD.forEach((t,i)=>{ if(coresOld[i]&&!t.coreAlive){ if(!NETON&&typeof JUICE!=='undefined'){ JUICE.slow=Math.max(JUICE.slow,.9); JUICE.kick(.8); }  } coresOld[i]=t.coreAlive; });
   };
 }
 /* nettoyage entre parties */

@@ -24,6 +24,7 @@ const J2={stepT:0,chain:{place:0,coin:0},lastPlace:0,lastCoin:0,prevZ:0,hbT:0,fo
 })();
 /* ---------- mer : vagues, caustiques et scintillements (shader greffé sur le matériau existant) ---------- */
 function patchSea(){
+  return; // vagues animées désactivées (on garde la mer d'origine)
   if(J2.seaOk||typeof sea==='undefined'||!sea) return; J2.seaOk=true; const u={uT:{value:0},uDay:{value:1}}; J2.u=u;
   sea.material.onBeforeCompile=sh=>{ sh.uniforms.uT=u.uT; sh.uniforms.uDay=u.uDay;
     sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nvarying vec3 vW;').replace('#include <begin_vertex>','#include <begin_vertex>\nvW=(modelMatrix*vec4(position,1.)).xyz;');

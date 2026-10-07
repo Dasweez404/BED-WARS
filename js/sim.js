@@ -344,7 +344,7 @@ function die(e,by,sea){
   // mort hors de sa base : on perd tout son équipement (les améliorations de base sont conservées)
   if((game.opts.loss|0)===1||((game.opts.loss|0)===0&&!nearBase(e))){
     const had=Object.keys(e.own).length+Object.values(e.am).filter(v=>v>0).length+e.grap+e.jet+e.bomb+e.repel+e.shield+(e.pick>0?1:0)+(e.sword>0?1:0)+totalBlocks(e);
-    e.blocks={2:8,3:0,4:0,5:0,7:0,8:0}; e.bsel=2; e.pick=0; e.sword=0; e.grap=e.jet=e.bomb=e.repel=e.shield=0; e.own=keepOwn(e); e.am=keepAm(e); e.ws={};
+    e.blocks={2:8,3:0,4:0,5:0,7:0,8:0}; e.bsel=2; e.pick=Math.max(0,e.pick-1); e.sword=Math.max(0,e.sword-1); e.grap=e.jet=e.bomb=e.repel=e.shield=0; e.own=keepOwn(e); e.am=keepAm(e); e.ws={};
     if(e===player&&had>8){ msg('Mort hors de ta base : tu perds ton équipement !','#fca5a5'); floatTxt(e.x,e.y-50,'ÉQUIPEMENT PERDU','#fca5a5',16); }
   }
   const lost=game.opts.rkeep?0:Object.values(e.res).reduce((a,b)=>a+b,0);
@@ -783,12 +783,12 @@ function wallRing(e){
   }
 }
 const SHOP=[
-  mk('wool','Blocs',e=>({name:'Toile ×8',desc:'Voile de toile : faible résistance, idéal pour les passerelles.',cost:{bronze:6}}),e=>e.blocks[2]+=8),
-  mk('wood','Blocs',e=>({name:'Planches ×4',desc:'Résistance moyenne.',cost:{silver:4}}),e=>e.blocks[3]+=4),
-  mk('stone','Blocs',e=>({name:'Pierre de cale ×4',desc:'Solide. Résiste à une bombe.',cost:{silver:8}}),e=>e.blocks[4]+=4),
-  mk('obs','Blocs',e=>({name:'Obsidienne ×2',desc:'Très solide : 2 bombes pour la casser.',cost:{gold:3}}),e=>e.blocks[5]+=2),
-  mk('coral','Blocs',e=>({name:'Corail ×4',desc:'Bloc rose, assez solide (16 PV) et pas cher.',cost:{silver:5}}),e=>e.blocks[7]+=4),
-  mk('iceblk','Blocs',e=>({name:'Glace ×8',desc:'Bloc translucide, très bon marché : parfait pour bâtir vite (7 PV).',cost:{bronze:6}}),e=>e.blocks[8]+=8),
+  mk('wool','Blocs',e=>({name:'Toile ×5',desc:'Voile de toile : faible résistance, idéal pour les passerelles.',cost:{bronze:6}}),e=>e.blocks[2]+=5),
+  mk('wood','Blocs',e=>({name:'Planches ×3',desc:'Résistance moyenne.',cost:{silver:4}}),e=>e.blocks[3]+=3),
+  mk('stone','Blocs',e=>({name:'Pierre de cale ×3',desc:'Solide. Résiste à une bombe.',cost:{silver:8}}),e=>e.blocks[4]+=3),
+  mk('obs','Blocs',e=>({name:'Obsidienne ×1',desc:'Très solide : 2 bombes pour la casser.',cost:{gold:3}}),e=>e.blocks[5]+=1),
+  mk('coral','Blocs',e=>({name:'Corail ×3',desc:'Bloc rose, assez solide (16 PV) et pas cher.',cost:{silver:5}}),e=>e.blocks[7]+=3),
+  mk('iceblk','Blocs',e=>({name:'Glace ×5',desc:'Bloc translucide, très bon marché : parfait pour bâtir vite (7 PV).',cost:{bronze:6}}),e=>e.blocks[8]+=5),
   mk('sword','Combat',e=>{
     const t=e.sword; if(t>=3) return {name:SWORDS[3].n,desc:'Niveau maximum',cost:{},ok:false,tag:'MAX'};
     return {name:SWORDS[t+1].n,desc:`Dégâts ${SWORDS[t+1].d} (actuel ${SWORDS[t].d})`,cost:SWORD_COST[t+1]};
