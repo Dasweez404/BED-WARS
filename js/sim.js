@@ -44,21 +44,22 @@ const PERM={}; // objets permanents (utilisables à volonté, avec recharge)
 const GUNS={
   // mag = chargeur, cd = cadence (s entre deux tirs), reload = rechargement (s), spread = dispersion de base, bloom = dispersion ajoutée à chaque tir, bmax = dispersion max
   bow:{n:'Arbalète',mag:1,cd:.1,reload:.85,sp:620,life:1.4,dmg:5,kb:217,col:'#f1f5f9',pel:1,spread:0,bloom:0,bmax:0,kind:'arrow',rec:0},
-  gun:{n:'Pistolet à silex',mag:12,cd:.2,reload:1.1,sp:820,life:.7,dmg:3,kb:140,col:'#fde047',pel:1,spread:.02,bloom:.014,bmax:.1,rec:55},
-  smg:{n:'Pistolets jumeaux',mag:30,cd:.075,reload:1.7,sp:800,life:.6,dmg:1.5,kb:60,col:'#fde047',pel:1,spread:.045,bloom:.02,bmax:.24,rec:20},
-  shotgun:{n:'Tromblon',mag:6,cd:.85,reload:2.3,sp:720,life:.36,dmg:2.2,kb:230,col:'#fb923c',pel:8,spread:.27,bloom:0,bmax:0,rec:260},
-  sniper:{n:'Mousquet long',mag:4,cd:1.3,reload:2.5,sp:1700,life:.9,dmg:11,kb:520,col:'#a5f3fc',pel:1,spread:0,bloom:0,bmax:0,pierce:true,rec:200,moveSpread:.1},
+  gun:{n:'Pistolet à silex',mag:12,cd:.2,reload:1.1,sp:820,life:.7,dmg:3.5,kb:140,col:'#fde047',pel:1,spread:.02,bloom:.014,bmax:.1,rec:48},
+  smg:{n:'Pistolets jumeaux',mag:30,cd:.075,reload:1.7,sp:800,life:.6,dmg:1.75,kb:60,col:'#fde047',pel:1,spread:.045,bloom:.02,bmax:.24,rec:14},
+  shotgun:{n:'Tromblon',mag:6,cd:.85,reload:2.3,sp:720,life:.36,dmg:2.5,kb:230,col:'#fb923c',pel:8,spread:.27,bloom:0,bmax:0,rec:300},
+  sniper:{n:'Mousquet long',mag:4,cd:1.3,reload:2.5,sp:1700,life:.9,dmg:12.5,kb:520,col:'#a5f3fc',pel:1,spread:0,bloom:0,bmax:0,pierce:true,rec:240,moveSpread:.1},
   rocket:{n:'Canon de poche',mag:1,cd:.1,reload:2.2,sp:430,life:2.2,dmg:0,kb:0,col:'#f87171',pel:1,spread:0,bloom:0,bmax:0,kind:'rocket',rec:300},
-  woolgun:{n:'Lance-filet',mag:8,cd:.34,reload:1.8,sp:560,life:.9,dmg:1.5,kb:150,col:'#f9a8d4',pel:1,spread:.06,bloom:.02,bmax:.16,kind:'wool',rec:40},
+  woolgun:{n:'Lance-filet',mag:8,cd:.34,reload:1.8,sp:560,life:.9,dmg:1.5,kb:150,col:'#f9a8d4',pel:1,spread:.06,bloom:.02,bmax:.16,kind:'wool',rec:30},
   boomerang:{n:'Hache de lancer',mag:1,cd:.1,reload:1.1,sp:560,life:1.3,dmg:4,kb:200,col:'#fbbf24',pel:1,spread:0,bloom:0,bmax:0,kind:'boomerang',pierce:true,rec:0},
-  bubble:{n:'Lance-écume',mag:3,cd:.45,reload:2.4,sp:360,life:1.2,dmg:0,kb:0,col:'#bfdbfe',pel:1,spread:0,bloom:0,bmax:0,kind:'bubble',rec:30},
-  ice:{n:'Harpon givré',mag:5,cd:.4,reload:2,sp:600,life:.9,dmg:1,kb:0,col:'#7dd3fc',pel:1,spread:.02,bloom:0,bmax:0,kind:'ice',rec:40},
-  trident:{n:'Trident de Poséidon',mag:6,cd:.5,reload:1.8,sp:760,life:.55,dmg:2.2,kb:150,col:'#38bdf8',pel:3,spread:.11,bloom:0,bmax:0,pierce:true,rec:90},
-  gatling:{n:'Poivrière rotative',mag:90,cd:.05,reload:3.2,sp:820,life:.55,dmg:.9,kb:30,col:'#fca5a5',pel:1,spread:.05,bloom:.012,bmax:.32,rec:14},
-  javelin:{n:'Javelot de chasse',mag:2,cd:.3,reload:1.5,sp:1150,life:.7,dmg:7,kb:380,col:'#f1f5f9',pel:1,spread:0,bloom:0,bmax:0,pierce:true,rec:120},
-  flarebow:{n:'Arc incendiaire',mag:3,cd:.35,reload:1.9,sp:640,life:1,dmg:2,kb:60,col:'#fb923c',pel:1,spread:.02,bloom:0,bmax:0,kind:'flame',rec:30},
-  flame:{n:'Torche cracheuse',mag:70,cd:.07,reload:2.6,sp:390,life:.32,dmg:1.1,kb:25,col:'#fb923c',pel:1,spread:.17,bloom:0,bmax:0,kind:'flame',rec:6}
+  bubble:{n:'Lance-écume',mag:3,cd:.45,reload:2.4,sp:360,life:1.2,dmg:0,kb:0,col:'#bfdbfe',pel:1,spread:0,bloom:0,bmax:0,kind:'bubble',rec:24},
+  ice:{n:'Harpon givré',mag:5,cd:.4,reload:2,sp:600,life:.9,dmg:1,kb:0,col:'#7dd3fc',pel:1,spread:.02,bloom:0,bmax:0,kind:'ice',rec:32},
+  trident:{n:'Trident de Poséidon',mag:6,cd:.5,reload:1.8,sp:760,life:.55,dmg:2.2,kb:150,col:'#38bdf8',pel:3,spread:.11,bloom:0,bmax:0,pierce:true,rec:110},
+  gatling:{n:'Poivrière rotative',mag:90,cd:.05,reload:3.2,sp:820,life:.55,dmg:1.05,kb:30,col:'#fca5a5',pel:1,spread:.05,bloom:.012,bmax:.32,rec:10},
+  javelin:{n:'Javelot de chasse',mag:2,cd:.3,reload:1.5,sp:1150,life:.7,dmg:7,kb:380,col:'#f1f5f9',pel:1,spread:0,bloom:0,bmax:0,pierce:true,rec:140},
+  flarebow:{n:'Arc incendiaire',mag:3,cd:.35,reload:1.9,sp:640,life:1,dmg:2,kb:60,col:'#fb923c',pel:1,spread:.02,bloom:0,bmax:0,kind:'flame',rec:24},
+  flame:{n:'Torche cracheuse',mag:70,cd:.07,reload:2.6,sp:390,life:.32,dmg:1.1,kb:25,col:'#fb923c',pel:1,spread:.17,bloom:0,bmax:0,kind:'flame',rec:4}
 };
+for(const id in GUNS){ const g=GUNS[id]; g.spread=+(g.spread*.85).toFixed(4); g.bloom=+(g.bloom*.85).toFixed(4); g.bmax=+(g.bmax*.85).toFixed(4); } // dispersion un peu réduite
 const isGun=id=>!!GUNS[id];
 const DIFFS={
   easy:{n:'Facile',react:.9,noise:.38,dmg:.55,speed:.8,hp:14,engage:4.5,meleeCd:.95,gunCd:2,likeP:.4,use:.5,aggr:.7,buyT:1.4,leave:[60,90],income:1,strafe:false,dodge:0,desc:'Bots lents et imprécis, peu d\'objets.'},
@@ -397,7 +398,7 @@ function doPlace(e,tx,ty,type){
   else if(wallT[i]===type){ hpW[i]+=BHP[type]; }
   else { wallT[i]=type; hpW[i]=BHP[type]; ownW[i]=e.team; }
   pop[i]=1;
-  if(Math.random()>=cv(e,'free')) e.blocks[type]--; e.cd.place=e.isBot?.45:.26; e.swing=.12; e.swingMax=.12;
+  if(Math.random()>=cv(e,'free')) e.blocks[type]--; e.cd.place=e.isBot?.56:.34; e.swing=.12; e.swingMax=.12;
   chunks((tx+.5)*T,(ty+.5)*T,col,4); ring((tx+.5)*T,(ty+.5)*T,T*.7,'#ffffff',.22); sfx('place',e.x,e.y);
   return true;
 }
@@ -412,7 +413,7 @@ function placeUnder(e){ // en saut : clic = bloc sous les pieds (pont au-dessus 
   else if(floorT[i]===0){ floorT[i]=type; hpF[i]=BHP[type]; ownF[i]=e.team; }
   else { if(e.z<WH-1) return false; wallT[i]=type; hpW[i]=BHP[type]; ownW[i]=e.team; }
   pop[i]=1; if(e===player&&!e.blocks[e.bsel]) e.bsel=type;
-  if(Math.random()>=cv(e,'free')) e.blocks[type]--; e.cd.place=e.isBot?.45:.26; e.swing=.12; e.swingMax=.12; e.squash=-.2;
+  if(Math.random()>=cv(e,'free')) e.blocks[type]--; e.cd.place=e.isBot?.56:.34; e.swing=.12; e.swingMax=.12; e.squash=-.2;
   chunks((tx+.5)*T,(ty+.5)*T,blockColor(type,e.team)[0],4); ring((tx+.5)*T,(ty+.5)*T,T*.7,'#ffffff',.22); sfx('place',e.x,e.y);
   return true;
 }
