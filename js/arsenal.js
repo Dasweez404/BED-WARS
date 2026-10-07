@@ -3,14 +3,14 @@
 Object.assign(game.opts,{rocket:0});
 /* ---------- épées spéciales (armes de mêlée achetables, avec leur effet) ---------- */
 const SW2={
-  rapier:{n:'Rapière de duelliste',ico:'🤺',col:'#e2e8f0',cost:{silver:16},cd:.24,dmg:4.4,reach:2.7,cone:.82,lunge:300,d:'Très rapide : attaques en fente qui te propulsent vers l\'avant. Touche en ligne droite, pas de dégâts de zone.'},
-  axe:{n:'Hache de guerre',ico:'🪓',col:'#94a3b8',cost:{silver:24},cd:.95,dmg:13,reach:2.15,cone:-1,wall:9,kb:520,d:'Lente mais dévastatrice : frappe tout autour de toi, repousse fort et brise les murs adverses.'},
-  frost:{n:'Lame de givre',ico:'❄️',col:'#7dd3fc',cost:{gold:3},cd:.5,dmg:6.4,reach:2,cone:.3,slow:2.6,freeze:.22,d:'Ralentit les ennemis touchés et peut les geler un instant.'},
-  flame:{n:'Lame ardente',ico:'🔥',col:'#fb923c',cost:{gold:3},cd:.5,dmg:6,reach:2,cone:.3,burn:3.6,d:'Enflamme les ennemis touchés : brûlure pendant plusieurs secondes.'},
-  blood:{n:'Sabre sanglant',ico:'🧛',col:'#f87171',cost:{gold:4},cd:.5,dmg:7,reach:2,cone:.3,leech:.4,d:'Te rend 40 % des dégâts infligés en PV.'},
-  spear:{n:'Lance d\'abordage',ico:'🦯',col:'#fde68a',cost:{silver:22},cd:.62,dmg:8,reach:3.6,line:true,kb:380,d:'Allonge énorme : transperce tous les ennemis alignés devant toi.'},
-  storm:{n:'Katana-tempête',ico:'⚡',col:'#a78bfa',cost:{gold:5},cd:.44,dmg:6.4,reach:2,cone:.3,bolt:4,d:'Rapide : tous les 4 coups, la foudre s\'abat sur ta cible.'},
-  hook:{n:'Sabre-grappin',ico:'🪝',col:'#d6b27a',cost:{silver:26},cd:.55,dmg:6.2,reach:3.1,cone:.55,pull:1,d:'Allonge moyenne : ramène les ennemis touchés vers toi et les immobilise un instant.'}
+  rapier:{n:'Rapière de duelliste',ico:'🤺',col:'#e2e8f0',cost:{silver:16},cd:.24,dmg:3.4,reach:2.7,cone:.82,lunge:300,d:'Très rapide : attaques en fente qui te propulsent vers l\'avant. Touche en ligne droite, pas de dégâts de zone.'},
+  axe:{n:'Hache de guerre',ico:'🪓',col:'#94a3b8',cost:{silver:24},cd:.95,dmg:8.5,reach:2.15,cone:-1,wall:9,kb:520,d:'Lente mais dévastatrice : frappe tout autour de toi, repousse fort et brise les murs adverses.'},
+  frost:{n:'Lame de givre',ico:'❄️',col:'#7dd3fc',cost:{gold:3},cd:.5,dmg:4.6,reach:2,cone:.3,slow:2.6,freeze:.22,d:'Ralentit les ennemis touchés et peut les geler un instant.'},
+  flame:{n:'Lame ardente',ico:'🔥',col:'#fb923c',cost:{gold:3},cd:.5,dmg:4.4,reach:2,cone:.3,burn:3.6,d:'Enflamme les ennemis touchés : brûlure pendant plusieurs secondes.'},
+  blood:{n:'Sabre sanglant',ico:'🧛',col:'#f87171',cost:{gold:4},cd:.5,dmg:5.2,reach:2,cone:.3,leech:.4,d:'Te rend 40 % des dégâts infligés en PV.'},
+  spear:{n:'Lance d\'abordage',ico:'🦯',col:'#fde68a',cost:{silver:22},cd:.62,dmg:5.8,reach:3.6,line:true,kb:380,d:'Allonge énorme : transperce tous les ennemis alignés devant toi.'},
+  storm:{n:'Katana-tempête',ico:'⚡',col:'#a78bfa',cost:{gold:5},cd:.44,dmg:4.8,reach:2,cone:.3,bolt:4,d:'Rapide : tous les 4 coups, la foudre s\'abat sur ta cible.'},
+  hook:{n:'Sabre-grappin',ico:'🪝',col:'#d6b27a',cost:{silver:26},cd:.55,dmg:4.6,reach:3.1,cone:.55,pull:1,d:'Allonge moyenne : ramène les ennemis touchés vers toi et les immobilise un instant.'}
 };
 for(const id in SW2){ const s=SW2[id]; const it={id,n:s.n,ico:s.ico,col:s.col}; ITEMS.push(it); ITEMMAP[id]=it; TIPS2[id]=s.d.split('.')[0]+' · clic : frapper';
   SHOP.push(mk(id,'Armes',e=>e.own[id]?{name:s.n,desc:'Déjà possédée',cost:{},ok:false,tag:'POSSÉDÉE'}:{name:s.n,desc:s.d,cost:s.cost},e=>{ e.own[id]=true; })); }

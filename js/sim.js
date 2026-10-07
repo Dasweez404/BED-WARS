@@ -15,7 +15,7 @@ const TEAMS=[
   {name:'Jaunes',col:'#eab308',dark:'#a16207',light:'#fde047',bx:76,by:50,dir:[-1,0],g:['#ecd98a','#e2cf80'],cl:'#9a8a3f'}
 ];
 const REGCOL={4:{g:['#d9c58c','#cfba80'],cl:'#8a7a48'},5:{g:['#8de0e6','#7fd6dd'],cl:'#3f8f96'}};
-const SWORDS=[{n:'Coutelas rouillé',d:4,c:'#b98a52'},{n:'Sabre d\'abordage',d:6,c:'#a7afb8'},{n:'Cimeterre',d:8,c:'#e5e7eb'},{n:'Sabre du capitaine',d:11,c:'#67e8f9'}];
+const SWORDS=[{n:'Coutelas rouillé',d:3,c:'#b98a52'},{n:'Sabre d\'abordage',d:4.2,c:'#a7afb8'},{n:'Cimeterre',d:5.4,c:'#e5e7eb'},{n:'Sabre du capitaine',d:6.8,c:'#67e8f9'}];
 const PICKS=[{n:'Pioche rouillée',d:2},{n:'Pioche de forban',d:4},{n:'Pioche en fer noir',d:7},{n:'Pioche du capitaine',d:12}];
 const SWORD_COST=[null,{bronze:40},{silver:10},{gold:3}];
 const PICK_COST=[null,{bronze:30},{silver:12},{gold:4}];
@@ -87,7 +87,7 @@ const MAPS={
 const CBASE={hp:0,spd:1,melee:1,gun:1,rel:1,def:1,kb:1,jump:1,mine:1,free:0,gcd:1,loot:1};
 const CLASSES={
   matelot:{n:'Matelot',ico:'⚓',d:'Polyvalent : aucun point fort, aucune faiblesse.',pros:[],cons:[]},
-  corsaire:{n:'Corsaire',ico:'🗡️',d:'Maître du sabre, un peu lourd à manœuvrer.',melee:1.3,spd:.92,hp:2,start:{sword:1},pros:['+30 % dégâts de mêlée','Sabre d\'abordage au départ','+2 PV'],cons:['−8 % vitesse']},
+  corsaire:{n:'Corsaire',ico:'🗡️',d:'Maître du sabre, un peu lourd à manœuvrer.',melee:1.2,spd:.92,hp:2,start:{sword:1},pros:['+20 % dégâts de mêlée','Sabre d\'abordage au départ','+2 PV'],cons:['−8 % vitesse']},
   canonnier:{n:'Canonnier',ico:'💣',d:'Spécialiste des armes à feu, fragile.',gun:1.25,rel:.8,hp:-4,start:{own:['gun']},pros:['+25 % dégâts à distance','Rechargement −20 %','Pistolet au départ'],cons:['−4 PV']},
   eclaireur:{n:'Éclaireur',ico:'🧭',d:'Rapide et agile, mais peu résistant.',spd:1.15,jump:1.2,hp:-4,melee:.8,start:{am:{springs:1}},pros:['+15 % vitesse','Sauts +20 %','Bottes de mousse au départ'],cons:['−4 PV','−20 % dégâts de mêlée']},
   charpentier:{n:'Charpentier',ico:'🔨',d:'Bâtisseur économe, peu combatif à distance.',free:.3,mine:1.5,gun:.85,start:{blocks:16},pros:['30 % de blocs gratuits','Minage +50 %','+16 blocs au départ'],cons:['−15 % dégâts à distance']},
