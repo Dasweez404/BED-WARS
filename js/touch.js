@@ -18,9 +18,13 @@ const isCont=id=>CONT_ITEMS.includes(id)||!!GUNS[id];
   .tknob{position:absolute;left:50%;top:50%;width:52px;height:52px;margin:-26px 0 0 -26px;border-radius:50%;background:rgba(255,236,190,.8);box-shadow:0 2px 8px #0008}
   .tb{position:absolute;pointer-events:auto;touch-action:none;width:46px;height:46px;border-radius:50%;border:3px solid #e2b14f;background:rgba(40,24,12,.72);color:#fff6e0;font-size:22px;display:flex;align-items:center;justify-content:center;padding:0;font-family:inherit;box-shadow:0 3px 8px #0008}
   .tb:active,.tb.on{background:#e2b14f;color:#3a2000}
-  .tb.big{width:68px;height:68px;font-size:30px}
+  .tb.big{width:72px;height:72px;font-size:32px}
+  .tb.mini{width:36px;height:36px;font-size:17px;border-width:2px;background:rgba(40,24,12,.55)}
+  .tb.pulse{animation:tpulse 1.2s ease-in-out infinite}
+  @keyframes tpulse{0%,100%{box-shadow:0 0 0 0 #fde68a99}50%{box-shadow:0 0 0 9px #fde68a00}}
+  #thint{position:absolute;left:50%;top:84px;transform:translateX(-50%);padding:8px 14px;border-radius:14px;background:rgba(12,30,48,.88);border:2px solid #fde68a;color:#fff6e0;font-size:12px;text-align:center;line-height:1.35;display:none;pointer-events:none;z-index:2;max-width:70vw}
   .tb.hide{display:none}
-  .tb small{position:absolute;bottom:-14px;font-size:10px;color:#fde68a;text-shadow:0 1px 2px #000;font-weight:700;pointer-events:none}
+  .tb small{position:absolute;bottom:-13px;font-size:10px;color:#fde68a;text-shadow:0 1px 2px #000;font-weight:700;pointer-events:none}
   #tpanel{position:absolute;pointer-events:auto;left:50%;top:50%;transform:translate(-50%,-50%);background:linear-gradient(160deg,#5b3a22f2,#2e1c10f2);border:3px solid #e2b14f;border-radius:16px;padding:10px;display:none;max-width:92vw}
   #tpanel .row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:4px 0}
   #tpanel button{font-family:inherit;font-size:26px;min-width:54px;height:54px;border-radius:14px;border:2px solid #7a5230;background:#4a2f1b;color:#fff6e0;padding:0 8px}
@@ -44,25 +48,27 @@ function touchBuild(){
   TEL.zl=tmk('div','tz l',root); TEL.zr=tmk('div','tz r',root);
   TEL.bl=tmk('div','tbase',root); tmk('div','tknob',TEL.bl); TEL.br=tmk('div','tbase',root); tmk('div','tknob',TEL.br);
   const B=(id,ico,cls,css,fn,lab)=>{ const b=tmk('button','tb '+(cls||''),root,ico+(lab?`<small>${lab}</small>`:'')); b.id=id; Object.assign(b.style,css); b.addEventListener('pointerdown',ev=>{ ev.preventDefault(); ev.stopPropagation(); fn(ev); }); TEL[id]=b; return b; };
-  B('tbJump','⤒','big',{right:'14px',bottom:'14px'},()=>{ if(player.alive&&game.state==='play') actJump(); });
-  B('tbShop','🛒','',{right:'92px',bottom:'18px'},()=>{ if(game.state==='play'&&!actBoat()) toggleShop(); },'');
-  B('tbRel','↻','',{right:'92px',bottom:'74px'},()=>{ if(player.alive) actReload(); });
-  B('tbSwap','⇄','',{right:'38px',bottom:'92px'},()=>{ if(player.alive) actSwap(); });
-  B('tbRide','🚀','',{right:'148px',bottom:'74px'},()=>{ if(typeof rampRide==='function') rampRide(); },'');
-  B('tbBlk','🧱','',{right:'148px',bottom:'18px'},()=>actCycle());
-  B('tbPing','📍','',{left:'12px',bottom:'12px'},()=>touchPanel('ping'));
-  B('tbEmo','😀','',{left:'66px',bottom:'12px'},()=>touchPanel('emo'));
-  B('tbPause','⏸','',{left:'120px',bottom:'12px'},()=>togglePause());
-  B('tbSpL','◀','',{left:'12px',bottom:'80px'},()=>specCycle(-1));
-  B('tbSpR','▶','',{left:'66px',bottom:'80px'},()=>specCycle(1));
-  B('tbSpF','🎥','',{left:'120px',bottom:'80px'},()=>{ SPEC.free=!SPEC.free; SPEC.fx=cam3.x; SPEC.fy=cam3.y; });
+  // pouce droit : saut au coin, autour en arc : bloc, recharge, réserve ; boutique/fusée un cran plus loin
+  B('tbJump','⤒','big',{right:'16px',bottom:'16px'},()=>{ if(player.alive&&game.state==='play') actJump(); },'saut');
+  B('tbBlk','🧱','',{right:'96px',bottom:'20px'},()=>actCycle(),'bloc');
+  B('tbRel','↻','',{right:'84px',bottom:'80px'},()=>{ if(player.alive) actReload(); },'');
+  B('tbSwap','⇄','',{right:'22px',bottom:'102px'},()=>{ if(player.alive) actSwap(); },'');
+  B('tbShop','🛒','pulse',{right:'154px',bottom:'20px'},()=>{ if(game.state==='play'&&!actBoat()) toggleShop(); },'');
+  B('tbRide','🚀','',{right:'154px',bottom:'80px'},()=>{ if(typeof rampRide==='function') rampRide(); },'');
+  // petits boutons discrets en haut au centre (loin des pouces)
+  B('tbPing','📍','mini',{left:'calc(50% - 62px)',top:'40px'},()=>touchPanel('ping'));
+  B('tbEmo','😀','mini',{left:'calc(50% - 17px)',top:'40px'},()=>touchPanel('emo'));
+  B('tbPause','⏸','mini',{left:'calc(50% + 28px)',top:'40px'},()=>togglePause());
+  B('tbSpL','◀','',{left:'12px',bottom:'16px'},()=>specCycle(-1));
+  B('tbSpR','▶','',{left:'66px',bottom:'16px'},()=>specCycle(1));
+  B('tbSpF','🎥','',{left:'120px',bottom:'16px'},()=>{ SPEC.free=!SPEC.free; SPEC.fx=cam3.x; SPEC.fy=cam3.y; });
   TEL.hot=tmk('div',null,root); TEL.hot.id='thot'; let hid=null;
   const pick=ev=>{ const l=hotList(player), hb=hotbarRect(l.length), i=Math.floor((ev.clientX-hb.x)/(hb.s+hb.g)); if(i>=0&&i<l.length&&l[i].id!==selId){ setSel(l[i].id); sfx('tick'); } };
   TEL.hot.addEventListener('pointerdown',ev=>{ ev.preventDefault(); ev.stopPropagation(); hid=ev.pointerId; try{ TEL.hot.setPointerCapture(hid); }catch(e){} const l=hotList(player), hb=hotbarRect(l.length), i=Math.floor((ev.clientX-hb.x)/(hb.s+hb.g)); if(l[i]&&selId==='block'&&l[i].id==='block') actCycle(); pick(ev); });
   TEL.hot.addEventListener('pointermove',ev=>{ if(ev.pointerId===hid) pick(ev); });
   const hup=ev=>{ if(ev.pointerId===hid) hid=null; }; TEL.hot.addEventListener('pointerup',hup); TEL.hot.addEventListener('pointercancel',hup);
   TEL.rot=tmk('div',null,document.body,'<span>📱</span><div>Tourne ton téléphone en <b>mode paysage</b> pour jouer</div>'); TEL.rot.id='trot';
-  TEL.panel=tmk('div',null,root); TEL.panel.id='tpanel'; TEL.pingTip=tmk('div',null,root); TEL.pingTip.id='tping';
+  TEL.hint=tmk('div',null,root); TEL.hint.id='thint'; TEL.hint.innerHTML='🕹️ <b>Stick gauche</b> : se déplacer · <b>stick droit</b> : viser et attaquer<br>Armes : maintiens · Gadgets : relâche pour lancer · ⤒ saut'; TEL.panel=tmk('div',null,root); TEL.panel.id='tpanel'; TEL.pingTip=tmk('div',null,root); TEL.pingTip.id='tping';
   stickZone(TEL.zl,TEL.bl,{move(vx,vy,m){ TOUCH.ix=vx; TOUCH.iy=vy; TOUCH.mag=m; },end(){ TOUCH.ix=TOUCH.iy=TOUCH.mag=0; }});
   stickZone(TEL.zr,TEL.br,{start(){ TOUCH.aimOn=true; TOUCH.t0=performance.now(); TOUCH.am=.6; },
     move(vx,vy,m){ if(m>.08){ TOUCH.ax=vx/m; TOUCH.ay=vy/m; TOUCH.am=m; } if(isCont(selId)&&player.alive) mouse.down=m>.22; },
@@ -135,7 +141,7 @@ function touchBindMenu(){
   const _r=render3d;
   render3d=function(dt){ _r(dt);
     if(!TOUCH.on||!TEL.root) return; const b=document.body, st=game.state;
-    b.classList.toggle('tportrait',innerHeight>innerWidth); if(st==='play'&&player){ const l=hotList(player), hb=hotbarRect(l.length), w=l.length*(hb.s+hb.g)-hb.g, h=TEL.hot.style; h.left=(hb.x-8)+'px'; h.width=(w+16)+'px'; h.top=(hb.y-12)+'px'; h.height=(hb.s+22)+'px'; }
+    b.classList.toggle('tportrait',innerHeight>innerWidth); if(st==='play'&&TEL.hint){ if(!TOUCH.hintT) TOUCH.hintT=performance.now(); let seen=false; try{ seen=localStorage.getItem('pirates_thint')==='1'; }catch(e){} const on=!seen&&performance.now()-TOUCH.hintT<9000&&!TOUCH.aimOn&&!(TOUCH.ix||TOUCH.iy); TEL.hint.style.display=on?'block':'none'; if(!on&&!seen&&performance.now()-TOUCH.hintT>=9000){ try{ localStorage.setItem('pirates_thint','1'); }catch(e){} } } else TOUCH.hintT=0; if(st==='play'&&player){ const l=hotList(player), hb=hotbarRect(l.length), w=l.length*(hb.s+hb.g)-hb.g, h=TEL.hot.style; h.left=(hb.x-8)+'px'; h.width=(w+16)+'px'; h.top=(hb.y-12)+'px'; h.height=(hb.s+22)+'px'; }
     b.classList.toggle('tmenu',st==='menu'); b.classList.toggle('tpause',!!game.paused); b.classList.toggle('tshop',!!shopOpen); b.classList.toggle('tover',st==='over');
     if(st==='play'&&player){ const s=w2s(aim.x,aim.y,0); mouse.x=s[0]; mouse.y=s[1];
       const spec=isSpec(); for(const id of ['tbSpL','tbSpR','tbSpF']) TEL[id].classList.toggle('hide',!spec); for(const id of ['tbJump','tbShop','tbRel','tbSwap','tbBlk','tbPing','tbEmo']) TEL[id].classList.toggle('hide',spec||!player.alive); TEL.tbRide.classList.toggle('hide',!(typeof rampOf==='function'&&rampOf(player)));
@@ -144,6 +150,6 @@ function touchBindMenu(){
   };
   /* barre d'objets plus compacte pour laisser la place aux boutons */
   const _hb=hotbarRect;
-  hotbarRect=function(n){ if(!TOUCH.on) return _hb(n); const s=Math.min(46,Math.max(26,(VW*.5)/Math.max(1,n)-5)), g=5; return {s,g,x:(VW-n*(s+g)+g)/2,y:VH-s-8}; };
+  hotbarRect=function(n){ if(!TOUCH.on) return _hb(n); const s=Math.min(48,Math.max(34,(VW*.5)/Math.max(1,n)-5)), g=5; return {s,g,x:(VW-n*(s+g)+g)/2,y:VH-s-8}; };
 }
 touchLoad(); touchBindMenu();
