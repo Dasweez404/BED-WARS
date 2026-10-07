@@ -92,7 +92,7 @@ addEventListener('mousemove',ev=>{ if(WHEEL.on) wheelUpdateSel(ev.clientX,ev.cli
 addEventListener('blur',()=>wheelClose(false));
 { const ui=document.getElementById('ui');
   ui.addEventListener('mousedown',ev=>{
-    if(ev.button===1){ ev.preventDefault(); ev.stopImmediatePropagation(); doPing(); return; }
+    if(ev.button===1){ ev.preventDefault(); ev.stopImmediatePropagation(); camMidDown(ev); return; }
     if(handleHudClick(ev.clientX,ev.clientY)){ ev.stopImmediatePropagation(); return; }
     if(WHEEL.on){ ev.stopImmediatePropagation(); return; }
     if(isSpec()&&!game.paused){ ev.stopImmediatePropagation(); if(!SPEC.free) specCycle(ev.button===2?-1:1); }

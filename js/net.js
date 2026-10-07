@@ -257,7 +257,7 @@ function netPlayFx(f){
 /* ---------- boucle de l'invité ---------- */
 function netLocalInput(){
   const up=keys.KeyW||keys['k:z']||keys.ArrowUp, dn=keys.KeyS||keys['k:s']||keys.ArrowDown, lf=keys.KeyA||keys['k:q']||keys.ArrowLeft, rt=keys.KeyD||keys['k:d']||keys.ArrowRight;
-  let ix=(rt?1:0)-(lf?1:0), iy=(dn?1:0)-(up?1:0); const m=Math.hypot(ix,iy)||1; return {ix:ix/m,iy:iy/m};
+  let ix=(rt?1:0)-(lf?1:0), iy=(dn?1:0)-(up?1:0); const m=Math.hypot(ix,iy)||1; const r=camRelInput(ix/m,iy/m); return {ix:r[0],iy:r[1]};
 }
 function netClientFrame(dt){
   dt=Math.min(dt,.1); game.t+=dt; updateFx(dt);

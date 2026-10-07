@@ -14,7 +14,7 @@
     let name=it.n; if(id==='block') name=`${BNAME[e.bsel]} ×${e.blocks[e.bsel]}`; else if(id==='pick') name=PICKS[e.pick].n; else if(id==='sword') name=SWORDS[e.sword].n;
     const tip=(TIPS[id]||(typeof TIPS2!=='undefined'&&TIPS2[id])||'');
     ctx.save(); ctx.setTransform(DPR,0,0,DPR,0,0);
-    const w=250, x=VW-w-14; ctx.font='12px '+FONT; const lines=wrapTxt(tip,w-92).slice(0,4), st=stats(e,id), h=Math.max(92,50+lines.length*15+(st?18:0)), y=VH-h-14;
+    const w=250, x=VW-w-14; ctx.font='12px '+FONT; const lines=wrapTxt(tip,w-92).slice(0,6), st=stats(e,id), h=Math.max(92,50+lines.length*15+(st?18:0)), y=VH-h-14;
     ctx.fillStyle='rgba(15,23,42,.72)'; ctx.beginPath(); ctx.roundRect?ctx.roundRect(x,y,w,h,14):ctx.rect(x,y,w,h); ctx.fill(); ctx.strokeStyle='rgba(255,255,255,.28)'; ctx.lineWidth=1.5; ctx.stroke();
     ctx.fillStyle='rgba(255,255,255,.08)'; ctx.fillRect(x+10,y+10,66,66);
     ctx.textAlign='center'; ctx.font='46px '+FONT; ctx.fillStyle='#fff'; ctx.fillText(it.ico||'',x+43,y+57);

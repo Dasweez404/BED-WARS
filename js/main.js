@@ -26,11 +26,19 @@ addEventListener('keydown',ev=>{
 });
 addEventListener('keyup',ev=>{const k=ev.key.length===1?ev.key.toLowerCase():ev.key;keys[ev.code]=false;keys['k:'+k]=false;});
 addEventListener('blur',()=>{for(const k in keys)keys[k]=false;mouse.down=false;});
+/* clic molette : glisser = tourner la caméra · simple clic = ping · Début (Home) = recentrer */
+const camDrag={on:false,x:0,moved:0,t:0};
+function camMidDown(ev){ if(game.state!=='play') { return; } camDrag.on=true; camDrag.x=ev.clientX; camDrag.moved=0; camDrag.t=performance.now(); }
+addEventListener('mouseup',ev=>{ if(ev.button===1&&camDrag.on){ camDrag.on=false; if(camDrag.moved<5&&performance.now()-camDrag.t<400&&typeof doPing==='function') doPing(); } });
+addEventListener('keydown',ev=>{ if(ev.code==='Home') CAMYAW=0; });
+addEventListener('mousemove',ev=>{ if(camDrag.on){ const d=ev.clientX-camDrag.x; camDrag.moved+=Math.abs(d); if(camDrag.moved>=5) CAMYAW+=d*.007; camDrag.x=ev.clientX; } });
 function bindMouse(c){
+  c.addEventListener('auxclick',ev=>{ if(ev.button===1) ev.preventDefault(); });
   c.addEventListener('mousemove',ev=>{mouse.x=ev.clientX;mouse.y=ev.clientY;});
   c.addEventListener('contextmenu',ev=>ev.preventDefault());
   c.addEventListener('mousedown',ev=>{
     mouse.x=ev.clientX;mouse.y=ev.clientY;
+    if(ev.button===1){ ev.preventDefault(); return; }
     if(game.state==='over'){showMenu();return;}
     if(game.state!=='play'||game.paused) return;
     if(ev.button===2){actCycle();return;}

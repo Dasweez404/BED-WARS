@@ -178,6 +178,8 @@ const WALL_K=1; // dégâts des projectiles sur les murs = dégâts de l'arme ×
 const MAXH=()=>Math.max(1,Math.min(4,(game.opts&&game.opts.stack)|0||3));
 const wallLayers=i=>{ const w=wallT[i]; return w===0?0:w===CORE?1:Math.max(1,Math.ceil(hpW[i]/BHP[w]-1e-6)); };
 const wallTop=(tx,ty)=>{ if(!inb(tx,ty)||wallT[idx(tx,ty)]===0) return 0; return WH*wallLayers(idx(tx,ty)); };
+let CAMYAW=0; // rotation de la caméra (clic molette + glisser)
+const camRelInput=(ix,iy)=>{ if(!CAMYAW||(!ix&&!iy)) return [ix,iy]; const c=Math.cos(CAMYAW), s=Math.sin(CAMYAW); return [ix*c+iy*s,-ix*s+iy*c]; };
 const rangeK=e=>1+Math.min(.5,Math.max(0,e.z||0)/220); // plus on est haut, plus la portée des objets et des armes grandit
 const groundH=e=>{ // hauteur du sol sous le corps : on reste sur un mur tant qu'une partie du corps le surplombe
   let best=0; const x0=Math.floor((e.x-ER)/T),x1=Math.floor((e.x+ER)/T),y0=Math.floor((e.y-ER)/T),y1=Math.floor((e.y+ER)/T);
@@ -1283,7 +1285,8 @@ function playerControl(e,dt){
   const up=keys.KeyW||keys['k:z']||keys.ArrowUp, dn=keys.KeyS||keys['k:s']||keys.ArrowDown,
         lf=keys.KeyA||keys['k:q']||keys.ArrowLeft, rt=keys.KeyD||keys['k:d']||keys.ArrowRight;
   const [wx,wy]=curWorld();
-  controlEnt(e,dt,{ix:(rt?1:0)-(lf?1:0),iy:(dn?1:0)-(up?1:0),wx,wy,down:mouse.down,clicked:mouse.clicked,sel:selId});
+  const [mx,my]=camRelInput((rt?1:0)-(lf?1:0),(dn?1:0)-(up?1:0));
+  controlEnt(e,dt,{ix:mx,iy:my,wx,wy,down:mouse.down,clicked:mouse.clicked,sel:selId});
 }
 function controlEnt(e,dt,inp){ // commandes d'un pirate humain (local ou distant)
   let ix=inp.ix, iy=inp.iy; const m=Math.hypot(ix,iy)||1; e.ix=ix/m; e.iy=iy/m;
