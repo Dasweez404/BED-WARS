@@ -179,7 +179,7 @@ function rebuildWorld(){
       const dm=(hpW[i]-(wallLayers(i)-1)*BHP[w])/BHP[w]; if(dm<1) c.lerp(new THREE.Color('#222'),(1-dm)*.5);
       if(w===CORE) put(iWall,nw++,tx+.5,WHu*.3+lift*.3,ty+.5,1,WHu*.6,1,c);
       else { const L=wallLayers(i); for(let k=0;k<L&&nw<CAP-1;k++) put(iWall,nw++,tx+.5,(k+.5)*WHu+lift*.3,ty+.5,.97,WHu*.99,.97,k===L-1?c:c.clone().lerp(new THREE.Color('#ffffff'),.04*(L-1-k))); }
-      if(w!==CORE) put(iBand,nb++,tx+.5,.07,ty+.5,1.02,.12,1.02,new THREE.Color(TEAMS[ownW[i]].col));
+      if(w!==CORE&&ownW[i]>=0) put(iBand,nb++,tx+.5,.07,ty+.5,1.02,.12,1.02,new THREE.Color(TEAMS[ownW[i]].col));
     }
   }
   for(const [m,n] of [[iGround,ng],[iPlat,np],[iWall,nw],[iBand,nb]]){ m.count=n; m.instanceMatrix.needsUpdate=true; if(m.instanceColor) m.instanceColor.needsUpdate=true; }

@@ -228,7 +228,7 @@ function overlayWorld(){
     else { const bb=Math.sin(game.t*5)*2; ctx.fillStyle='#fff'; ctx.beginPath(); ctx.moveTo(s[0]-6,s[1]-16+bb); ctx.lineTo(s[0]+6,s[1]-16+bb); ctx.lineTo(s[0],s[1]-7+bb); ctx.closePath(); ctx.fill(); ctx.strokeStyle='rgba(10,20,50,.8)'; ctx.lineWidth=2; ctx.stroke(); }
   }
   // PV des moutons ultimes
-  for(const td of TD){ const ci=idx(td.bx,td.by); if(!td.coreAlive||wallT[ci]!==CORE) continue; const k=hpW[ci]/BHP[CORE]; if(k>=1) continue; const s=w2s((td.bx+.5)*T,(td.by+.5)*T,110); ctx.fillStyle='rgba(10,20,50,.8)'; rr(s[0]-24,s[1]-2,48,9,4); ctx.fill(); ctx.fillStyle=k>.5?td.col:k>.25?'#f59e0b':'#ef4444'; rr(s[0]-22,s[1],Math.max(4,44*k),5,2); ctx.fill(); }
+  for(const td of TD){ const ci=idx(td.bx,td.by); if(!td.coreAlive||wallT[ci]!==CORE) continue; if(td.id===player.team&&!(player.up&&player.up.watch>0)) continue; const k=hpW[ci]/BHP[CORE]; if(k>=1) continue; const s=w2s((td.bx+.5)*T,(td.by+.5)*T,110); ctx.fillStyle='rgba(10,20,50,.8)'; rr(s[0]-24,s[1]-2,48,9,4); ctx.fill(); ctx.fillStyle=k>.5?td.col:k>.25?'#f59e0b':'#ef4444'; rr(s[0]-22,s[1],Math.max(4,44*k),5,2); ctx.fill(); }
   // textes flottants
   for(const f of floats){ if(f.y0===undefined) f.y0=f.y; const s=w2s(f.x,f.y0,40); if(!s[2]) continue; ctx.globalAlpha=Math.min(1,f.t*2); ctx.font=`bold ${Math.round(f.s*1.15*(1+Math.max(0,f.t-.78)*3.2))}px ${FONT}`; ctx.textAlign='center'; ctx.lineWidth=4; ctx.strokeStyle='rgba(10,20,50,.9)'; const yy=s[1]-(f.y0-f.y)*1.3; ctx.strokeText(f.txt,s[0],yy); ctx.fillStyle=f.col; ctx.fillText(f.txt,s[0],yy); }
   ctx.globalAlpha=1;
@@ -291,13 +291,14 @@ function drawHud(){
   TD.forEach((t,i)=>{
     const y=10+i*38, ci=idx(t.bx,t.by), chp=wallT[ci]===CORE?hpW[ci]:0;
     if(t.hpPrev===undefined) t.hpPrev=chp;
-    if(chp<t.hpPrev-.1){ t.alert=1.4; if(i===player.team&&hud.alertT<=0){ announce('TON COFFRE EST ATTAQUÉ !','#fca5a5'); sfx('alarm'); hud.alertT=7; } }
+    const hideOwn=i===player.team&&!(player.up&&player.up.watch>0)&&t.coreAlive; // sans la Cloche de vigie : aucune alerte sur ton propre coffre
+    if(chp<t.hpPrev-.1&&!hideOwn){ t.alert=1.4; if(i===player.team&&hud.alertT<=0){ announce('TON COFFRE EST ATTAQUÉ !','#fca5a5'); sfx('alarm'); hud.alertT=7; } }
     t.hpPrev=chp; t.alert=Math.max(0,(t.alert||0)-dt);
     panel(10,y,214,33,12,t.alert>0&&Math.floor(game.t*8)%2?'#ef4444':null);
     ctx.fillStyle=t.col; rr(10,y,8,33,4); ctx.fill();
     ctx.fillStyle='#fff'; ctx.font='bold 14px '+FONT; ctx.fillText(t.name+(i===player.team?' (toi)':''),26,y+15);
     ctx.fillStyle='rgba(10,20,50,.7)'; rr(26,y+21,104,7,3); ctx.fill();
-    if(t.coreAlive){ const k=chp/BHP[CORE]; ctx.fillStyle=k>.5?t.col:k>.25?'#f59e0b':'#ef4444'; rr(26,y+21,Math.max(4,104*k),7,3); ctx.fill(); }
+    if(t.coreAlive){ const k=hideOwn?1:chp/BHP[CORE]; ctx.fillStyle=k>.5?t.col:k>.25?'#f59e0b':'#ef4444'; rr(26,y+21,Math.max(4,104*k),7,3); ctx.fill(); }
     ctx.font='bold 12px '+FONT; ctx.fillStyle=t.coreAlive?'#9af2b8':'#fca5a5'; ctx.fillText(t.coreAlive?'💰 intact':'✖ pillé',138,y+15);
     const mem=t.members; ctx.font='13px '+FONT;
     if(mem.every(m=>m.elim)){ctx.fillStyle='#fca5a5';ctx.fillText('☠ éliminé',138,y+28);}
@@ -320,7 +321,7 @@ function drawHud(){
   if(e.jetT>0){ctx.fillStyle='#fb923c';rr(bx,hy-8,bw*e.jetT/4,5,2);ctx.fill();}
   ctx.textAlign='left'; ctx.font='bold 12px '+FONT; ctx.fillStyle='rgba(255,255,255,.8)'; ctx.fillText(C(e).ico+' '+C(e).n,bx+bw+10,hy+17);
   { let sx=bx; ctx.textAlign='left'; ctx.font='bold 13px '+FONT;
-    for(const [v,ico,col] of [[e.haste,'🧪','#38bdf8'],[e.cloak,'👻','#e5e7eb'],[e.springT,'👟','#4ade80'],[e.bubble,'🧼','#bfdbfe'],[e.frozen,'❄️','#7dd3fc'],[e.slow,'🕸️','#cbd5e1'],[e.root,'⚓','#e5e7eb'],[e.burn,'🔥','#fb923c']]) if(v>0){ const t=`${ico} ${v.toFixed(1)}s`, w=ctx.measureText(t).width+16; panel(sx,hy-32,w,22,9,col); ctx.fillStyle='#fff'; ctx.fillText(t,sx+8,hy-16); sx+=w+6; } }
+    for(const [v,ico,col] of [[e.haste,'🧪','#38bdf8'],[e.cloak,'👻','#e5e7eb'],[e.springT,'👟','#4ade80'],[e.bubble,'🧼','#bfdbfe'],[e.frozen,'❄️','#7dd3fc'],[e.slow,'🕸️','#cbd5e1'],[e.root,'⚓','#e5e7eb'],[e.burn,'🔥','#fb923c'],[e.magnet,'🧲','#f87171']]) if(v>0){ const t=`${ico} ${v.toFixed(1)}s`, w=ctx.measureText(t).width+16; panel(sx,hy-32,w,22,9,col); ctx.fillStyle='#fff'; ctx.fillText(t,sx+8,hy-16); sx+=w+6; } }
   // barre d'objets
   const hx0=(VW-(n*(hb.s+hb.g)-hb.g))/2;
   list.forEach((s,i)=>{
