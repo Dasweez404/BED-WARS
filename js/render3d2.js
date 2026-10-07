@@ -403,7 +403,7 @@ function updateCamera(dt){
   let lx=0,ly=0; if(player.alive&&game.state==='play'&&aim.ok){ lx=clamp((aim.x-tgt.x)*.14,-90,90); ly=clamp((aim.y-tgt.y)*.14,-90,90); }
   const k=Math.min(1,dt*6); cam3.x+=(tgt.x+lx-cam3.x)*k; cam3.y+=(tgt.y+ly-cam3.y)*k;
   const cx=cam3.x*U, cz=cam3.y*U, sh=shake*.03*SET.shake;
-  camera3.position.set(cx+(Math.random()-.5)*sh,16.5+tgt.z*U*.25+(Math.random()-.5)*sh,cz+11);
+  camera3.position.set(cx+(Math.random()-.5)*sh,16.5+tgt.z*U*.9+(Math.random()-.5)*sh,cz+11+tgt.z*U*.5);
   camera3.lookAt(cx,.2,cz-.2);
   sun.position.set(cx-14,30,cz+12); sun.target.position.set(cx,0,cz);
 }

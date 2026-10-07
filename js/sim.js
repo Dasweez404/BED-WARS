@@ -178,6 +178,7 @@ const WALL_K=1; // dégâts des projectiles sur les murs = dégâts de l'arme ×
 const MAXH=()=>Math.max(1,Math.min(4,(game.opts&&game.opts.stack)|0||3));
 const wallLayers=i=>{ const w=wallT[i]; return w===0?0:w===CORE?1:Math.max(1,Math.ceil(hpW[i]/BHP[w]-1e-6)); };
 const wallTop=(tx,ty)=>{ if(!inb(tx,ty)||wallT[idx(tx,ty)]===0) return 0; return WH*wallLayers(idx(tx,ty)); };
+const rangeK=e=>1+Math.min(.5,Math.max(0,e.z||0)/220); // plus on est haut, plus la portée des objets et des armes grandit
 const groundH=e=>{ // hauteur du sol sous le corps : on reste sur un mur tant qu'une partie du corps le surplombe
   let best=0; const x0=Math.floor((e.x-ER)/T),x1=Math.floor((e.x+ER)/T),y0=Math.floor((e.y-ER)/T),y1=Math.floor((e.y+ER)/T);
   for(let ty=y0;ty<=y1;ty++)for(let tx=x0;tx<=x1;tx++){ const t=wallTop(tx,ty); if(t>best&&e.z>=t-1) best=t; }
@@ -519,7 +520,7 @@ function fireGun(e,id){
   sfx(id==='gun'?'shot':id==='rocket'?'whoosh':id==='bow'?'bow':id==='woolgun'?'woof':id,e.x,e.y);
   for(let i=0;i<g.pel;i++){
     const a=e.ang+(g.pel>1?rnd(-spr,spr):(Math.random()*2-1)*spr*.7+Math.sin(s.n*1.7)*s.b*.45);
-    projs.push({x:e.x+Math.cos(e.ang)*14,y:e.y+Math.sin(e.ang)*14,z:12,vx:Math.cos(a)*g.sp,vy:Math.sin(a)*g.sp,team:e.team,owner:e,life:g.life,dmg:g.dmg*cv(e,'gun'),kb:g.kb,kind:g.kind||'bullet',col:g.col,pierce:g.pierce,hit:g.pierce?[]:null,short:g.short,lift:g.lift});
+    projs.push({x:e.x+Math.cos(e.ang)*14,y:e.y+Math.sin(e.ang)*14,z:12,vx:Math.cos(a)*g.sp,vy:Math.sin(a)*g.sp,team:e.team,owner:e,life:g.life*(g.kind==='flame'?1:rangeK(e)),dmg:g.dmg*cv(e,'gun'),kb:g.kb,kind:g.kind||'bullet',col:g.col,pierce:g.pierce,hit:g.pierce?[]:null,short:g.short,lift:g.lift});
   }
   e.vx-=Math.cos(e.ang)*g.rec; e.vy-=Math.sin(e.ang)*g.rec;
   if(id!=='flame'&&id!=='bow'){ burst(e.x+Math.cos(e.ang)*16,e.y+Math.sin(e.ang)*16,g.col,4,120,.15,3); if(e===player) shake=Math.max(shake,id==='shotgun'||id==='sniper'||id==='rocket'?6:2); }
@@ -546,7 +547,7 @@ function doBaa(e){
 }
 function throwBomb(e,kind,wx,wy){
   if(e[kind]<=0||e.cd.gad>0) return;
-  const dx=wx-e.x,dy=wy-e.y,d=Math.hypot(dx,dy)||1,m=Math.min(d,9*T);
+  const dx=wx-e.x,dy=wy-e.y,d=Math.hypot(dx,dy)||1,m=Math.min(d,9*T*rangeK(e));
   e[kind]--; e.cd.gad=.5; e.swing=.15; e.swingMax=.15;
   bombs.push({x:e.x,y:e.y,tx:e.x+dx/d*m,ty:e.y+dy/d*m,fuse:1.7,team:e.team,owner:e,kind,h:20});
 }

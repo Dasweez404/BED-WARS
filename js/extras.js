@@ -53,7 +53,7 @@ SHOP.forEach(s=>SHOPMAP[s.id]=s);
 
 /* ---------- effets des gadgets (appelé par useGadget) ---------- */
 let delayed=[];
-function aimPoint(e,wx,wy,maxd){ const dx=wx-e.x,dy=wy-e.y,d=Math.hypot(dx,dy)||1,m=Math.min(d,maxd); return [e.x+dx/d*m,e.y+dy/d*m]; }
+function aimPoint(e,wx,wy,maxd){ const dx=wx-e.x,dy=wy-e.y,d=Math.hypot(dx,dy)||1,m=Math.min(d,maxd*rangeK(e)); return [e.x+dx/d*m,e.y+dy/d*m]; }
 function nearestFoe(e,x,y,R){ let b=null,bd=R; for(const o of ents){ if(!o.alive||o.team===e.team) continue; const d=Math.hypot(o.x-x,o.y-y); if(d<bd){bd=d;b=o;} } return b; }
 function useGadget2(e,id,wx,wy,ax,ay){
   switch(id){
