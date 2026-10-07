@@ -44,22 +44,21 @@ const PERM={}; // objets permanents (utilisables à volonté, avec recharge)
 const GUNS={
   // mag = chargeur, cd = cadence (s entre deux tirs), reload = rechargement (s), spread = dispersion de base, bloom = dispersion ajoutée à chaque tir, bmax = dispersion max
   bow:{n:'Arbalète',mag:1,cd:.1,reload:.85,sp:620,life:1.4,dmg:5,kb:217,col:'#f1f5f9',pel:1,spread:0,bloom:0,bmax:0,kind:'arrow',rec:0},
-  gun:{n:'Pistolet à silex',mag:12,cd:.2,reload:1.1,sp:820,life:.7,dmg:3.5,kb:140,col:'#fde047',pel:1,spread:.02,bloom:.014,bmax:.1,rec:48},
-  smg:{n:'Pistolets jumeaux',mag:30,cd:.075,reload:1.7,sp:800,life:.6,dmg:1.75,kb:60,col:'#fde047',pel:1,spread:.045,bloom:.02,bmax:.24,rec:14},
-  shotgun:{n:'Tromblon',mag:6,cd:.85,reload:2.3,sp:720,life:.36,dmg:2.5,kb:230,col:'#fb923c',pel:8,spread:.27,bloom:0,bmax:0,rec:300},
-  sniper:{n:'Mousquet long',mag:4,cd:1.3,reload:2.5,sp:1700,life:.9,dmg:12.5,kb:520,col:'#a5f3fc',pel:1,spread:0,bloom:0,bmax:0,pierce:true,rec:240,moveSpread:.1},
+  gun:{n:'Pistolet à silex',mag:12,cd:.27,reload:1.1,sp:820,life:.7,dmg:4.7,kb:140,col:'#fde047',pel:1,spread:.02,bloom:.014,bmax:.1,rec:48},
+  smg:{n:'Pistolets jumeaux',mag:30,cd:.1,reload:1.7,sp:800,life:.6,dmg:2.35,kb:60,col:'#fde047',pel:1,spread:.045,bloom:.02,bmax:.24,rec:14},
+  shotgun:{n:'Tromblon',mag:6,cd:1.15,reload:2.3,sp:720,life:.36,dmg:3.4,kb:230,col:'#fb923c',pel:8,spread:.27,bloom:0,bmax:0,rec:300},
+  sniper:{n:'Mousquet long',mag:4,cd:1.75,reload:2.5,sp:1700,life:.9,dmg:17,kb:520,col:'#a5f3fc',pel:1,spread:0,bloom:0,bmax:0,pierce:true,rec:240,moveSpread:.1},
   rocket:{n:'Canon de poche',mag:1,cd:.1,reload:2.2,sp:430,life:2.2,dmg:0,kb:0,col:'#f87171',pel:1,spread:0,bloom:0,bmax:0,kind:'rocket',rec:300},
   woolgun:{n:'Lance-filet',mag:8,cd:.34,reload:1.8,sp:560,life:.9,dmg:1.5,kb:150,col:'#f9a8d4',pel:1,spread:.06,bloom:.02,bmax:.16,kind:'wool',rec:30},
   boomerang:{n:'Hache de lancer',mag:1,cd:.1,reload:1.1,sp:560,life:1.3,dmg:4,kb:200,col:'#fbbf24',pel:1,spread:0,bloom:0,bmax:0,kind:'boomerang',pierce:true,rec:0},
   bubble:{n:'Lance-écume',mag:3,cd:.45,reload:2.4,sp:360,life:1.2,dmg:0,kb:0,col:'#bfdbfe',pel:1,spread:0,bloom:0,bmax:0,kind:'bubble',rec:24},
   ice:{n:'Harpon givré',mag:5,cd:.4,reload:2,sp:600,life:.9,dmg:1,kb:0,col:'#7dd3fc',pel:1,spread:.02,bloom:0,bmax:0,kind:'ice',rec:32},
   trident:{n:'Trident de Poséidon',mag:6,cd:.5,reload:1.8,sp:760,life:.55,dmg:2.2,kb:150,col:'#38bdf8',pel:3,spread:.11,bloom:0,bmax:0,pierce:true,rec:110},
-  gatling:{n:'Poivrière rotative',mag:90,cd:.05,reload:3.2,sp:820,life:.55,dmg:1.05,kb:30,col:'#fca5a5',pel:1,spread:.05,bloom:.012,bmax:.32,rec:10},
+  gatling:{n:'Poivrière rotative',mag:90,cd:.068,reload:3.2,sp:820,life:.55,dmg:1.4,kb:30,col:'#fca5a5',pel:1,spread:.05,bloom:.012,bmax:.32,rec:10},
   javelin:{n:'Javelot de chasse',mag:2,cd:.3,reload:1.5,sp:1150,life:.7,dmg:7,kb:380,col:'#f1f5f9',pel:1,spread:0,bloom:0,bmax:0,pierce:true,rec:140},
   flarebow:{n:'Arc incendiaire',mag:3,cd:.35,reload:1.9,sp:640,life:1,dmg:2,kb:60,col:'#fb923c',pel:1,spread:.02,bloom:0,bmax:0,kind:'flame',rec:24},
   flame:{n:'Torche cracheuse',mag:70,cd:.07,reload:2.6,sp:390,life:.32,dmg:1.1,kb:25,col:'#fb923c',pel:1,spread:.17,bloom:0,bmax:0,kind:'flame',rec:4}
 };
-for(const id in GUNS){ const g=GUNS[id]; g.spread=+(g.spread*.85).toFixed(4); g.bloom=+(g.bloom*.85).toFixed(4); g.bmax=+(g.bmax*.85).toFixed(4); } // dispersion un peu réduite
 const isGun=id=>!!GUNS[id];
 const DIFFS={
   easy:{n:'Facile',react:.9,noise:.38,dmg:.55,speed:.8,hp:14,engage:4.5,meleeCd:.95,gunCd:2,likeP:.4,use:.5,aggr:.7,buyT:1.4,leave:[60,90],income:1,strafe:false,dodge:0,desc:'Bots lents et imprécis, peu d\'objets.'},
@@ -1507,7 +1506,7 @@ function botThink(b,dt){
     if(fd>T*1.5&&fd<7*T&&Math.random()<dt*.35*D.aggr) jump(b); // petits bonds en combat
     if(foe.z>20&&fd<4*T&&Math.random()<dt*2) jump(b);
     if(fd<T*2.4&&Math.random()<dt*2.2*D.aggr) botMelee(b,foe,fd);
-    else if(fd>T*1.5&&Math.random()<dt*1.6*D.aggr) botRanged(b,fd);
+    else if(fd>T*1.2&&Math.random()<dt*2.8*D.aggr) botRanged(b,fd);
     botGadgets(b,foe,fd,dt,nearCore);
     if(b.grap>0&&D.use>1.5&&fd>4*T&&fd<10*T&&Math.random()<dt*.6) useGrapple(b);
     if((b.am.tp||0)>0&&D.use>1.5&&b.hp<maxhp(b)*.3&&b.cd.gad<=0&&Math.random()<dt*2) useGadget(b,'tp',coreX,coreY);
