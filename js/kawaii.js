@@ -16,11 +16,11 @@ function kwSmile(par,x,y,z,s,rotY){ if(!KW.smile) KW.smile=new THREE.TorusGeomet
 mkDolphin=function(){
   const g=new THREE.Group(), bl=kwMat(0x8ec5ef), be=kwMat(0xeef7ff), dk=kwMat(0x6fa8d8);
   kwAdd(g,KWS(),bl,0,0,0,.62,.46,.46); kwAdd(g,KWS(),be,.1,-.14,0,.5,.3,.38); kwAdd(g,KWS(),bl,.62,-.06,0,.2,.13,.16); kwAdd(g,KWS(),be,.66,-.11,0,.16,.07,.13);
-  for(const s of [-1,1]){ kwEye(g,.42,.1,s*.3,.11); kwBlush(g,.5,-.06,s*.33,.3); kwAdd(g,KWS(),dk,.05,-.22,s*.4,.16,.05,.12,0,s*.4,-.3); }
+  for(const s of [-1,1]){ kwAdd(g,KWS(),new THREE.MeshBasicMaterial({color:0x14101a}),.5,.1,s*.3,.045,.05,.045); kwBlush(g,.5,-.06,s*.33,.3); kwAdd(g,KWS(),dk,.05,-.22,s*.4,.16,.05,.12,0,s*.4,-.3); }
   kwSmile(g,.7,-.06,0,.05);
   kwAdd(g,new THREE.ConeGeometry(1,1,10),dk,-.08,.5,0,.12,.22,.07,0,0,-.35);
   const tail=new THREE.Group(); tail.position.x=-.55; g.add(tail); kwAdd(tail,KWS(),bl,-.12,0,0,.22,.18,.18); for(const s of [-1,1]) kwAdd(tail,KWS(),dk,-.32,.02,s*.14,.1,.04,.18,0,s*.4,0);
-  g.scale.setScalar(.95); g.userData={tail}; return g; };
+  g.scale.set(1.25,.9,.9); g.userData={tail}; return g; };
 /* tortue */
 mkTurtle=function(){
   const g=new THREE.Group(), sh=kwMat(0x7ccf7a), sp=kwMat(0xb8e6a0), sk=kwMat(0xa6e3a1), be=kwMat(0xfff1c4);

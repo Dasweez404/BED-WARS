@@ -47,7 +47,7 @@ function seaBuild(){
   SEAL.g=new THREE.Group(); scene.add(SEAL.g); SEAL.whales=[]; SEAL.dolphins=[]; SEAL.schools=[]; SEAL.buoys=[]; SEAL.lights=[]; SEAL.t=0;
   const rn=prng3(77+(game.opts.map||'').length*13);
   for(let i=0;i<2;i++){ const p=waterSpot(), m=mkWhale(); SEAL.g.add(m); SEAL.whales.push({m,x:p[0],y:p[1],a:rnd(0,6.28),turn:Math.random()<.5?1:-1,seed:rn()*10,spout:rnd(6,14),ph:0}); }
-  for(let i=0;i<3;i++){ const p=waterSpot(), a0=rnd(0,6.28); for(let k=0;k<3;k++){ const m=mkDolphin(); SEAL.g.add(m); SEAL.dolphins.push({m,x:p[0]+rnd(-30,30),y:p[1]+rnd(-30,30),a:a0+rnd(-.2,.2),turn:Math.random()<.5?1:-1,seed:rn()*10,jump:rnd(3,9),jt:-1,pod:i}); } }
+  for(let i=0;i<2;i++){ const p=waterSpot(), a0=rnd(0,6.28); for(let k=0;k<(i===0?2:1);k++){ const m=mkDolphin(); SEAL.g.add(m); SEAL.dolphins.push({m,x:p[0]+rnd(-30,30),y:p[1]+rnd(-30,30),a:a0+rnd(-.2,.2),turn:Math.random()<.5?1:-1,seed:rn()*10,jump:rnd(3,9),jt:-1,pod:i}); } }
   // bancs de poissons (instanciés)
   const fg=new THREE.ConeGeometry(.5,1.4,4); fg.rotateZ(-Math.PI/2); const NF=44; SEAL.fishInst=new THREE.InstancedMesh(fg,new THREE.MeshBasicMaterial({color:0x1b6f8a,transparent:true,opacity:.75,depthWrite:false}),NF,); SEAL.fishInst.frustumCulled=false; SEAL.fishInst.count=NF; SEAL.g.add(SEAL.fishInst);
   for(let i=0;i<4;i++){ const p=waterSpot(); SEAL.schools.push({x:p[0],y:p[1],a:rnd(0,6.28),turn:Math.random()<.5?1:-1,seed:rn()*10,n:11,fish:Array.from({length:11},()=>({ox:rnd(-1,1),oy:rnd(-1,1),ph:rnd(0,6.28)}))}); }
