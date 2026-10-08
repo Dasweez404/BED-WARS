@@ -16,7 +16,7 @@ function kwSmile(par,x,y,z,s,rotY){ if(!KW.smile) KW.smile=new THREE.TorusGeomet
 mkDolphin=function(){
   const g=new THREE.Group(), bl=kwMat(0x8ec5ef), be=kwMat(0xeef7ff), dk=kwMat(0x6fa8d8);
   kwAdd(g,KWS(),bl,0,0,0,.62,.46,.46); kwAdd(g,KWS(),be,.1,-.14,0,.5,.3,.38); kwAdd(g,KWS(),bl,.62,-.06,0,.2,.13,.16); kwAdd(g,KWS(),be,.66,-.11,0,.16,.07,.13);
-  for(const s of [-1,1]){ kwAdd(g,KWS(),new THREE.MeshBasicMaterial({color:0x14101a}),.5,.1,s*.3,.045,.05,.045); kwBlush(g,.5,-.06,s*.33,.3); kwAdd(g,KWS(),dk,.05,-.22,s*.4,.16,.05,.12,0,s*.4,-.3); }
+  for(const s of [-1,1]){ kwAdd(g,KWS(),new THREE.MeshBasicMaterial({color:0x14101a}),.5,.1,s*.3,.045,.05,.045); kwBlush(g,.5,-.06,s*.33,.3); kwAdd(g,KWS(),dk,.05,-.2,s*.34,.16,.05,.13,0,s*.4,-.3); }
   kwSmile(g,.7,-.06,0,.05);
   kwAdd(g,new THREE.ConeGeometry(1,1,10),dk,-.08,.5,0,.12,.22,.07,0,0,-.35);
   const tail=new THREE.Group(); tail.position.x=-.55; g.add(tail); kwAdd(tail,KWS(),bl,-.12,0,0,.22,.18,.18); for(const s of [-1,1]) kwAdd(tail,KWS(),dk,-.32,.02,s*.14,.1,.04,.18,0,s*.4,0);
@@ -25,10 +25,9 @@ mkDolphin=function(){
 mkTurtle=function(){
   const g=new THREE.Group(), sh=kwMat(0x7ccf7a), sp=kwMat(0xb8e6a0), sk=kwMat(0xa6e3a1), be=kwMat(0xfff1c4);
   kwAdd(g,KWS(),sh,0,.06,0,.48,.32,.42); kwAdd(g,KWS(),be,0,-.08,0,.44,.12,.38);
-  for(const [x,z,s] of [[0,0,.16],[.24,.16,.09],[.24,-.16,.09],[-.24,.16,.09],[-.24,-.16,.09],[.0,.27,.08],[0,-.27,.08]]) kwAdd(g,KWS(),sp,x,.3,z,s,.06,s);
   const head=new THREE.Group(); head.position.set(.52,.1,0); g.add(head); kwAdd(head,KWS(),sk,0,0,0,.24,.22,.24);
   for(const s of [-1,1]){ kwEye(head,.1,.06,s*.11,.075); kwBlush(head,.14,-.07,s*.15,.22); } kwSmile(head,.23,-.06,0,.035);
-  const fl=[]; for(const [x,z] of [[.28,.4],[.28,-.4],[-.3,.34],[-.3,-.34]]){ const f=new THREE.Group(); f.position.set(x,-.03,z); kwAdd(f,KWS(),sk,0,0,z>0?.08:-.08,.13,.05,.1); g.add(f); fl.push(f); }
+  const fl=[]; for(const [x,z] of [[.28,.3],[.28,-.3],[-.3,.26],[-.3,-.26]]){ const f=new THREE.Group(); f.position.set(x,-.04,z); kwAdd(f,KWS(),sk,0,0,z>0?.12:-.12,.16,.06,.17); g.add(f); fl.push(f); }
   kwAdd(g,KWS(),sk,-.5,-.02,0,.08,.05,.06);
   g.userData={fl,head}; return g; };
 /* crabe */
