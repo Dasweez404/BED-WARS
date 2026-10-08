@@ -148,7 +148,7 @@ function netLeave(keepLobbyUI){
 const R2=v=>{ if(typeof v==='number') return Math.round(v*100)/100; if(Array.isArray(v)) return v.map(R2); if(v&&typeof v==='object'&&!(v instanceof Set)){ const o={}; for(const k in v){ const x=v[k]; if(typeof x==='function') continue; o[k]=R2(x); } return o; } return v; };
 const ENT_SKIP=new Set(['riding','ai','lastBy','burnBy','hook','inp','x','y','z','ang','held','ix','iy','_tx','_ty','_tz','_follow','_ff']);
 const ENT_STATIC=['team','slot','name','cls','look','isBot','remote','up','pers'];
-const ENT_NUM=['resp','inv','flash','swing','swingMax','cloak','bubble','frozen','slow','root','curse','aegis','plate','rage','burn','slip','squash','muzzle','stepPh','springT','jetT','voidT','haste','kills','deaths','ix','iy','bsel','sword','jet','grap','shield','sdx','sdy','tiny','giant','glide','stickT','carry','pilot','mark','markT'];
+const ENT_NUM=['resp','inv','flash','swing','swingMax','cloak','bubble','frozen','slow','root','curse','aegis','plate','rage','burn','slip','squash','muzzle','stepPh','springT','jetT','voidT','haste','kills','deaths','ix','iy','bsel','sword','jet','grap','shield','sdx','sdy','tiny','giant','glide','stickT','carry','pilot','mark','markT','mirror'];
 const r1=v=>Math.round(v*10)/10, r2=v=>Math.round(v*100)/100;
 function packEntDyn(e){
   const o={x:r1(e.x),y:r1(e.y),z:r1(e.z),g:r2(e.ang),h:r1(e.hp),a:e.alive?1:0};

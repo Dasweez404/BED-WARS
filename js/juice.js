@@ -85,7 +85,7 @@ const _updateCamera0=updateCamera;
 updateCamera=function(dt){
   _updateCamera0(dt); if(game.state==='menu') return;
   if(!JUICE.fov0) JUICE.fov0=camera3.fov; const f=JUICE.fov0*(1-JUICE.k*.07); if(Math.abs(camera3.fov-f)>.01){ camera3.fov=f; camera3.updateProjectionMatrix(); }
-  if(player&&player.relics&&player.relics.r_glass){ const tg=new THREE.Vector3(cam3.x*U,.2,cam3.y*U-.2); camera3.position.sub(tg).multiplyScalar(1.16).add(tg); camera3.lookAt(tg); }
+  if(player&&player.relics&&player.relics.r_glass){ const tg=new THREE.Vector3(cam3.x*U,.2,cam3.y*U-.2); camera3.position.sub(tg).multiplyScalar(1.45).add(tg); camera3.lookAt(tg); }
   camera3.rotation.z+= (Math.random()-.5)*JUICE.k*.012;
 };
 const _drawHud0=drawHud;

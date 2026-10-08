@@ -180,7 +180,7 @@ const wallLayers=i=>{ const w=wallT[i]; return w===0?0:w===CORE?1:Math.max(1,Mat
 const wallTop=(tx,ty)=>{ if(!inb(tx,ty)||wallT[idx(tx,ty)]===0) return 0; return WH*wallLayers(idx(tx,ty)); };
 let CAMYAW=0; // rotation de la caméra (clic molette + glisser)
 const camRelInput=(ix,iy)=>{ if(!CAMYAW||(!ix&&!iy)) return [ix,iy]; const c=Math.cos(CAMYAW), s=Math.sin(CAMYAW); return [ix*c+iy*s,-ix*s+iy*c]; };
-const rangeK=e=>1+Math.min(.5,Math.max(0,e.z||0)/220); // plus on est haut, plus la portée des objets et des armes grandit
+const rangeK=e=>(1+Math.min(.5,Math.max(0,e.z||0)/220))*(e.relics&&e.relics.r_glass?1.2:1); // plus on est haut, plus la portée des objets et des armes grandit
 const groundH=e=>{ // hauteur du sol sous le corps : on reste sur un mur tant qu'une partie du corps le surplombe
   let best=0; const x0=Math.floor((e.x-ER)/T),x1=Math.floor((e.x+ER)/T),y0=Math.floor((e.y-ER)/T),y1=Math.floor((e.y+ER)/T);
   for(let ty=y0;ty<=y1;ty++)for(let tx=x0;tx<=x1;tx++){ const t=wallTop(tx,ty); if(t>best&&e.z>=t-1) best=t; }

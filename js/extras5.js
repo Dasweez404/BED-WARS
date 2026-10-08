@@ -6,7 +6,7 @@ const RELICS={
   r_feather:{n:'Bottes de plume',ico:'🪽',col:'#bbf7d0',d:'Plus aucun dégât de chute et sauts +10 %.',cost:{silver:22},lose:false},
   r_hp:{n:'Amulette de vie',ico:'📿',col:'#f87171',d:'+4 PV maximum, en permanence.',cost:{silver:24},lose:false},
   r_coin:{n:'Pièce porte-bonheur',ico:'🍀',col:'#86efac',d:'+12 % de ressources ramassées.',cost:{silver:26},lose:false},
-  r_glass:{n:'Longue-vue',ico:'🔭',col:'#bae6fd',d:'Caméra plus large et mini-carte étendue (ennemis visibles jusqu\'à 40 cases).',cost:{silver:18},lose:false},
+  r_glass:{n:'Longue-vue',ico:'🔭',col:'#bae6fd',d:'Vue bien plus large, +20 % de portée pour tes armes et objets, mini-carte étendue (ennemis visibles jusqu\'à 60 cases).',cost:{silver:18},lose:false},
   r_anchor:{n:'Ancre de poche',ico:'⚓',col:'#cbd5e1',d:'Tu es repoussé 35 % de moins.',cost:{silver:20},lose:false},
   r_fang:{n:'Croc de requin',ico:'🦷',col:'#e5e7eb',d:'Tu récupères 10 % des dégâts que tu infliges. PERDU à ta mort hors base.',cost:{gold:4},lose:true},
   r_skull:{n:'Crâne d\'or',ico:'💀',col:'#fbbf24',d:'+20 % de dégâts infligés, mais +12 % de dégâts reçus. PERDU à ta mort hors base.',cost:{gold:3},lose:true},
