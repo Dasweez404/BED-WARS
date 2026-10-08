@@ -19,7 +19,7 @@ const SWORDS=[{n:'Coutelas rouillé',d:3,c:'#b98a52'},{n:'Sabre d\'abordage',d:4
 const PICKS=[{n:'Pioche rouillée',d:2},{n:'Pioche de forban',d:4},{n:'Pioche en fer noir',d:7},{n:'Pioche du capitaine',d:12}];
 const SWORD_COST=[null,{bronze:40},{silver:10},{gold:3}];
 const PICK_COST=[null,{bronze:30},{silver:12},{gold:4}];
-const FB_INT=[1.3,.95,.7,.52], FS_INT=[6.5,5,3.8,2.9], GOLD_INT=[Infinity,20,12];
+const FB_INT=[1.3,.95,.7,.52], FS_INT=[6.5,5,3.8,2.9], GOLD_INT=[Infinity,32,20];
 // catalogue de la barre d'objets : seuls les objets possédés apparaissent
 const ITEMS=[
   {id:'block',n:'Blocs',ico:'🧱',col:'#fff'},{id:'pick',n:'Pioche',ico:'⛏️',col:'#fde047'},{id:'sword',n:'Sabre',ico:'🗡️',col:'#e5e7eb'},
@@ -225,7 +225,7 @@ function newGame(){
     spawners.push({x:dx,y:dy,kind:'dia',team:-1,types:{diamond:{t:0,stock:0,cap:Infinity,int:()=>32}}});
   }
   for(const [ox,oy] of [[-2,0],[2,0],[0,-2],[0,2]])
-    spawners.push({x:CX+ox,y:CY+oy,kind:'gold',team:-1,types:{gold:{t:0,stock:0,cap:Infinity,int:()=>26}}});
+    spawners.push({x:CX+ox,y:CY+oy,kind:'gold',team:-1,types:{gold:{t:0,stock:0,cap:Infinity,int:()=>48}}});
   TEAMS.forEach((t,i)=>{
     island(t.bx,t.by,5,8,i);
     const d=t.dir, p=[-d[1],d[0]];

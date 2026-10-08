@@ -54,7 +54,7 @@ function bossDie(){
   BOSS.on=false; const x=BOSS.x,y=BOSS.y; BOSS.next=game.t+210; for(let k=0;k<4;k++) ring(x,y,T*(2+k*1.3),'#a78bfa',.5+k*.2,k<1); burst(x,y,'#c4b5fd',50,320,1,5); chunks(x,y,'#6d28d9',14); sfx('boom',x,y); JUICE.kick(1); flashScreen('#ddd6fe',.4);
   const rank=Object.entries(BOSS.dmg).sort((a,b)=>b[1]-a[1]); announce(BOSSES[BOSS.kind].ico+' '+BOSSES[BOSS.kind].n+' VAINCU !','#c4b5fd');
   rank.forEach(([t,d],i)=>{ if(d<8) return; const team=+t; const mem=TD[team].members.filter(m=>m.alive||!m.elim);
-    for(const m of mem){ if(i===0){ m.res.diamond+=5; m.res.gold+=5; } else { m.res.gold+=2; m.res.silver+=15; } if(m.alive) floatTxt(m.x,m.y-46,i===0?'+5 diamants +5 or':'+2 or','#fde68a',16); }
+    for(const m of mem){ if(i===0){ m.res.diamond+=4; m.res.gold+=3; } else { m.res.gold+=1; m.res.silver+=15; } if(m.alive) floatTxt(m.x,m.y-46,i===0?'+5 diamants +5 or':'+2 or','#fde68a',16); }
     if(i===0){ const pool=Object.keys(RELICS).filter(k=>!RELICS[k].lose); const lead=TD[team].ent; const free=pool.filter(k=>!(lead.relics&&lead.relics[k])); if(free.length){ const r=free[Math.floor(Math.random()*free.length)]; lead.relics[r]=true; msg(`${RELICS[r].ico} ${lead.name} reçoit ${RELICS[r].n} !`,'#fde68a'); } msg(`${BOSSES[BOSS.kind].ico} Les ${TD[team].name} ont terrassé le boss (${Math.round(d)} dégâts) !`,TD[team].light); }
   });
   BOSS.dmg={};
@@ -135,7 +135,7 @@ function treUpdate(dt){
 }
 function treOpen(near,team){
   TRE.on=false; TRE.next=rnd(80,110); const x=TRE.x,y=TRE.y; TRE.x=0; ring(x,y,T*3,'#fde047',.8,true); burst(x,y,'#fde047',40,280,.9,5); sfx('fanfare'); JUICE.kick(.5);
-  near.forEach((o,i)=>{ o.res.diamond+=i===0?4:2; o.res.gold+=i===0?3:2; o.res.silver+=i===0?30:12; floatTxt(o.x,o.y-48,i===0?'+4💎 +3 or':'+2💎','#fde047',16); });
+  near.forEach((o,i)=>{ o.res.diamond+=i===0?4:2; o.res.gold+=i===0?2:1; o.res.silver+=i===0?30:12; floatTxt(o.x,o.y-48,i===0?'+4💎 +3 or':'+2💎','#fde047',16); });
   const lead=near[0], pool=Object.keys(RELICS).filter(k=>!RELICS[k].lose&&!(lead.relics&&lead.relics[k]));
   if(pool.length){ const r=pool[Math.floor(Math.random()*pool.length)]; lead.relics[r]=true; msg(`${RELICS[r].ico} ${lead.name} trouve ${RELICS[r].n} !`,'#fde68a'); }
   announce(`💎 Les ${TD[team].name} ouvrent le coffre-butin !`,TD[team].light);
@@ -149,7 +149,7 @@ function galUpdate(dt){
     else if(GAL.capTeam!==lead){ GAL.capV-=22*dt; if(GAL.capV<=0){ GAL.capTeam=lead; GAL.capV=0; } }
     else { GAL.capV+=(8+5*(mx-1))*dt; if(GAL.capV>=100){ GAL.capV=100; if(GAL.holder!==lead){ GAL.holder=lead; announce(`⚓ LES ${TD[lead].name.toUpperCase()} PRENNENT LE GALION !`,TD[lead].light); msg(`⚓ Les ${TD[lead].name} contrôlent le galion : forges +35 %, or régulier, coffre −20 % de dégâts.`,TD[lead].light); flashScreen(TD[lead].col,.2); sfx('fanfare'); } } }
   } else if(GAL.holder<0) GAL.capV=Math.max(0,GAL.capV-4*dt);
-  if(GAL.holder>=0){ GAL.gold-=dt; if(GAL.gold<=0){ GAL.gold=12; for(const m of TD[GAL.holder].members) if(m.alive){ m.res.gold+=1; floatTxt(m.x,m.y-44,'+1 or (galion)','#fbbf24',13); } } }
+  if(GAL.holder>=0){ GAL.gold-=dt; if(GAL.gold<=0){ GAL.gold=24; for(const m of TD[GAL.holder].members) if(m.alive){ m.res.gold+=1; floatTxt(m.x,m.y-44,'+1 or (galion)','#fbbf24',13); } } }
 }
 { const _u=updateEvents;
   updateEvents=function(dt){
