@@ -2,10 +2,10 @@
 /* =====================  CONSTANTES  ===================== */
 const T=32, W=100, H=100, CX=50, CY=50, WH=28; // hauteur des murs (px) ; 1 case = 32 px = 1 unité 3D
 const WOOL=2, WOOD=3, STONE=4, OBS=5, CORE=6;
-const BNAME={2:'Laine',3:'Bois',4:'Pierre',5:'Obsidienne',7:'Corail',8:'Glace'};
+const BNAME={2:'Bois',3:'Grès',4:'Grès taillé',5:'Obsidienne',7:'Grès rouge',8:'Glace'};
 const BORDER=[2,8,3,7,4,5]; // du plus fragile au plus solide
 const BHP={2:4,3:10,4:24,5:60,6:30,7:16,8:7};
-const BCOL={3:['#b98a52','#8a6234'],4:['#a7afb8','#79818b'],5:['#4a2d73','#2a1745'],7:['#f472b6','#be185d'],8:['#c9f0ff','#7ec8e8']};
+const BCOL={2:['#d2a064','#9a6a38'],3:['#e8d6a0','#c2a86b'],4:['#d6b47c','#a98650'],5:['#4a2d73','#2a1745'],7:['#dc8e62','#b0603a'],8:['#c9f0ff','#7ec8e8']};
 const RESCOL={bronze:'#cd7f32',silver:'#d6dde6',gold:'#fbbf24',diamond:'#22d3ee'};
 const RESNAME={bronze:'Bronze',silver:'Argent',gold:'Or',diamond:'Diamant'};
 const TEAMS=[
@@ -73,7 +73,7 @@ function shade(hex,k){
   const n=parseInt(hex.slice(1),16); let r=n>>16,g=(n>>8)&255,b=n&255;
   r=Math.max(0,Math.min(255,r+k));g=Math.max(0,Math.min(255,g+k));b=Math.max(0,Math.min(255,b+k)); return `rgb(${r},${g},${b})`;
 }
-function blockColor(t,team){return t===WOOL?[TEAMS[Math.max(0,team)].light,TEAMS[Math.max(0,team)].col]:BCOL[t];}
+function blockColor(t,team){return BCOL[t]||BCOL[2];}
 
 /* =====================  ÉTAT  ===================== */
 let floorT,wallT,hpF,hpW,ownF,ownW,region,pop;
@@ -788,11 +788,11 @@ function wallRing(e){
   }
 }
 const SHOP=[
-  mk('wool','Blocs',e=>({name:'Toile ×5',desc:'Voile de toile : faible résistance, idéal pour les passerelles.',cost:{bronze:6}}),e=>e.blocks[2]+=5),
-  mk('wood','Blocs',e=>({name:'Planches ×3',desc:'Résistance moyenne.',cost:{silver:4}}),e=>e.blocks[3]+=3),
-  mk('stone','Blocs',e=>({name:'Pierre de cale ×3',desc:'Solide. Résiste à une bombe.',cost:{silver:8}}),e=>e.blocks[4]+=3),
+  mk('wool','Blocs',e=>({name:'Bois ×5',desc:'Planches : le bloc de base, peu résistant mais pas cher. Il brûle !',cost:{bronze:6}}),e=>e.blocks[2]+=5),
+  mk('wood','Blocs',e=>({name:'Grès ×3',desc:'Résistance moyenne, ne brûle pas.',cost:{silver:4}}),e=>e.blocks[3]+=3),
+  mk('stone','Blocs',e=>({name:'Grès taillé ×3',desc:'Solide. Résiste à une bombe.',cost:{silver:8}}),e=>e.blocks[4]+=3),
   mk('obs','Blocs',e=>({name:'Obsidienne ×1',desc:'Très solide : 2 bombes pour la casser.',cost:{gold:3}}),e=>e.blocks[5]+=1),
-  mk('coral','Blocs',e=>({name:'Corail ×3',desc:'Bloc rose, assez solide (16 PV) et pas cher.',cost:{silver:5}}),e=>e.blocks[7]+=3),
+  mk('coral','Blocs',e=>({name:'Grès rouge ×3',desc:'Assez solide (16 PV) et pas cher.',cost:{silver:5}}),e=>e.blocks[7]+=3),
   mk('iceblk','Blocs',e=>({name:'Glace ×5',desc:'Bloc translucide, très bon marché : parfait pour bâtir vite (7 PV).',cost:{bronze:6}}),e=>e.blocks[8]+=5),
   mk('sword','Combat',e=>{
     const t=e.sword; if(t>=3) return {name:SWORDS[3].n,desc:'Niveau maximum',cost:{},ok:false,tag:'MAX'};

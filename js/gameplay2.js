@@ -3,6 +3,7 @@
    • moins de doublons : les armes gelantes sont regroupées (Harpon givré), moins de bombes, moins de tourelles, moins d'objets de saut
    • sorts de départ (option) : chaque pirate choisit 2 sorts qui se rechargent tout seuls
    • combos élémentaires avec beaucoup de retours visuels : feu × bois/laine, glace × eau, feu × bombes/mines */
+ITEMMAP.block.ico='🪵';
 /* ---------- 1. fusions ---------- */
 const GONE=['blowpipe','firecracker','stickybomb','turret2','cannonman','launcher']; // sarbacane → Harpon givré · pétard/bombe collante → Bombe · Canon givrant → Canon de pont · Homme-canon → Canon d'embarquement
 for(const id of GONE){ const i=SHOP.findIndex(s=>s.id===id); if(i>=0) SHOP.splice(i,1); const it=SHOPMAP[id]; if(it) it.info=()=>({name:ITEMMAP[id]?ITEMMAP[id].n:id,desc:'Retiré',cost:{},ok:false}); }
@@ -55,10 +56,10 @@ function sigShow(){
 }
 /* ---------- 3. combos (retours visuels forts, particules 2D uniquement) ---------- */
 const FIRE=new Map(), ICEB=new Map(); let comboHint={fire:false,ice:false,chain:false};
-const flamm=i=>wallT[i]===WOOL||wallT[i]===WOOD||(!wallT[i]&&(floorT[i]===WOOL||floorT[i]===WOOD));
+const flamm=i=>wallT[i]===WOOL||(!wallT[i]&&floorT[i]===WOOL); // seul le bois (type 2) brûle
 function igniteTile(tx,ty,owner){ if(!inb(tx,ty)) return; const i=idx(tx,ty); if(FIRE.has(i)||!flamm(i)) return;
   FIRE.set(i,{t:7,own:owner,a:0,tx,ty}); const x=(tx+.5)*T,y=(ty+.5)*T; ring(x,y,T*1.1,'#fb923c',.5,true); burst(x,y,'#fbbf24',8,120,.5,3); floatTxt(x,y-26,'🔥 EN FEU !','#fb923c',14);
-  if(!comboHint.fire&&owner===player){ comboHint.fire=true; msg('Combo : la flamme met le feu au bois et à la laine, et il se propage !','#fb923c'); } }
+  if(!comboHint.fire&&owner===player){ comboHint.fire=true; msg('Combo : la flamme met le feu aux blocs de bois, et il se propage !','#fb923c'); } }
 { const _e=updateEvents; let fxT=0, spT=0;
   updateEvents=function(dt){ _e(dt); if(game.state!=='play'||game.paused) return;
     // projectiles élémentaires

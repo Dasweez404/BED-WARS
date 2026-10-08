@@ -126,11 +126,28 @@ function groundColor(reg,tx,ty,out){
   if(reg===4){ out.set(b?'#b88a55':'#a97b47'); return out; }
   out.set(b?'#e3d3a2':'#d8c793').lerp(new THREE.Color('#8fd0cf'),.15); return out;
 }
+/* ---------- textures de blocs (pixel art procédural) : bois par défaut, le reste en grès, obsidienne, glace ---------- */
+const BTYPES=[2,3,4,5,7,8]; let iWallT={}, iPlatT={}; const BTEX={};
+function blockTex(t){
+  if(BTEX[t]) return BTEX[t]; const N=32, c=document.createElement('canvas'); c.width=c.height=N; const g=c.getContext('2d'); let sd=t*977+13; const R=()=>((sd=(Math.imul(sd,1664525)+1013904223)>>>0)/4294967296);
+  const px=(x,y,col,w,h)=>{ g.fillStyle=col; g.fillRect(x,y,w||1,h||1); };
+  if(t===2){ g.fillStyle='#cc9a5e'; g.fillRect(0,0,N,N); for(let r=0;r<4;r++){ const y=r*8; px(0,y,r%2?'#d7a96c':'#c4904f',N,7); px(0,y+7,'#7a4f25',N,1); const jx=(r%2?10:22); px(jx,y,'#7a4f25',1,7);
+      for(let k=0;k<7;k++){ const x=Math.floor(R()*N), yy=y+1+Math.floor(R()*5), l=3+Math.floor(R()*7); px(x,yy,'#a8763b',l,1); } px(jx-3,y+3,'#5b3a1a'); px(jx+3,y+3,'#5b3a1a'); } }
+  else if(t===3){ g.fillStyle='#e9d7a2'; g.fillRect(0,0,N,N); for(let y=0;y<N;y+=1){ const b=Math.floor(y/4)%3; if(b===1) px(0,y,'#dfc88c',N,1); else if(b===2&&y%4===3) px(0,y,'#f0e2b6',N,1); } for(let k=0;k<26;k++) px(Math.floor(R()*N),Math.floor(R()*N),R()<.5?'#cdb375':'#f4e9c4'); px(0,0,'#c9ad6b',N,1); px(0,0,'#c9ad6b',1,N); }
+  else if(t===4){ g.fillStyle='#d6b47c'; g.fillRect(0,0,N,N); for(let r=0;r<4;r++){ const y=r*8, off=r%2?8:0; px(0,y,'#a98650',N,1); for(let x=off;x<N+16;x+=16) px(x%N,y,'#a98650',1,8); px(0,y+1,'#e6c996',N,1); }
+    for(let k=0;k<30;k++) px(Math.floor(R()*N),Math.floor(R()*N),R()<.5?'#bf9a62':'#e2c48c'); }
+  else if(t===7){ g.fillStyle='#dc8e62'; g.fillRect(0,0,N,N); for(let y=0;y<N;y++){ const b=Math.floor(y/3)%4; if(b===1) px(0,y,'#c4764a',N,1); else if(b===3) px(0,y,'#e8a17a',N,1); } for(let k=0;k<26;k++) px(Math.floor(R()*N),Math.floor(R()*N),R()<.5?'#a85f3a':'#f2b48e'); px(0,0,'#a85f3a',N,1); px(0,0,'#a85f3a',1,N); }
+  else if(t===5){ g.fillStyle='#2a1745'; g.fillRect(0,0,N,N); for(let k=0;k<6;k++){ let x=Math.floor(R()*N), y=Math.floor(R()*N); for(let l=0;l<8+Math.floor(R()*8);l++){ px(x,y,k%2?'#6d3fb0':'#4c2a85'); x+=Math.floor(R()*3)-1+1; y+=Math.floor(R()*3)-1+(R()<.5?1:0); x=(x+N)%N; y=(y+N)%N; } } for(let k=0;k<20;k++) px(Math.floor(R()*N),Math.floor(R()*N),'#9d6bf0'); px(2,2,'#c4a1ff',3,1); px(2,2,'#c4a1ff',1,3); }
+  else { g.fillStyle='#bfe9fb'; g.fillRect(0,0,N,N); for(let k=0;k<7;k++){ const x=Math.floor(R()*N), y=Math.floor(R()*N); for(let l=0;l<9;l++) px((x+l)%N,(y+l)%N,k%2?'#eaf9ff':'#8fd0ee'); } for(let k=0;k<12;k++) px(Math.floor(R()*N),Math.floor(R()*N),'#ffffff'); }
+  const tx=new THREE.CanvasTexture(c); tx.magFilter=THREE.NearestFilter; tx.minFilter=THREE.NearestMipmapLinearFilter; tx.generateMipmaps=true; if('colorSpace' in tx) tx.colorSpace=THREE.SRGBColorSpace; return BTEX[t]=tx;
+}
+function blockMat(t){ return new THREE.MeshStandardMaterial({map:blockTex(t),flatShading:true,roughness:t===5?.22:t===8?.15:.85,metalness:t===5?.45:0,transparent:t===8,opacity:t===8?.88:1,emissive:t===5?0x1a0a33:0x000000,emissiveIntensity:t===5?.5:0}); }
 function buildWorldMeshes(){
-  for(const m of [iGround,iPlat,iWall,iBand,iPuff,iUnder,iFoam,iTuft,iShell]) if(m){ scene.remove(m); m.dispose&&m.dispose(); }
+  for(const m of [iGround,iPlat,iWall,iBand,iPuff,iUnder,iFoam,iTuft,iShell,...Object.values(iWallT),...Object.values(iPlatT)]) if(m){ scene.remove(m); m.dispose&&m.dispose(); }
   iGround=instMesh(GEO.box,new THREE.MeshStandardMaterial({flatShading:true,roughness:1}),CAP,false,true);
   iPlat=instMesh(GEO.box,new THREE.MeshStandardMaterial({flatShading:true,roughness:.9}),CAP,true,true);
   iWall=instMesh(GEO.box,new THREE.MeshStandardMaterial({flatShading:true,roughness:.85}),CAP,true,true);
+  iWallT={}; iPlatT={}; for(const t of BTYPES){ iWallT[t]=instMesh(GEO.box,blockMat(t),CAP,true,true); iPlatT[t]=instMesh(GEO.box,blockMat(t),CAP,true,true); }
   iBand=instMesh(GEO.box,new THREE.MeshStandardMaterial({flatShading:true,roughness:.7}),CAP,false,false);
   iPuff=instMesh(GEO.sphere0,new THREE.MeshStandardMaterial({flatShading:true,roughness:1}),CAP,false,false);
   iUnder=instMesh(GEO.sphere0,new THREE.MeshStandardMaterial({flatShading:true,roughness:1}),CAP,false,false);
@@ -162,7 +179,7 @@ function worldSignature(){
   return h;
 }
 function rebuildWorld(){
-  let ng=0,np=0,nw=0,nb=0; const tmpC=new THREE.Color();
+  let ng=0,np=0,nw=0,nb=0; const tmpC=new THREE.Color(), nwT={}, npT={}; for(const t of BTYPES){ nwT[t]=0; npT[t]=0; }
   const put=(mesh,i,x,y,z,sx,sy,sz,c)=>{ sc3.set(sx,sy,sz); v3.set(x,y,z); m4.compose(v3,qd.identity(),sc3); mesh.setMatrixAt(i,m4); mesh.setColorAt(i,c); };
   popActive=false;
   for(let ty=0;ty<H;ty++)for(let tx=0;tx<W;tx++){
@@ -170,18 +187,19 @@ function rebuildWorld(){
     const lift=pop[i]>0?pop[i]:0; if(lift>0) popActive=true;
     if(f===1){ groundColor(region[i],tx,ty,tmpC); put(iGround,ng++,tx+.5,-.25,ty+.5,1,.5,1,tmpC.clone()); }
     else if(f>1){
-      const bc=blockColor(f,ownF[i]); tmpC.set(bc[0]); const dm=hpF[i]/BHP[f]; if(dm<1) tmpC.lerp(new THREE.Color('#333'),(1-dm)*.45);
-      put(iPlat,np++,tx+.5,-.09+lift*.25,ty+.5,.98,.2,.98,tmpC.clone());
+      tmpC.set('#ffffff'); const dm=hpF[i]/BHP[f]; if(dm<1) tmpC.lerp(new THREE.Color('#444'),(1-dm)*.45);
+      if(iPlatT[f]) put(iPlatT[f],npT[f]++,tx+.5,-.09+lift*.25,ty+.5,.98,.2,.98,tmpC.clone());
     }
     if(w){
       let c;
-      if(w===CORE) c=new THREE.Color('#6b4423'); else { const bc=blockColor(w,ownW[i]); c=new THREE.Color(bc[0]); if(w===WOOL) c.lerp(new THREE.Color(TEAMS[ownW[i]].col),.2); }
+      if(w===CORE) c=new THREE.Color('#6b4423'); else { const bc=blockColor(w,ownW[i]); c=new THREE.Color('#ffffff'); }
       const dm=(hpW[i]-(wallLayers(i)-1)*BHP[w])/BHP[w]; if(dm<1) c.lerp(new THREE.Color('#222'),(1-dm)*.5);
       if(w===CORE) put(iWall,nw++,tx+.5,WHu*.3+lift*.3,ty+.5,1,WHu*.6,1,c);
-      else { const L=wallLayers(i); for(let k=0;k<L&&nw<CAP-1;k++) put(iWall,nw++,tx+.5,(k+.5)*WHu+lift*.3,ty+.5,.97,WHu*.99,.97,k===L-1?c:c.clone().lerp(new THREE.Color('#ffffff'),.04*(L-1-k))); }
+      else if(iWallT[w]){ const L=wallLayers(i); for(let k=0;k<L&&nwT[w]<CAP-1;k++) put(iWallT[w],nwT[w]++,tx+.5,(k+.5)*WHu+lift*.3,ty+.5,.97,WHu*.99,.97,k===L-1?c:c.clone().lerp(new THREE.Color('#ffffff'),.04*(L-1-k))); }
       if(w!==CORE&&ownW[i]>=0) put(iBand,nb++,tx+.5,.07,ty+.5,1.02,.12,1.02,new THREE.Color(TEAMS[ownW[i]].col));
     }
   }
+  for(const t of BTYPES){ for(const [m,n] of [[iWallT[t],nwT[t]],[iPlatT[t],npT[t]]]){ m.count=n; m.instanceMatrix.needsUpdate=true; if(m.instanceColor) m.instanceColor.needsUpdate=true; } }
   for(const [m,n] of [[iGround,ng],[iPlat,np],[iWall,nw],[iBand,nb]]){ m.count=n; m.instanceMatrix.needsUpdate=true; if(m.instanceColor) m.instanceColor.needsUpdate=true; }
 }
 
