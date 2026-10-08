@@ -573,7 +573,7 @@ function jump(e,power){
   if(e.plume>0&&e.z>groundH(e)+3&&e.vz<=140&&!e.pull&&e.bubble<=0&&e.frozen<=0&&!e.riding&&e.alive){ e.plume--; e.vz=320; e.squash=-.3; sfx('jump',e.x,e.y); burst(e.x,e.y+6-e.z,'#bbf7d0',8,90,.5,3); ring(e.x,e.y+8-e.z,T*.7,'#4ade80',.25); floatTxt(e.x,e.y-40,'×'+e.plume,'#4ade80',13); return; }
   if(e.bubble>0||e.root>0||e.z>groundH(e)+1||e.vz>0||e.pull||e.frozen>0||e.riding) return;
   if(fl(Math.floor(e.x/T),Math.floor(e.y/T))===0&&e.jetT<=0){ if(e.waterJumps>=1) return; e.waterJumps=(e.waterJumps||0)+1; } // un seul saut de rattrapage au-dessus de l'eau
-  sfx('jump',e.x,e.y); e.vz=(power||(e.springT>0?540:320))*cv(e,'jump')*(1+.1*(e.up.jmp||0))*(e.relics&&e.relics.r_feather?1.1:1); e.squash=-.5; burst(e.x,e.y+6-e.z,'#e5e7eb',6,70,.3,3);
+  sfx('jump',e.x,e.y); e.vz=Math.sqrt(Math.pow((power||(e.springT>0?540:320))*cv(e,'jump')*(e.relics&&e.relics.r_feather?1.1:1),2)+56000*(e.up.jmp||0)); // chaque niveau : +1 bloc de hauteur de saut e.squash=-.5; burst(e.x,e.y+6-e.z,'#e5e7eb',6,70,.3,3);
 }
 function useGadget(e,id,wx,wy){
   if(e.cd.gad>0) return false;
@@ -604,7 +604,8 @@ function useGadget(e,id,wx,wy){
       ring(e.x,e.y,T*1.6,'#fff',.4,true); burst(e.x,e.y,'#fff',14,160,.5,4); break;}
     case 'repair':{
       const td=TD[e.team],ci=idx(td.bx,td.by); if(!td.coreAlive||hpW[ci]>=BHP[CORE]-.5) return false;
-      hpW[ci]=Math.min(BHP[CORE],hpW[ci]+Math.max(14,BHP[CORE]*.2)); ring((td.bx+.5)*T,(td.by+.5)*T,T*2.2,'#86efac',.5,true); floatTxt((td.bx+.5)*T,(td.by+.5)*T-50,'+14 PV','#86efac',16); break;}
+      if(Math.hypot((td.bx+.5)*T-e.x,(td.by+.5)*T-e.y)>3.4*T){ floatTxt(e.x,e.y-34,'Va près de ton coffre pour le réparer','#fde68a',14); return false; }
+      if(e.repairCh) return false; e.repairCh={t:0,dur:4.5,hp0:e.hp,tot:Math.max(16,BHP[CORE]*.35)}; ring((td.bx+.5)*T,(td.by+.5)*T,T*2.2,'#86efac',.5,true); floatTxt(e.x,e.y-44,'🔧 Réparation… reste près du coffre','#86efac',14); break;}
     case 'turret2':{
       const tx=Math.floor(wx/T),ty=Math.floor(wy/T);
       if(fl(tx,ty)===0||wl(tx,ty)>0||Math.hypot((tx+.5)*T-e.x,(ty+.5)*T-e.y)>3.7*T) return false;
@@ -828,7 +829,7 @@ const SHOP=[
   gadItem('turret','Canon de pont','Tire seul sur les ennemis proches jusqu\'à ce qu\'il soit détruit.',{silver:14},1,'Défense'),
   gadItem('turret2','Canon givrant','Gèle brièvement les ennemis proches jusqu\'à ce qu\'il soit détruit.',{silver:16},1,'Défense'),
   gadItem('guard','Matelots gardiens','Deux matelots gardiens défendent ta base pendant 45 s.',{silver:12},1,'Défense'),
-  gadItem('repair','Réparation du coffre','Soigne ton coffre au trésor de 14 PV.',{silver:8},1,'Défense'),
+  gadItem('repair','Réparation du coffre','Répare ton coffre en 4,5 s (reste près de lui, sans te faire toucher) : jusqu\'à +35 % de sa vie.',{silver:8},1,'Défense'),
   gadItem('vortex','Maelström','Aspire les ennemis vers son centre pendant 3,5 s.',{gold:2},1),
   gadItem('springs','Bottes de mousse','Sauts très hauts 25 s, et l\'atterrissage fait mal.',{silver:8},1),
   gadItem('cloak','Brume magique','Invisible 7 s : les bots ne te voient plus de loin.',{silver:10},1),
@@ -863,7 +864,7 @@ const SHOP=[
   upItem('sp','Agilité',3,[3,5,8],['+8% vitesse','+8% vitesse','+8% vitesse']),
   upItem('ar','Armure',3,[3,5,8],['-12% dégâts','-12% dégâts','-12% dégâts']),
   upItem('core','Blindage du coffre',3,[4,6,9],['Le coffre au trésor subit -20% de dégâts','-35% de dégâts','-50% de dégâts'],null),
-  upItem('jmp','Ressorts aux bottes',3,[3,5,8],['Sauts +10 %','Sauts +20 %','Sauts +30 %']),
+  upItem('jmp','Ressorts aux bottes',3,[3,5,8],['Tu sautes 1 bloc de plus','Tu sautes 2 blocs de plus','Tu sautes 3 blocs de plus']),
   upItem('reg','Régénération',3,[3,5,8],['Soin plus rapide : +0,5 PV/s, délai −1,1 s','+1 PV/s, délai −2,2 s','+1,5 PV/s, délai −3,3 s']),
   upItem('vamp','Vampirisme',3,[4,6,9],['Tu récupères 8 % des dégâts infligés','16 % des dégâts infligés','24 % des dégâts infligés']),
   upItem('rel','Rechargement express',3,[3,5,8],['Recharge des armes −12 %','−24 %','−36 %']),
