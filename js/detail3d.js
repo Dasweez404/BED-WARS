@@ -91,9 +91,15 @@ createCrab=function(c){
   g.userData=u; return g;
 };
 updateCrabM=function(c,m){ const u=m.userData; m.position.set(c.x*U,Math.abs(Math.sin(c.ph))*.06,c.y*U); m.rotation.y=-Math.atan2(c.vy,c.vx); u.legs.forEach((l,i)=>l.rotation.x=Math.sin(c.ph*2+i)*.35); u.claws.forEach((cl,i)=>cl.rotation.y=Math.sin(c.ph*1.5+i*3)*.35); const bl=c.t<2&&Math.floor(game.t*10)%2; u.mat.emissive.setRGB(bl?.9:0,bl?.3:0,0); };
-{ const _w=mkWhale; mkWhale=function(){ const g=_w(); const sm=stdM, add=(geo,mat,x,y,z,sx,sy,sz,rx,ry,rz)=>{ const m=new THREE.Mesh(geo,mat); m.position.set(x,y,z); m.scale.set(sx,sy,sz); if(rx||ry||rz) m.rotation.set(rx||0,ry||0,rz||0); g.add(m); return m; };
-    for(const s of [-1,1]){ add(GEO.sphere0,sm(0x47677f),1.0,-.45,s*.95,.55,.1,.22,0,s*.3,s*.5); for(let k=0;k<6;k++) add(GEO.box,sm(0xcfdde8),1.0+k*.16,-.52,s*.7,.02,.04,.2,0,0,0); }
-    for(let k=0;k<5;k++) add(GEO.sphere0,sm(0xe7efe6),.2+k*.35,.8-k*.02,(k%2?.3:-.3),.06,.04,.06); add(GEO.sphere0,sm(0x36546b),1.55,.85,0,.1,.04,.16); return g; }; }
+/* baleine : simple silhouette sombre sous la surface (discrète, peu encombrante) */
+mkWhale=function(){
+  const g=new THREE.Group(), mat=new THREE.MeshBasicMaterial({color:0x0a3b5e,transparent:true,opacity:.34,depthWrite:false}), add=(geo,x,z,sx,sz,ry,parent)=>{ const m=new THREE.Mesh(geo,mat); m.scale.set(sx,.02,sz); m.position.set(x,0,z); if(ry) m.rotation.y=ry; (parent||g).add(m); return m; };
+  add(GEO.sphere,0,0,2.6,.95); add(GEO.sphere,1.9,0,1.0,.8); // corps, tête
+  for(const s of [-1,1]) add(GEO.sphere0,.9,s*1.0,.55,.2,s*.5); // nageoires pectorales
+  const tail=new THREE.Group(); tail.position.set(-2.5,0,0); g.add(tail); add(GEO.sphere,-.9,0,1.1,.4,0,tail);
+  const fluke=new THREE.Group(); fluke.position.x=-1.9; tail.add(fluke); for(const s of [-1,1]) add(GEO.sphere0,0,s*.7,.5,.85,s*.4,fluke);
+  g.scale.setScalar(1.15); g.userData={tail,fluke}; return g;
+};
 { const _d=mkDolphin; mkDolphin=function(){ const g=_d(); const add=(geo,c,x,y,z,sx,sy,sz,rx,ry,rz)=>{ const m=new THREE.Mesh(geo,stdM(c)); m.position.set(x,y,z); m.scale.set(sx,sy,sz); m.rotation.set(rx||0,ry||0,rz||0); g.add(m); return m; };
     add(GEO.sphere,0x7aa2c0,.55,.05,0,.36,.26,.27); for(const s of [-1,1]){ add(GEO.cone,0x5f89a8,.25,-.12,s*.27,.05,.25,.1,s*1.1,0,-.4); const e=new THREE.Mesh(GEO.sphere0,new THREE.MeshBasicMaterial({color:0x0b0f14})); e.scale.setScalar(.035); e.position.set(.62,.08,s*.2); g.add(e); } add(GEO.box,0x3a5a73,.98,-.04,0,.1,.012,.03); return g; }; }
 /* ---------- tortues de mer + perroquets ---------- */
