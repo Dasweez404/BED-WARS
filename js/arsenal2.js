@@ -16,13 +16,14 @@ SHOP.push(
     'Construit une batterie autour de ta base (elle détruit les blocs sur son emplacement) : monte dessus (touche E) pour passer en vue du dessus, désigne une zone et clique : 5 boulets tombent du ciel. Recharge 40 s.',
     'Salve de 7 boulets, recharge 32 s.','Salve de 9 boulets, recharge 25 s.']),
   upItem('catapult','Catapulte à blocs',1,[3],['Construit une catapulte autour de ta base (elle détruit les blocs sur son emplacement). Monte dessus (touche E), vise et clique : un bloc de pierre (consommé) part jusqu\'à 18 cases, dégâts énormes sur les murs. Recharge 6 s.']),
+  upItem('scope','Observatoire',1,[3],['Construit un observatoire autour de ta base : monte dessus (touche E) pour regarder partout sur la carte, déplacer la vue (ZQSD) et zoomer (molette).']),
   upItem('lighthouse','Phare de garde',1,[3],['Les ennemis qui approchent à 14 cases de ton coffre sont signalés à toute ton équipe (repère à l\'écran et sur la mini-carte).']),
   upItem('shipyard','Chantier naval',2,[4,6],['Toutes les 40 s, un matelot gardien réapparaît à ta base (2 gardiens maximum).','Toutes les 28 s, jusqu\'à 3 gardiens.'])
 );
 SHOP.forEach(s=>SHOPMAP[s.id]=s);
 H_THROW.push('barrel'); H_BUFF.push('mirror');
 const ART={on:false,t:0,px:0,py:0}; let barrels2=[]; const LHM={}; const LHSEEN=new Map(), SY={};
-{ const _ng=newGame; newGame=function(){ _ng(); for(const t of TD){ const u=t.ent.up; u.art=0; u.catapult=0; u.lighthouse=0; u.shipyard=0; SY[t.id]=20; } ART.on=false; barrels2=[]; LHSEEN.clear(); for(const k in LHM) delete LHM[k]; }; }
+{ const _ng=newGame; newGame=function(){ _ng(); for(const t of TD){ const u=t.ent.up; u.art=0; u.catapult=0; u.scope=0; u.radar=0; u.lighthouse=0; u.shipyard=0; SY[t.id]=20; } ART.on=false; barrels2=[]; LHSEEN.clear(); for(const k in LHM) delete LHM[k]; }; }
 /* ---------- salves d'artillerie ---------- */
 function artFire(e,tx,ty){
   const lv=Math.max(1,e.up.art|0), n=3+2*lv, R=2.4*T; ring(tx,ty,R*1.2,'#fb923c',1.3,true); ring(tx,ty,R*.5,'#fff',.8); sfx('gadget',e.x,e.y); floatTxt(e.x,e.y-46,`🎯 SALVE ×${n}`,'#fdba74',16);

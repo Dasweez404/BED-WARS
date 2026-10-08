@@ -1,7 +1,7 @@
 'use strict';
 /* =====================  NOUVEAUX GADGETS & AMÉLIORATIONS  =====================
    Piège à ancre, Perroquet messager, Aimant à butin, Canne de pêche, Cloche de brume, Radeau-bombe, Marteau de réparation,
-   améliorations de base : Radar de bord (révèle périodiquement les ennemis) et Cloche de vigie (prévient quand ton coffre est attaqué). */
+   améliorations de base : Totem de vigie (révèle périodiquement les ennemis) et Cloche de vigie (prévient quand ton coffre est attaqué). */
 const NEWG=[
   {id:'anchortrap',n:'Piège à ancre',ico:'🪤',col:'#94a3b8'},{id:'parrotmsg',n:'Perroquet messager',ico:'🦜',col:'#4ade80'},{id:'magnet',n:'Aimant à butin',ico:'🧲',col:'#f87171'},
   {id:'fishrod',n:'Canne de pêche',ico:'🎣',col:'#38bdf8'},{id:'mistbell',n:'Cloche de brume',ico:'🔔',col:'#e2e8f0'},{id:'bombraft',n:'Radeau-bombe',ico:'🛶',col:'#f59e0b'},{id:'repairhammer',n:'Marteau de réparation',ico:'🔨',col:'#fbbf24'}
@@ -11,7 +11,7 @@ Object.assign(TIPS2,{
   anchortrap:'Pose un piège : l\'ennemi qui marche dessus est immobilisé et le pont sous lui s\'effondre',
   parrotmsg:'Le perroquet marque l\'ennemi le plus proche de la cible : il reste visible 8 s pour ton équipe',
   magnet:'10 s : aspire les ressources des piles proches, même celles des bases ennemies',
-  fishrod:'Lance la ligne : sur un ennemi, tu lui voles des ressources ; dans l\'eau, tu pêches… des trucs',
+  fishrod:'Lance la ligne : accroche un ennemi (tiré vers toi + butin volé) ou pêche dans l\'eau',
   mistbell:'Un nuage de brume 10 s : tes alliés dedans deviennent invisibles et les tirs ennemis sont bloqués',
   bombraft:'Un radeau piégé dérive vers l\'ennemi et explose au contact',
   repairhammer:'Rebâtit les blocs de ton équipe détruits récemment, autour de toi'
@@ -20,11 +20,11 @@ SHOP.push(
   gadItem('anchortrap','Piège à ancre','Posé au sol : l\'ennemi qui marche dessus est immobilisé 2,5 s et les ponts autour de lui s\'effondrent (le sol des îles résiste).',{silver:14},2,'Gadgets'),
   gadItem('parrotmsg','Perroquet messager','Vise un ennemi : il le marque, ainsi que celui qui est le plus proche de lui. Tes alliés les voient 8 s sur la carte et à l\'écran.',{silver:12},2,'Outils'),
   gadItem('magnet','Aimant à butin','Pendant 10 s, les ressources des piles dans 8 cases viennent à toi, même sur une base ennemie ou sur le galion !',{silver:14},1,'Outils'),
-  gadItem('fishrod','Canne de pêche','Lance la ligne vers un ennemi : tu lui voles des ressources. Dans l\'eau : une prise surprise (butin, vieille botte, crabe, requin allié…).',{silver:16},3,'Gadgets'),
+  gadItem('fishrod','Canne de pêche','Lance la ligne : sur un ennemi, tu le tires vers toi (comme un lasso) et tu lui voles des ressources ; dans l\'eau, une prise surprise (butin, vieille botte, crabe, requin allié, relique…).',{silver:16},3,'Gadgets'),
   gadItem('mistbell','Cloche de brume','Un nuage de brume de 10 s autour de toi : tes alliés dedans sont invisibles et les tirs ennemis y sont arrêtés.',{silver:18},1,'Défense'),
   gadItem('bombraft','Radeau-bombe','Pose un radeau piégé sur l\'eau : il dérive vers l\'ennemi le plus proche et explose au contact. Les tirs peuvent le détruire.',{gold:2},1,'Gadgets'),
   gadItem('repairhammer','Marteau de réparation','Rebâtit instantanément les ponts et murs de ton équipe détruits ces dernières 45 s dans 6 cases autour de toi.',{silver:14},2,'Défense'),
-  upItem('radar','Radar de bord',3,[4,6,9],['Toutes les 30 s, les ennemis sont révélés 3 s sur la mini-carte','Toutes les 22 s pendant 4 s','Toutes les 15 s pendant 6 s']),
+  upItem('radar','Totem de vigie',3,[4,6,9],['Un totem veille sur ton île : toutes les 30 s, les esprits révèlent les ennemis 3 s sur la mini-carte','Toutes les 22 s pendant 4 s','Toutes les 15 s pendant 6 s']),
   upItem('watch','Cloche de vigie',1,[3],['Tu es prévenu quand ton coffre est attaqué (alarme, bannière, jauge de vie du coffre). Sans elle, tu ne sais jamais quand on te pille !'])
 );
 SHOP.forEach(s=>SHOPMAP[s.id]=s);
@@ -52,9 +52,10 @@ let rafts2=[], wreck=[]; // radeaux-bombes, tuiles détruites récemment (pour l
         for(let k=0;k<12;k++) parts.push({x:e.x+(o.x-e.x)*k/12,y:e.y+(o.y-e.y)*k/12,z:30+Math.sin(k/12*Math.PI)*26,vx:0,vy:0,vz:0,life:.4+k*.04,max:.4+k*.04,col:'#86efac',size:4}); sfx('gadget',e.x,e.y); return true; }
       case 'magnet': e.magnet=10; floatTxt(e.x,e.y-42,'🧲 AIMANT !','#f87171',16); ring(e.x,e.y,T*8,'#f87171',.9); sfx('gadget',e.x,e.y); return true;
       case 'fishrod':{ const [tx,ty]=aimPoint(e,wx,wy,10*T), foe=nearestFoe(e,tx,ty,2.6*T);
-        if(foe&&Math.hypot(foe.x-e.x,foe.y-e.y)<=11*T){ const order=['diamond','gold','silver','bronze'], k=order.find(q=>foe.res[q]>0); if(!k){ floatTxt(foe.x,foe.y-38,'Poches vides !','#fde68a',14); return false; }
-          const cap={bronze:24,silver:9,gold:3,diamond:2}[k], n=Math.max(1,Math.min(cap,Math.ceil(foe.res[k]*.4))); foe.res[k]-=n; e.res[k]+=n; foe.vx+=(e.x-foe.x)*3; foe.vy+=(e.y-foe.y)*3; foe.root=Math.max(foe.root,.4); foe.lastBy=e; foe.lastByT=5;
-          floatTxt(e.x,e.y-44,`🎣 +${n} ${RESNAME[k]}`,RESCOL[k],16); floatTxt(foe.x,foe.y-40,'PÊCHÉ !','#fca5a5',15); for(let q=0;q<10;q++) parts.push({x:e.x+(foe.x-e.x)*q/10,y:e.y+(foe.y-e.y)*q/10,z:20,vx:0,vy:0,vz:0,life:.3,max:.3,col:'#e0f2fe',size:2.5}); sfx('coin',e.x,e.y); return true; }
+        if(foe&&Math.hypot(foe.x-e.x,foe.y-e.y)<=11*T){ const order=['diamond','gold','silver','bronze'], k=order.find(q=>foe.res[q]>0), dd=Math.hypot(foe.x-e.x,foe.y-e.y)||1;
+          foe.vx+=(e.x-foe.x)/dd*900; foe.vy+=(e.y-foe.y)/dd*900; foe.root=Math.max(foe.root,.6); foe.lastBy=e; foe.lastByT=5; // prise comme au lasso : l'ennemi est tiré vers toi
+          if(k){ const cap={bronze:24,silver:9,gold:3,diamond:2}[k], n=Math.max(1,Math.min(cap,Math.ceil(foe.res[k]*.4))); foe.res[k]-=n; e.res[k]+=n; floatTxt(e.x,e.y-44,`🎣 +${n} ${RESNAME[k]}`,RESCOL[k],16); }
+          floatTxt(foe.x,foe.y-40,'ACCROCHÉ !','#fca5a5',15); for(let q=0;q<10;q++) parts.push({x:e.x+(foe.x-e.x)*q/10,y:e.y+(foe.y-e.y)*q/10,z:20,vx:0,vy:0,vz:0,life:.3,max:.3,col:'#e0f2fe',size:2.5}); sfx('coin',e.x,e.y); return true; }
         const x=Math.floor(tx/T), y=Math.floor(ty/T); if(fl(x,y)>0){ floatTxt(e.x,e.y-34,'Rien à pêcher ici : vise un ennemi ou la mer','#fde68a',13); return false; }
         splash(tx,ty); ring(tx,ty,T*1.2,'#bae6fd',.8); floatTxt(tx,ty-30,'🎣 …','#bae6fd',16);
         delayed.push({t:1.4,fn:()=>{ if(!e.alive) return; fishCatch(e,tx,ty); }}); return true; }
@@ -112,7 +113,7 @@ function collectFrom(e,sp,anyBase){
       for(const p of projs){ if(p.life>0&&p.team!==r.team&&p.dmg>0&&Math.hypot(p.x-r.x,p.y-r.y)<22){ r.hp-=p.dmg; p.life=p.pierce?p.life:0; burst(r.x,r.y,'#f59e0b',4,100,.3,3); if(r.hp<=0){ r.dead=true; splash(r.x,r.y); chunks(r.x,r.y,'#7c4a21',8); } } } }
     rafts2=rafts2.filter(r=>!r.dead);
     // radar de bord
-    for(const t of TD){ const lv=t.ent.up.radar|0; if(!lv||!t.members.some(m=>m.alive)) continue; t.radarT-=dt; if(t.radarT<=0){ t.radarT=[30,22,15][lv-1]; const dur=[3,4,6][lv-1]; for(const m of t.members) if(m.alive) m.spy=Math.max(m.spy||0,dur); if(t.id===player.team) { floatTxt(player.x,player.y-58,'📡 RADAR','#7dd3fc',15); sfx('gadget'); } } }
+    for(const t of TD){ const lv=t.ent.up.radar|0; if(!lv||!t.members.some(m=>m.alive)) continue; t.radarT-=dt; if(t.radarT<=0){ t.radarT=[30,22,15][lv-1]; const dur=[3,4,6][lv-1]; for(const m of t.members) if(m.alive) m.spy=Math.max(m.spy||0,dur); if(t.id===player.team) { floatTxt(player.x,player.y-58,'🗿 TOTEM','#7dd3fc',15); sfx('gadget'); } } }
     wreck=wreck.filter(w=>game.t-w.t<46);
   };
 }

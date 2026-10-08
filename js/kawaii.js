@@ -4,7 +4,7 @@
 const KW={ smile:null };
 function kwMat(c,o){ return new THREE.MeshStandardMaterial(Object.assign({color:c,flatShading:false,roughness:.55},o||{})); }
 function kwAdd(par,geo,mat,x,y,z,sx,sy,sz,rx,ry,rz){ const m=new THREE.Mesh(geo,mat); m.position.set(x,y,z); m.scale.set(sx,sy,sz===undefined?sx:sz); if(rx||ry||rz) m.rotation.set(rx||0,ry||0,rz||0); m.castShadow=true; par.add(m); return m; }
-const KWS=()=>KW.sph||(KW.sph=new THREE.SphereGeometry(1,16,12));
+const KWS=()=>KW.sph||(KW.sph=new THREE.SphereGeometry(1,12,8));
 function kwEye(par,x,y,z,s,face){ // face : direction (+x), z : côté
   const W=new THREE.MeshBasicMaterial({color:0xffffff}), K=new THREE.MeshBasicMaterial({color:0x1a1420});
   kwAdd(par,KWS(),W,x,y,z,s*.9,s,s*.9); kwAdd(par,KWS(),K,x+s*.42,y-s*.05,z,s*.62,s*.75,s*.62);

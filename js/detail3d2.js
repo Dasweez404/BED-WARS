@@ -86,3 +86,13 @@ mkLighthouse=function(){
   const beam=new THREE.Mesh(GEO.cone,new THREE.MeshBasicMaterial({color:0xfef3c7,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide})); beam.scale.set(1.2,7,1.2); beam.rotation.z=-Math.PI/2; beam.position.set(3.6,topY+.5,0);
   const pv=new THREE.Group(); pv.add(beam); g.add(pv); g.userData={lamp,pv,beam,vane}; return g;
 };
+
+/* ---------- optimisation : les pièces fixes des structures et des phares sont fusionnées en un seul maillage ---------- */
+function bakeStatic(g,keep){
+  const parts=[]; for(const ch of g.children.slice()){ if(!ch.isMesh||keep.has(ch)||!ch.material||ch.material.transparent||ch.material.isMeshBasicMaterial||!ch.material.color) continue;
+    const geo=ch.geometry.index?ch.geometry.toNonIndexed():ch.geometry.clone(); ch.updateMatrix(); geo.applyMatrix4(ch.matrix); const n=geo.attributes.position.count, col=new Float32Array(n*3), c=ch.material.color;
+    for(let i=0;i<n;i++){ col[i*3]=c.r; col[i*3+1]=c.g; col[i*3+2]=c.b; } geo.setAttribute('color',new THREE.BufferAttribute(col,3)); parts.push({geo,pos:[0,0,0],color:'#ffffff'}); g.remove(ch); }
+  if(parts.length){ const m=new THREE.Mesh(mergeParts(parts),VCMAT()); m.castShadow=true; m.receiveShadow=true; g.add(m); } return g; }
+function bakeKeep(g){ const keep=new Set(); for(const k in g.userData){ const v=g.userData[k]; for(const o of (Array.isArray(v)?v:[v])) if(o&&o.isObject3D) keep.add(o); } return keep; }
+{ const _bs=buildStruct; buildStruct=function(key,lvl,td){ const g=_bs(key,lvl,td); if(key!=='lighthouse') bakeStatic(g,bakeKeep(g)); return g; };
+  const _ml=mkLighthouse; mkLighthouse=function(){ const g=_ml(); bakeStatic(g,bakeKeep(g)); return g; }; }

@@ -5,7 +5,7 @@
    • combos élémentaires avec beaucoup de retours visuels : feu × bois/laine, glace × eau, feu × bombes/mines */
 ITEMMAP.block.ico='🪵';
 /* ---------- 1. fusions ---------- */
-const GONE=['blowpipe','firecracker','stickybomb','turret2','cannonman','launcher']; // sarbacane → Harpon givré · pétard/bombe collante → Bombe · Canon givrant → Canon de pont · Homme-canon → Canon d'embarquement
+const GONE=['blowpipe','firecracker','stickybomb','turret2','cannonman','launcher','lasso']; // sarbacane → Harpon givré · pétard/bombe collante → Bombe · Canon givrant → Canon de pont · Homme-canon → Canon d'embarquement
 for(const id of GONE){ const i=SHOP.findIndex(s=>s.id===id); if(i>=0) SHOP.splice(i,1); const it=SHOPMAP[id]; if(it) it.info=()=>({name:ITEMMAP[id]?ITEMMAP[id].n:id,desc:'Retiré',cost:{},ok:false}); }
 { // descriptions claires et distinctes
   const setD=(id,txt)=>{ const it=SHOPMAP[id]; if(!it) return; const o=it.info; it.info=function(e){ const r=o.call(this,e); return r.ok===false?r:Object.assign({},r,{desc:txt}); }; };

@@ -4,7 +4,7 @@
    • chaque effet d'état a son habillage sur le pirate : glace (déjà là), filet, flaque collante, flammes, miroir, armure, rage, égide, bottes/rhum, parapluie, aimant */
 /* ---------- structures de base ---------- */
 const STRUCT=new Map(); // clé "équipe:nom" -> {g,lvl}
-const SLOTS={lighthouse:[-4,-4],art:[-4,4],catapult:[-5,0],shipyard:[0,-5],radar:[4,-4],watch:[4,4]}; // sur le pourtour de l'île, pas dans la base
+const SLOTS={lighthouse:[-4,-4],art:[-4,4],catapult:[-5,0],shipyard:[0,-5],radar:[4,-4],watch:[4,4],scope:[0,5]}; // sur le pourtour de l'île, pas dans la base
 const STRFOOT=new Set(); // cases occupées par une structure : plus de blocs possibles
 function stBox(g,col,sx,sy,sz,x,y,z,opts){ const m=new THREE.Mesh(GEO.box,M(col,opts)); m.scale.set(sx,sy,sz); m.position.set(x,y,z); m.castShadow=true; g.add(m); return m; }
 function stCyl(g,col,sx,sy,sz,x,y,z,opts){ const m=new THREE.Mesh(GEO.cyl,M(col,opts)); m.scale.set(sx,sy,sz); m.position.set(x,y,z); m.castShadow=true; g.add(m); return m; }
@@ -22,8 +22,19 @@ function buildStruct(key,lvl,td){
   else if(key==='shipyard'){ stBox(g,'#9a6b3a',2.6,.1,1.1,0,.06,0); for(let k=0;k<5;k++) stBox(g,'#7c4a21',.08,.14,1.1,-1.1+k*.55,.1,0);
     for(let k=0;k<lvl;k++){ const z=(k-(lvl-1)/2)*.9; const hull=stBox(g,'#7c4a21',1.5,.28,.55,0,.35,z); hull.rotation.z=.04; stBox(g,'#5b3a1a',1.3,.05,.5,0,.52,z); stCyl(g,'#5b4326',.05,1.0,.05,0,.95,z); stBox(g,td.col,.5,.34,.03,.28,1.1,z); }
     stBox(g,'#5b4326',.1,1.1,.1,-1.2,.6,-.5); stBox(g,'#5b4326',.7,.08,.08,-.9,1.15,-.5); const hook=stCyl(g,'#9ca3af',.03,.4,.03,-.6,.9,-.5); g.userData.hook=hook; }
-  else if(key==='radar'){ stCyl(g,'#6b7280',.07,1.5,.07,0,.75,0); stBox(g,'#4b5563',.5,.12,.5,0,.06,0); const dish=new THREE.Group(); dish.position.set(0,1.55,0); g.add(dish); g.userData.dish=dish;
-    const d=new THREE.Mesh(GEO.sphere,M('#e5e7eb',{metalness:.5,roughness:.3})); d.scale.set(.55+.1*lvl,.12,.55+.1*lvl); d.rotation.z=.5; dish.add(d); stCyl(dish,'#f87171',.03,.5,.03,.18,.2,0); const tip=new THREE.Mesh(GEO.sphere0,new THREE.MeshBasicMaterial({color:0x4ade80})); tip.scale.setScalar(.07); tip.position.set(.28,.46,0); dish.add(tip); g.userData.tip=tip; }
+  else if(key==='radar'){ // totem de vigie : pierre, 3 visages sculptés aux yeux lumineux, ailes de plumes, oiseau sacré au sommet
+    stCyl(g,'#7b7f88',.46,.14,.46,0,.07,0); stBox(g,'#6b4423',.52,.52,.52,0,.4,0); stBox(g,'#8a5a2b',.46,.46,.46,0,.9,0); stBox(g,'#a8743c',.4,.4,.4,0,1.33,0);
+    for(const [y,w] of [[.4,.52],[.9,.46],[1.33,.4]]){ stBox(g,'#3b2a1a',w*.7,.07,.03,0,y-.1,w/2+.005); stBox(g,'#e8d6a0',.12,.05,.03,0,y-.18,w/2+.01); }
+    for(const s2 of [-1,1]){ for(const [y,c] of [[.95,'#ef4444'],[.88,'#fbbf24'],[.81,'#38bdf8']]) stBox(g,c,.34,.07,.04,s2*.38,y,0,0,0,s2*.35); }
+    const head=new THREE.Group(); head.position.set(0,1.62,0); g.add(head); g.userData.dish=head;
+    stBox(head,'#ef4444',.3,.18,.3,0,.09,0); stBox(head,'#fbbf24',.1,.1,.2,.18,.08,0); stBox(head,'#38bdf8',.34,.05,.1,0,.2,0); stBox(head,'#ef4444',.08,.16,.05,-.17,.22,0,0,0,.4);
+    const eyes=[]; for(const z of [-1,1]) for(const [y,w] of [[.4,.52],[.9,.46],[1.33,.4]]){ const e=new THREE.Mesh(GEO.box,new THREE.MeshBasicMaterial({color:0x4ade80})); e.scale.set(.07,.07,.03); e.position.set(z*.1,y-.01,w/2+.015); g.add(e); eyes.push(e); } g.userData.eyes=eyes; g.userData.tip=eyes[0]; }
+  else if(key==='scope'){ // observatoire : plateforme, trépied et grande longue-vue de cuivre
+    stBox(g,'#8a5a2b',1.6,.14,1.6,0,.07,0); stBox(g,'#a8743c',1.5,.04,1.5,0,.16,0); for(const [x,z] of [[-.7,-.7],[.7,-.7],[-.7,.7],[.7,.7]]) stBox(g,'#5b3a1a',.1,.32,.1,x,.3,z);
+    for(const s2 of [[.35,0],[-.2,.3],[-.2,-.3]]) stCyl(g,'#4b2e14',.035,1.0,.035,s2[0],.7,s2[1],{},0,0,0).rotation.set(s2[1]*.9,0,-s2[0]*.9);
+    const tel=new THREE.Group(); tel.position.set(0,1.18,0); g.add(tel); g.userData.tel=tel; const br={metalness:.7,roughness:.3};
+    const tb=stCyl(tel,'#b87333',.12,1.5,.12,.2,0,0,br); tb.rotation.z=Math.PI/2+.25; stCyl(tel,'#7c4a21',.14,.5,.14,-.25,-.04,0,{}).rotation.z=Math.PI/2+.25; const lens=stCyl(tel,'#bfe9ff',.1,.04,.1,.97,.24,0,{emissive:0x3a7fa8,emissiveIntensity:.5}); lens.rotation.z=Math.PI/2+.25;
+    stCyl(tel,'#d6a43c',.16,.06,.16,.88,.22,0,br).rotation.z=Math.PI/2+.25; stBox(g,'#e8d6a0',.5,.02,.34,.5,.19,.4,{}); stFlag(g,td,-.65,.2,.6); }
   else if(key==='watch'){ for(const [x,z] of [[-.4,-.4],[.4,-.4],[-.4,.4],[.4,.4]]) stBox(g,'#7c4a21',.1,1.7,.1,x,.85,z); stBox(g,'#5b3a1a',1.1,.1,1.1,0,1.75,0); stBox(g,'#8a5a2b',1.0,.07,1.0,0,.55,0);
     const pv=new THREE.Group(); pv.position.set(0,1.65,0); g.add(pv); g.userData.bell=pv; const bell=new THREE.Mesh(GEO.cone,M('#fbbf24',{metalness:.7,roughness:.3})); bell.scale.set(.5,.55,.5); bell.position.y=-.3; bell.rotation.x=Math.PI; pv.add(bell); stFlag(g,td,0,1.8,0); }
   return g;
@@ -33,8 +44,8 @@ function updStruct(key,g,td,t,lvl){
   if(u.lamp&&u.lamp.userData&&u.lamp.userData.pv){ const L=u.lamp.userData, night=typeof WX!=='undefined'?1-WX.dayK:0; L.pv.rotation.y=t*1.1; L.beam.material.opacity=Math.max(0,night-.1)*.18; L.lamp.material.color.set(night>.2?0xfff2b0:0xcdbb7a); if(L.vane) L.vane.rotation.y=t*.6; }
   if(u.gun){ const o=OB(td), a=Math.atan2(CY*T-o.by*T,CX*T-o.bx*T); u.gun.rotation.y=-a+Math.sin(t*.4)*.05; }
   if(u.arm){ const cd=(td.ent.pcd&&td.ent.pcd.catapult)||0; u.arm.rotation.z=cd>.2?-.35+Math.min(1,cd/6)*.0:.55; u.arm.rotation.z=cd>0?-.3:.55+Math.sin(t*1.2)*.03; if(u.stone) u.stone.visible=cd<=0; }
-  if(u.dish) u.dish.rotation.y=t*(.8+.3*lvl);
-  if(u.tip) u.tip.visible=Math.floor(t*3)%2===0;
+  if(u.dish) u.dish.rotation.y=Math.sin(t*.8)*.6; if(u.eyes){ const k=.6+.4*Math.sin(t*3); for(const e of u.eyes) e.scale.set(.07*k+.03,.07*k+.03,.03); }
+  if(u.tel){ const a=Math.atan2(CY*T-OB(td).by*T,CX*T-OB(td).bx*T); u.tel.rotation.y=-a+Math.sin(t*.5)*.2; }
   if(u.bell) u.bell.rotation.z=Math.sin(t*(td.alert>0?9:1.6))*(td.alert>0?.5:.12);
   if(u.hook) u.hook.position.y=.9+Math.sin(t*1.5)*.15;
   if(u.flags) for(const f of u.flags) f.rotation.y=Math.sin(t*3+f.position.x)*.35;
@@ -49,7 +60,7 @@ function structClear(td,key){ const [cx,cy]=structTile(td,key); let n=0;
 function structSync(){
   if(!renderer||!scene||!TD.length) return; const t=game.t; STRFOOT.clear();
   for(const td of TD){ const u=td.ent&&td.ent.up; if(!u) continue; const o0=OB(td), d=o0.dir, p=[-d[1],d[0]];
-    const lv={lighthouse:u.lighthouse|0,art:u.art|0,catapult:u.catapult|0,shipyard:u.shipyard|0,radar:u.radar|0,watch:u.watch|0};
+    const lv={lighthouse:u.lighthouse|0,art:u.art|0,catapult:u.catapult|0,shipyard:u.shipyard|0,radar:u.radar|0,watch:u.watch|0,scope:u.scope|0};
     for(const key in SLOTS){ const k=td.id+':'+key, L=lv[key], cur=STRUCT.get(k), show=L>0&&td.coreAlive&&game.state!=='menu';
       if(cur&&(!show||cur.lvl!==L)){ scene.remove(cur.g); STRUCT.delete(k); }
       if(show&&!STRUCT.get(k)){ const g=buildStruct(key,L,td); scene.add(g); STRUCT.set(k,{g,lvl:L}); g.scale.setScalar(.01); g.userData.born=t; if(!NETCLIENT) structClear(td,key); }
@@ -69,8 +80,8 @@ const _ngS=newGame; newGame=function(){ _ngS(); for(const td of TD) td.ob={bx:td
 { const _oc=onNewGame; onNewGame=function(){ for(const [,e] of STRUCT) scene&&scene.remove(e.g); STRUCT.clear(); for(const [,e] of COREARM) scene&&scene.remove(e.g); COREARM.clear(); _oc(); };
   const _r=render3d; render3d=function(dt){ _r(dt); if(game.state==='menu'){ if(STRUCT.size||COREARM.size){ for(const [,e] of STRUCT) scene.remove(e.g); STRUCT.clear(); for(const [,e] of COREARM) scene.remove(e.g); COREARM.clear(); } return; } structSync(); coreArmorSync(); };
   // réseau : niveaux d'amélioration des autres équipes
-  const _nc=netCommon; netCommon=function(){ const c=_nc(); c.tu=TD.map(t=>{ const u=t.ent.up; return [u.lighthouse|0,u.art|0,u.catapult|0,u.shipyard|0,u.radar|0,u.watch|0,u.core|0]; }); return c; };
-  const _na=netApplySnap; netApplySnap=function(m){ _na(m); if(m.tu) m.tu.forEach((a,i)=>{ const td=TD[i]; if(!td) return; const u=td.ent.up; u.lighthouse=a[0]; u.art=a[1]; u.catapult=a[2]; u.shipyard=a[3]; u.radar=a[4]; u.watch=a[5]; if(td.ent!==player) u.core=a[6]; }); }; }
+  const _nc=netCommon; netCommon=function(){ const c=_nc(); c.tu=TD.map(t=>{ const u=t.ent.up; return [u.lighthouse|0,u.art|0,u.catapult|0,u.shipyard|0,u.radar|0,u.watch|0,u.core|0,u.scope|0]; }); return c; };
+  const _na=netApplySnap; netApplySnap=function(m){ _na(m); if(m.tu) m.tu.forEach((a,i)=>{ const td=TD[i]; if(!td) return; const u=td.ent.up; u.lighthouse=a[0]; u.art=a[1]; u.catapult=a[2]; u.shipyard=a[3]; u.radar=a[4]; u.watch=a[5]; u.scope=a[7]|0; if(td.ent!==player) u.core=a[6]; }); }; }
 /* ---------- auras d'état sur les pirates ---------- */
 function auraBuild(m){
   const g=new THREE.Group(); m.add(g); const A={g}; const bm=(c,o)=>new THREE.MeshBasicMaterial(Object.assign({color:c,transparent:true,opacity:.5,depthWrite:false},o||{}));
@@ -89,7 +100,7 @@ function auraBuild(m){
   return A;
 }
 { const _a=animatePirate;
-  animatePirate=function(e,m,dt){ _a(e,m,dt); const u=m.userData; if(!u.aur) u.aur=auraBuild(m); const A=u.aur, t=game.t;
+  animatePirate=function(e,m,dt){ _a(e,m,dt); const u=m.userData; if(!u.aur){ if(!(e.root>0||e.slow>0||e.burn>0||e.mirror>0||e.plate>0||e.aegis>0||e.rage>0||e.haste>0||e.springT>0||e.magnet>0||(e.glide>0&&e.z>2))) return; u.aur=auraBuild(m); } const A=u.aur, t=game.t;
     A.root.visible=e.root>0&&!(e.frozen>0); A.slow.visible=e.slow>0&&!(e.frozen>0); if(A.slow.visible) A.slow.material.opacity=.4+.2*Math.sin(t*5);
     const b=e.burn>0; A.burn.forEach((c,i)=>{ c.visible=b; if(b){ c.scale.set(.3,.6+.4*Math.abs(Math.sin(t*9+i*2)),.3); c.position.y=.5+.12*Math.sin(t*11+i); } });
     A.mirror.visible=e.mirror>0; if(A.mirror.visible) A.mirror.material.opacity=.3+.18*Math.sin(t*6);
@@ -103,7 +114,7 @@ function auraBuild(m){
 /* ---------- utilisation : debout sur la structure, touche E (la boutique n'est pas disponible en même temps) ---------- */
 const CAT={on:false};
 function structNear(e){ if(!e||!e.alive||e.riding||!TD[e.team]) return null; const td=TD[e.team]; if(typeof EG!=='undefined'&&EG.arena) return null;
-  for(const key of ['art','catapult']){ if(!((e.up[key]|0)>0)) continue; const [x,y]=structTile(td,key); if(Math.hypot((x+.5)*T-e.x,(y+.5)*T-e.y)<2.2*T) return key; } return null; }
+  for(const key of ['art','catapult','scope']){ if(!((e.up[key]|0)>0)) continue; const [x,y]=structTile(td,key); if(Math.hypot((x+.5)*T-e.x,(y+.5)*T-e.y)<2.2*T) return key; } return null; }
 function useStruct(e,key){
   if(key==='art'){ if(e===player&&!NETCLIENT){ if(ART.on){ ART.on=false; return true; } return abilityArt(e); } return abilityArt(e,e.inp?e.inp.wx:e.x,e.inp?e.inp.wy:e.y); }
   if(key==='catapult'){ if(e===player&&!NETCLIENT){ CAT.on=!CAT.on; if(CAT.on) msg('🪨 Catapulte : vise et clique pour lancer · E : descendre','#d6d3d1'); return true; } return abilityCat(e,e.inp?e.inp.wx:e.x,e.inp?e.inp.wy:e.y); }
@@ -115,10 +126,34 @@ function useStruct(e,key){
   const _ce=controlEnt; controlEnt=function(e,dt,inp){ if(e===player&&CAT.on){ const k=structNear(e); if(!k||k!=='catapult'||!e.alive||e.frozen>0) CAT.on=false; else { e.ix=e.iy=0; e.held='sword'; if(inp.clicked) abilityCat(e,inp.wx,inp.wy); return; } } _ce(e,dt,inp); };
   addEventListener('keydown',ev=>{ if(ev.key==='Escape') CAT.on=false; });
   const _dh=drawHud;
-  drawHud=function(){ _dh(); if(game.state!=='play'||!ctx||!player||!player.alive||shopOpen) return; const k=structNear(player); if(!k&&!ART.on&&!CAT.on) return;
+  drawHud=function(){ _dh(); if(game.state!=='play'||!ctx||!player||!player.alive||shopOpen||(typeof SCOPE!=='undefined'&&SCOPE.on)) return; const k=structNear(player); if(!k&&!ART.on&&!CAT.on) return;
     const touch=typeof TOUCH!=='undefined'&&TOUCH.on, cd=k==='art'?(player.pcd.artillery||0):(player.pcd.catapult||0);
-    const txt=ART.on?'':CAT.on?`🪨 Catapulte : clic pour lancer ${cd>0?'(recharge '+Math.ceil(cd)+' s)':''} · E : descendre`:`${touch?'🛒':'[E]'}  Utiliser ${k==='art'?'l\'artillerie 🎯':'la catapulte 🪨'}${cd>0?' ('+Math.ceil(cd)+' s)':''}`;
+    const txt=ART.on?'':CAT.on?`🪨 Catapulte : clic pour lancer ${cd>0?'(recharge '+Math.ceil(cd)+' s)':''} · E : descendre`:`${touch?'🛒':'[E]'}  Utiliser ${k==='art'?'l\'artillerie 🎯':k==='scope'?'l\'observatoire 🔭':'la catapulte 🪨'}${cd>0?' ('+Math.ceil(cd)+' s)':''}`;
     if(!txt) return; ctx.save(); ctx.setTransform(DPR,0,0,DPR,0,0); const pp=1+.03*Math.sin(game.t*5), w=Math.max(260,ctx.measureText(txt).width+40); ctx.translate(VW/2,VH-(touch?96:150)); ctx.scale(pp,pp); panel(-w/2,-15,w,30,15,'#fdba74'); ctx.fillStyle='#fdba74'; ctx.font='bold 15px '+FONT; ctx.textAlign='center'; ctx.fillText(txt,0,5); ctx.restore(); };
   // pas de blocs sur l'emplacement d'une structure
   const _pt=placeTarget; placeTarget=function(e,wx,wy){ const r=_pt(e,wx,wy); if(r&&STRFOOT.has(idx(r[0],r[1]))) return null; return r; };
+}
+
+/* ---------- observatoire : vue libre sur toute la carte + zoom (E sur la structure) ---------- */
+const SCOPE={on:false,cx:0,cy:0,h:18};
+function scopeToggle(e){ if(SCOPE.on){ SCOPE.on=false; return true; } SCOPE.on=true; SCOPE.cx=e.x; SCOPE.cy=e.y; SCOPE.h=18; msg('🔭 Observatoire : ZQSD déplace la vue · molette : zoom · E ou Échap : revenir','#bae6fd'); return true; }
+{ const _us=useStruct; useStruct=function(e,key){ if(key==='scope'&&e===player) return scopeToggle(e); if(key==='scope') return false; return _us(e,key); };
+  const _ab=actBoat; actBoat=function(){ if(player&&player.alive&&NETCLIENT&&structNear(player)==='scope'){ scopeToggle(player); return true; } return _ab(); };
+  const _bi=boatInteract; boatInteract=function(e){ if(e===player&&SCOPE.on){ SCOPE.on=false; return true; } return _bi(e); };
+  addEventListener('keydown',ev=>{ if(ev.key==='Escape') SCOPE.on=false; });
+  { const ui=document.getElementById('ui'); ui.addEventListener('wheel',ev=>{ if(!SCOPE.on) return; ev.preventDefault(); ev.stopImmediatePropagation(); SCOPE.h=clamp(SCOPE.h*(ev.deltaY>0?1.12:.89),3.5,95); },{capture:true,passive:false}); }
+  const _ce=controlEnt; controlEnt=function(e,dt,inp){ if(e===player&&SCOPE.on){ if(!e.alive||e.frozen>0||structNear(e)!=='scope'){ SCOPE.on=false; } else { e.ix=e.iy=0; e.held='sword'; return; } } _ce(e,dt,inp); };
+  const _nl=netLocalInput; netLocalInput=function(){ if(SCOPE.on) return {ix:0,iy:0}; return _nl(); };
+  const _cam=updateCamera;
+  updateCamera=function(dt){ _cam(dt); if(!SCOPE.on||game.state!=='play'||!player) return;
+    if(!player.alive||structNear(player)!=='scope'&&!NETCLIENT){ SCOPE.on=false; return; }
+    const up=keys.KeyW||keys['k:z']||keys.ArrowUp, dn=keys.KeyS||keys['k:s']||keys.ArrowDown, lf=keys.KeyA||keys['k:q']||keys.ArrowLeft, rt=keys.KeyD||keys['k:d']||keys.ArrowRight;
+    let ix=(rt?1:0)-(lf?1:0), iy=(dn?1:0)-(up?1:0); if(typeof TOUCH!=='undefined'&&TOUCH.on&&!ix&&!iy){ ix=TOUCH.ix; iy=TOUCH.iy; } [ix,iy]=camRelInput(ix,iy);
+    const sp=SCOPE.h*34*dt; SCOPE.cx=clamp(SCOPE.cx+ix*sp,0,W*T); SCOPE.cy=clamp(SCOPE.cy+iy*sp,0,H*T); cam3.x=SCOPE.cx; cam3.y=SCOPE.cy;
+    const cx=cam3.x*U, cz=cam3.y*U, back=SCOPE.h*.4; camera3.position.set(cx+Math.sin(CAMYAW)*back,SCOPE.h,cz+Math.cos(CAMYAW)*back); camera3.lookAt(cx,0,cz); };
+  const _dh=drawHud;
+  drawHud=function(){ _dh(); if(!SCOPE.on||!ctx) return; ctx.save(); ctx.setTransform(DPR,0,0,DPR,0,0);
+    const g=ctx.createRadialGradient(VW/2,VH/2,Math.min(VW,VH)*.38,VW/2,VH/2,Math.max(VW,VH)*.75); g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(0,10,30,.55)'); ctx.fillStyle=g; ctx.fillRect(0,0,VW,VH);
+    ctx.strokeStyle='rgba(186,230,253,.6)'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(VW/2,VH/2,16,0,6.283); ctx.moveTo(VW/2-30,VH/2); ctx.lineTo(VW/2-8,VH/2); ctx.moveTo(VW/2+8,VH/2); ctx.lineTo(VW/2+30,VH/2); ctx.moveTo(VW/2,VH/2-30); ctx.lineTo(VW/2,VH/2-8); ctx.moveTo(VW/2,VH/2+8); ctx.lineTo(VW/2,VH/2+30); ctx.stroke();
+    ctx.textAlign='center'; ctx.font='bold 14px '+FONT; ctx.lineWidth=4; ctx.strokeStyle='rgba(0,20,40,.9)'; const t=`🔭 Observatoire · zoom ×${(18/SCOPE.h).toFixed(1)} · ZQSD : déplacer · molette : zoom · E : revenir`; ctx.strokeText(t,VW/2,VH-130); ctx.fillStyle='#bae6fd'; ctx.fillText(t,VW/2,VH-130); ctx.restore(); };
 }
