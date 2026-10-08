@@ -1470,7 +1470,9 @@ function pickGoal(b){
   const alive=TD.filter(t=>t.id!==b.team&&t.coreAlive);
   if(alive.length){
     alive.sort((p,q)=>Math.hypot(p.bx-me,p.by-my)-Math.hypot(q.bx-me,q.by-my));
-    const t=Math.random()<.5?alive[0]:alive[Math.floor(Math.random()*alive.length)];
+    const bots=player&&!game.tut?alive.filter(t=>t.id!==player.team):alive; // moins de focus sur le joueur : les bots se battent entre eux
+    const pool=(bots.length&&Math.random()<.7)?bots:alive;
+    const t=Math.random()<.45?pool[0]:pool[Math.floor(Math.random()*pool.length)];
     ai.mode='raid'; ai.target=t.id;
     if((b.am.haste||0)>0) useGadget(b,'haste',b.x,b.y);
     return;
@@ -1496,8 +1498,8 @@ function botThink(b,dt){
   if(b.frozen>0||b.bubble>0) return;
   botJumpEnv(b,dt);
   const coreX=(tm.bx+.5)*T,coreY=(tm.by+.5)*T;
-  let foe=null,fd=1e9;
-  for(const o of ents){ if(!o.alive||o.team===b.team) continue; const d=dist(b,o); if(o.cloak>0&&d>3*T) continue; if(d<fd){fd=d;foe=o;} }
+  let foe=null,fd=1e9,fdk=1e9;
+  for(const o of ents){ if(!o.alive||o.team===b.team) continue; let d=dist(b,o); if(o.cloak>0&&d>3*T) continue; const dk=(player&&o.team===player.team&&!game.tut)?1.35:1; /* les bots s'attaquent aussi entre eux */ if(d*dk<fdk){fdk=d*dk;fd=d;foe=o;} }
   const nearCore=foe&&Math.hypot(foe.x-coreX,foe.y-coreY)<8*T;
   if(foe&&fd<(nearCore?D.engage*1.8:D.engage)*T){
     if(ai.foe!==foe){ai.foe=foe;ai.react=D.react;}
