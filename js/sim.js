@@ -43,20 +43,20 @@ const ITEMMAP={}; ITEMS.forEach(i=>ITEMMAP[i.id]=i);
 const PERM={}; // objets permanents (utilisables à volonté, avec recharge)
 const GUNS={
   // mag = chargeur, cd = cadence (s entre deux tirs), reload = rechargement (s), spread = dispersion de base, bloom = dispersion ajoutée à chaque tir, bmax = dispersion max
-  bow:{n:'Arbalète',mag:1,cd:.1,reload:.85,sp:620,life:1.4,dmg:5,kb:217,col:'#f1f5f9',pel:1,spread:0,bloom:0,bmax:0,kind:'arrow',rec:0},
-  gun:{n:'Pistolet à silex',mag:12,cd:.27,reload:1.1,sp:820,life:.7,dmg:4.7,kb:140,col:'#fde047',pel:1,spread:.02,bloom:.014,bmax:.1,rec:48},
-  smg:{n:'Pistolets jumeaux',mag:30,cd:.1,reload:1.7,sp:800,life:.6,dmg:2.35,kb:60,col:'#fde047',pel:1,spread:.045,bloom:.02,bmax:.24,rec:14},
-  shotgun:{n:'Tromblon',mag:6,cd:1.15,reload:2.3,sp:720,life:.36,dmg:3.4,kb:230,col:'#fb923c',pel:8,spread:.27,bloom:0,bmax:0,rec:300},
+  bow:{n:'Arbalète',mag:1,cd:.1,reload:.85,sp:620,life:1.4,dmg:6.5,kb:217,col:'#f1f5f9',pel:1,spread:0,bloom:0,bmax:0,kind:'arrow',rec:0},
+  gun:{n:'Pistolet à silex',mag:12,cd:.27,reload:1.1,sp:820,life:.7,dmg:4.2,kb:140,col:'#fde047',pel:1,spread:.02,bloom:.014,bmax:.1,rec:48},
+  smg:{n:'Pistolets jumeaux',mag:30,cd:.1,reload:1.7,sp:800,life:.6,dmg:2.1,kb:60,col:'#fde047',pel:1,spread:.045,bloom:.02,bmax:.24,rec:14},
+  shotgun:{n:'Tromblon',mag:6,cd:1.15,reload:2.3,sp:720,life:.36,dmg:3,kb:230,col:'#fb923c',pel:8,spread:.27,bloom:0,bmax:0,rec:300},
   sniper:{n:'Mousquet long',mag:4,cd:1.75,reload:2.5,sp:1700,life:.9,dmg:17,kb:520,col:'#a5f3fc',pel:1,spread:0,bloom:0,bmax:0,pierce:true,rec:240,moveSpread:.1},
   rocket:{n:'Canon de poche',mag:1,cd:.1,reload:2.2,sp:430,life:2.2,dmg:0,kb:0,col:'#f87171',pel:1,spread:0,bloom:0,bmax:0,kind:'rocket',rec:300},
-  woolgun:{n:'Lance-filet',mag:8,cd:.34,reload:1.8,sp:560,life:.9,dmg:1.5,kb:150,col:'#f9a8d4',pel:1,spread:.06,bloom:.02,bmax:.16,kind:'wool',rec:30},
-  boomerang:{n:'Hache de lancer',mag:1,cd:.1,reload:1.1,sp:560,life:1.3,dmg:4,kb:200,col:'#fbbf24',pel:1,spread:0,bloom:0,bmax:0,kind:'boomerang',pierce:true,rec:0},
+  woolgun:{n:'Lance-filet',mag:8,cd:.34,reload:1.8,sp:560,life:.9,dmg:2.5,kb:150,col:'#f9a8d4',pel:1,spread:.06,bloom:.02,bmax:.16,kind:'wool',rec:30},
+  boomerang:{n:'Hache de lancer',mag:1,cd:.1,reload:1.1,sp:560,life:1.3,dmg:7,kb:200,col:'#fbbf24',pel:1,spread:0,bloom:0,bmax:0,kind:'boomerang',pierce:true,rec:0},
   bubble:{n:'Lance-écume',mag:3,cd:.45,reload:2.4,sp:360,life:1.2,dmg:0,kb:0,col:'#bfdbfe',pel:1,spread:0,bloom:0,bmax:0,kind:'bubble',rec:24},
-  ice:{n:'Harpon givré',mag:5,cd:.4,reload:2,sp:600,life:.9,dmg:1,kb:0,col:'#7dd3fc',pel:1,spread:.02,bloom:0,bmax:0,kind:'ice',rec:32},
+  ice:{n:'Harpon givré',mag:5,cd:.4,reload:2,sp:600,life:.9,dmg:2,kb:0,col:'#7dd3fc',pel:1,spread:.02,bloom:0,bmax:0,kind:'ice',rec:32},
   trident:{n:'Trident de Poséidon',mag:6,cd:.5,reload:1.8,sp:760,life:.55,dmg:2.2,kb:150,col:'#38bdf8',pel:3,spread:.11,bloom:0,bmax:0,pierce:true,rec:110},
   gatling:{n:'Poivrière rotative',mag:90,cd:.068,reload:3.2,sp:820,life:.55,dmg:1.4,kb:30,col:'#fca5a5',pel:1,spread:.05,bloom:.012,bmax:.32,rec:10},
-  javelin:{n:'Javelot de chasse',mag:2,cd:.3,reload:1.5,sp:1150,life:.7,dmg:7,kb:380,col:'#f1f5f9',pel:1,spread:0,bloom:0,bmax:0,pierce:true,rec:140},
-  flarebow:{n:'Arc incendiaire',mag:3,cd:.35,reload:1.9,sp:640,life:1,dmg:2,kb:60,col:'#fb923c',pel:1,spread:.02,bloom:0,bmax:0,kind:'flame',rec:24},
+  javelin:{n:'Javelot de chasse',mag:2,cd:.3,reload:1.5,sp:1150,life:.7,dmg:6.2,kb:380,col:'#f1f5f9',pel:1,spread:0,bloom:0,bmax:0,pierce:true,rec:140},
+  flarebow:{n:'Arc incendiaire',mag:3,cd:.35,reload:1.9,sp:640,life:1,dmg:3.2,kb:60,col:'#fb923c',pel:1,spread:.02,bloom:0,bmax:0,kind:'flame',rec:24},
   flame:{n:'Torche cracheuse',mag:70,cd:.07,reload:2.6,sp:390,life:.32,dmg:1.1,kb:25,col:'#fb923c',pel:1,spread:.17,bloom:0,bmax:0,kind:'flame',rec:4}
 };
 const isGun=id=>!!GUNS[id];

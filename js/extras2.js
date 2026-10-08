@@ -57,9 +57,9 @@ function actBoat(){ // touche E : monter / descendre (sinon : boutique)
 
 /* ---------- objets rigolos ---------- */
 Object.assign(GUNS,{
-  pogo:{n:'Canon à ressort',mag:4,cd:.5,reload:1.8,sp:700,life:.7,dmg:1,kb:320,lift:520,col:'#f472b6',pel:1,spread:.02,bloom:0,bmax:0,rec:60},
+  pogo:{n:'Canon à ressort',mag:4,cd:.5,reload:1.8,sp:700,life:.7,dmg:2.5,kb:320,lift:520,col:'#f472b6',pel:1,spread:.02,bloom:0,bmax:0,rec:60},
   popcorn:{n:'Canon à pop-corn',mag:20,cd:.18,reload:1.8,sp:520,life:.45,dmg:.7,kb:90,col:'#fff3c4',pel:5,spread:.4,bloom:0,bmax:0,rec:30},
-  rubberchicken:{n:'Poulet en caoutchouc',mag:1,cd:.1,reload:1.4,sp:520,life:1.4,dmg:2.5,kb:520,col:'#fde047',pel:1,spread:0,bloom:0,bmax:0,kind:'boomerang',pierce:true,rec:0}
+  rubberchicken:{n:'Poulet en caoutchouc',mag:1,cd:.1,reload:1.4,sp:520,life:1.4,dmg:5,kb:520,col:'#fde047',pel:1,spread:0,bloom:0,bmax:0,kind:'boomerang',pierce:true,rec:0}
 });
 const NEW2=[
   {id:'boat',n:'Barque',ico:'⛵',col:'#b98a52'},{id:'bananarow',n:'Tapis de bananes',ico:'🍌',col:'#fde047'},{id:'pogo',n:'Canon à ressort',ico:'🪀',col:'#f472b6'},

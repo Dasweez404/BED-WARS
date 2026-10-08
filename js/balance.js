@@ -14,7 +14,7 @@
     sniper:{gold:2},rocket:{gold:3},gatling:{gold:3},meteor:{gold:3},spy:{gold:3},r_parrot:{gold:4},storm:{gold:4},
     blood:{gold:3},frost:{gold:2},flame:{gold:2},raid:{gold:2},r_fang:{gold:3},
     shield:14,wallgad:6,
-    gun:8,bow:7
+    gun:8,bow:7,pogo:8,rubberchicken:9,boomerang:10,ice:10,flarebow:12
   };
   let n=0;
   for(const it of SHOP){

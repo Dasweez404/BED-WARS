@@ -54,7 +54,7 @@ let rafts2=[], wreck=[]; // radeaux-bombes, tuiles détruites récemment (pour l
       case 'fishrod':{ const [tx,ty]=aimPoint(e,wx,wy,10*T), foe=nearestFoe(e,tx,ty,2.6*T);
         if(foe&&Math.hypot(foe.x-e.x,foe.y-e.y)<=11*T){ const order=['diamond','gold','silver','bronze'], k=order.find(q=>foe.res[q]>0), dd=Math.hypot(foe.x-e.x,foe.y-e.y)||1;
           foe.vx+=(e.x-foe.x)/dd*900; foe.vy+=(e.y-foe.y)/dd*900; foe.root=Math.max(foe.root,.6); foe.lastBy=e; foe.lastByT=5; // prise comme au lasso : l'ennemi est tiré vers toi
-          if(k){ const cap={bronze:24,silver:9,gold:3,diamond:2}[k], n=Math.max(1,Math.min(cap,Math.ceil(foe.res[k]*.4))); foe.res[k]-=n; e.res[k]+=n; floatTxt(e.x,e.y-44,`🎣 +${n} ${RESNAME[k]}`,RESCOL[k],16); }
+          if(k){ const cap={bronze:12,silver:5,gold:2,diamond:1}[k], n=Math.max(1,Math.min(cap,Math.ceil(foe.res[k]*.25))); foe.res[k]-=n; e.res[k]+=n; floatTxt(e.x,e.y-44,`🎣 +${n} ${RESNAME[k]}`,RESCOL[k],16); }
           floatTxt(foe.x,foe.y-40,'ACCROCHÉ !','#fca5a5',15); for(let q=0;q<10;q++) parts.push({x:e.x+(foe.x-e.x)*q/10,y:e.y+(foe.y-e.y)*q/10,z:20,vx:0,vy:0,vz:0,life:.3,max:.3,col:'#e0f2fe',size:2.5}); sfx('coin',e.x,e.y); return true; }
         const x=Math.floor(tx/T), y=Math.floor(ty/T); if(fl(x,y)>0){ floatTxt(e.x,e.y-34,'Rien à pêcher ici : vise un ennemi ou la mer','#fde68a',13); return false; }
         splash(tx,ty); ring(tx,ty,T*1.2,'#bae6fd',.8); floatTxt(tx,ty-30,'🎣 …','#bae6fd',16);
@@ -73,18 +73,18 @@ let rafts2=[], wreck=[]; // radeaux-bombes, tuiles détruites récemment (pour l
     return _u(e,id,wx,wy,ax,ay);
   };
 }
-function fishCatch(e,x,y){
+function fishCatch(e,x,y){ // prises plus modestes : la canne est réutilisable
   const r=Math.random()*100; let t=0; const roll=w=>(t+=w,r<t);
-  if(roll(22)){ const n=Math.round(rnd(20,38)); e.res.bronze+=n; floatTxt(e.x,e.y-44,`🎣 +${n} Bronze`,RESCOL.bronze,16); }
-  else if(roll(18)){ const n=Math.round(rnd(7,13)); e.res.silver+=n; floatTxt(e.x,e.y-44,`🎣 +${n} Argent`,RESCOL.silver,16); }
-  else if(roll(10)){ const n=Math.round(rnd(2,3)); e.res.gold+=n; floatTxt(e.x,e.y-44,`🎣 +${n} Or`,RESCOL.gold,17); }
-  else if(roll(5)){ e.res.diamond+=1; floatTxt(e.x,e.y-44,'🎣 +1 Diamant !','#22d3ee',18); announce('💎 UN DIAMANT AU BOUT DE LA LIGNE !','#67e8f9'); }
-  else if(roll(13)){ floatTxt(e.x,e.y-44,'🎣 Une vieille botte…','#cbd5e1',15); }
-  else if(roll(8)){ e.hp=Math.min(maxhp(e),e.hp+9); floatTxt(e.x,e.y-44,'🎣 Bouteille de rhum ! +9 ♥','#4ade80',16); }
+  if(roll(30)){ const n=Math.round(rnd(10,20)); e.res.bronze+=n; floatTxt(e.x,e.y-44,`🎣 +${n} Bronze`,RESCOL.bronze,16); }
+  else if(roll(22)){ const n=Math.round(rnd(3,6)); e.res.silver+=n; floatTxt(e.x,e.y-44,`🎣 +${n} Argent`,RESCOL.silver,16); }
+  else if(roll(6)){ const n=Math.round(rnd(1,2)); e.res.gold+=n; floatTxt(e.x,e.y-44,`🎣 +${n} Or`,RESCOL.gold,17); }
+  else if(roll(2)){ e.res.diamond+=1; floatTxt(e.x,e.y-44,'🎣 +1 Diamant !','#22d3ee',18); announce('💎 UN DIAMANT AU BOUT DE LA LIGNE !','#67e8f9'); }
+  else if(roll(17)){ floatTxt(e.x,e.y-44,'🎣 Une vieille botte…','#cbd5e1',15); }
+  else if(roll(9)){ e.hp=Math.min(maxhp(e),e.hp+4); floatTxt(e.x,e.y-44,'🎣 Bouteille de rhum ! +4 ♥','#4ade80',16); }
   else if(roll(8)){ hurt(e,2,null,0,0); floatTxt(e.x,e.y-44,'🎣 UN CRABE ! Aïe !','#fca5a5',16); burst(e.x,e.y,'#f87171',8,120,.4,3); }
-  else if(roll(6)){ sharks.push({x,y,ang:rnd(0,6.28),team:e.team,owner:e,t:14,cd:.8,wp:null,bite:0,ph:0}); floatTxt(x,y-34,'🦈 Un requin mord à l\'hameçon !','#93c5fd',16); announce('🦈 UN REQUIN ALLIÉ !','#93c5fd'); }
-  else if(roll(6)){ const ids=[...BOT_USES].filter(k=>ITEMMAP[k]&&SHOPMAP[k]&&!PERM[k]&&!RELICS[k]); const g=ids[Math.floor(Math.random()*ids.length)]; e.am[g]=(e.am[g]||0)+1; floatTxt(e.x,e.y-44,`🎣 ${ITEMMAP[g].ico} ${ITEMMAP[g].n} !`,'#fde68a',16); msg(`🎣 ${e.name} pêche : ${ITEMMAP[g].n}`,'#fde68a'); }
-  else { const pool=Object.keys(RELICS).filter(k=>!RELICS[k].lose&&!(e.relics&&e.relics[k])); if(pool.length){ const k=pool[Math.floor(Math.random()*pool.length)]; e.relics[k]=true; announce(`${RELICS[k].ico} UNE RELIQUE DANS LES FILETS !`,'#fde68a'); msg(`${RELICS[k].ico} ${e.name} repêche ${RELICS[k].n} !`,'#fde68a'); } else { e.res.gold+=2; floatTxt(e.x,e.y-44,'🎣 +2 Or','#fbbf24',16); } }
+  else if(roll(3)){ sharks.push({x,y,ang:rnd(0,6.28),team:e.team,owner:e,t:10,cd:.8,wp:null,bite:0,ph:0}); floatTxt(x,y-34,'🦈 Un requin mord à l\'hameçon !','#93c5fd',16); announce('🦈 UN REQUIN ALLIÉ !','#93c5fd'); }
+  else if(roll(2)){ const ids=[...BOT_USES].filter(k=>ITEMMAP[k]&&SHOPMAP[k]&&!PERM[k]&&!RELICS[k]); const g=ids[Math.floor(Math.random()*ids.length)]; e.am[g]=(e.am[g]||0)+1; floatTxt(e.x,e.y-44,`🎣 ${ITEMMAP[g].ico} ${ITEMMAP[g].n} !`,'#fde68a',16); msg(`🎣 ${e.name} pêche : ${ITEMMAP[g].n}`,'#fde68a'); }
+  else { floatTxt(e.x,e.y-44,'🎣 Rien ne mord…','#cbd5e1',14); }
   splash(x,y); sfx('splash',x,y);
 }
 /* ---------- boucle : pièges, brume, aimant, radeaux, radar, marques ---------- */
@@ -162,3 +162,10 @@ const raftM=new Map();
     return _bg(b,foe,fd,nearCore,r,dt); };
   if(typeof BOT_USES!=='undefined') for(const k of ['anchortrap','fishrod','mistbell','repairhammer','bombraft']) BOT_USES.add(k);
 }
+
+/* ---------- canne à pêche : objet permanent (recharge 12 s), butin plus modeste ---------- */
+{ PERM.fishrod=PERM_DEF.fishrod={cd:12,keep:true,cost:{silver:16}};
+  const it=SHOPMAP.fishrod; if(it){ it.cat='Outils';
+    it.info=e=>e.own.fishrod?{name:'Canne à pêche',desc:'Déjà possédée (permanente)',cost:{},ok:false,tag:'PERMANENT'}:{name:'Canne à pêche (permanente)',desc:'Réutilisable (recharge 12 s). Sur un ennemi : il est tiré vers toi et tu lui voles un peu de ressources ; dans l\'eau : une petite prise (butin modeste, botte, crabe, requin allié…).',cost:{silver:16}};
+    it.buy=e=>{ e.own.fishrod=true; if(e.isBot) e.am.fishrod=99; }; }
+  TIPS2.fishrod='Lance la ligne (recharge 12 s) : accroche un ennemi (tiré vers toi + petit butin) ou pêche dans l\'eau'; }
