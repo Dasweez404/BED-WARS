@@ -80,4 +80,4 @@ function swordTrail(e,col){
   updateCamera=function(dt){ _cam(dt); if(game.state==='menu'||!player) return; const sp=Math.hypot(player.vx||0,player.vy||0), tgt=player.pilot?11:Math.min(5,Math.max(0,(sp-250)/90)); J2.fovAdd+=(tgt-J2.fovAdd)*Math.min(1,dt*4); if(J2.fovAdd>.05){ camera3.fov+=J2.fovAdd; camera3.updateProjectionMatrix(); } };
 }
 /* ---------- arrivée d'un boss : caméra braquée dessus ---------- */
-if(typeof bossStart==='function'){ const _bs=bossStart; bossStart=function(){ const was=BOSS.on; _bs(); if(!was&&BOSS.on&&typeof camFocusOn==='function'){ camFocusOn(BOSS.x,BOSS.y,2.6,1.25); if(!NETON) JUICE.slow=Math.max(JUICE.slow,.8); J2.punch=1; } }; }
+if(typeof bossStart==='function'){ const _bs=bossStart; bossStart=function(){ const was=BOSS.on; _bs(); if(!was&&BOSS.on){ if(!NETON) JUICE.slow=Math.max(JUICE.slow,.8); J2.punch=1; } }; }
