@@ -55,9 +55,12 @@ function bossHit(dmg,src){
 function bossDie(){
   BOSS.on=false; const x=BOSS.x,y=BOSS.y; BOSS.next=game.t+210*bossK(); for(let k=0;k<4;k++) ring(x,y,T*(2+k*1.3),'#a78bfa',.5+k*.2,k<1); burst(x,y,'#c4b5fd',50,320,1,5); chunks(x,y,'#6d28d9',14); sfx('boom',x,y); JUICE.kick(1); flashScreen('#ddd6fe',.4);
   const rank=Object.entries(BOSS.dmg).sort((a,b)=>b[1]-a[1]); announce(BOSSES[BOSS.kind].ico+' '+BOSSES[BOSS.kind].n+' VAINCU !','#c4b5fd');
-  rank.forEach(([t,d],i)=>{ if(d<8) return; const team=+t; const mem=TD[team].members.filter(m=>m.alive||!m.elim);
-    for(const m of mem){ if(i===0){ m.res.diamond+=4; m.res.gold+=3; } else { m.res.gold+=1; m.res.silver+=15; } if(m.alive) floatTxt(m.x,m.y-46,i===0?'+5 diamants +5 or':'+2 or','#fde68a',16); }
-    if(i===0){ const pool=Object.keys(RELICS).filter(k=>!RELICS[k].lose); const lead=TD[team].ent; const free=pool.filter(k=>!(lead.relics&&lead.relics[k])); if(free.length){ const r=free[Math.floor(Math.random()*free.length)]; lead.relics[r]=true; msg(`${RELICS[r].ico} ${lead.name} reçoit ${RELICS[r].n} !`,'#fde68a'); } msg(`${BOSSES[BOSS.kind].ico} Les ${TD[team].name} ont terrassé le boss (${Math.round(d)} dégâts) !`,TD[team].light); }
+  const tot=rank.reduce((s,[,d])=>s+(d>=8?d:0),0)||1; // récompense partagée selon les dégâts infligés au boss
+  rank.forEach(([t,d],i)=>{ if(d<8) return; const team=+t, share=d/tot; const mem=TD[team].members.filter(m=>m.alive||!m.elim);
+    const dia=Math.round(share*6), gold=Math.max(1,Math.round(share*7)), sil=Math.round(share*30);
+    for(const m of mem){ m.res.diamond+=dia; m.res.gold+=gold; m.res.silver+=sil; if(m.alive) floatTxt(m.x,m.y-46,`+${dia?dia+'💎 ':''}${gold} or (${Math.round(share*100)} %)`,'#fde68a',16); }
+    if(i===0){ const pool=Object.keys(RELICS).filter(k=>!RELICS[k].lose); const lead=TD[team].ent; const free=pool.filter(k=>!(lead.relics&&lead.relics[k])); if(free.length){ const r=free[Math.floor(Math.random()*free.length)]; lead.relics[r]=true; msg(`${RELICS[r].ico} ${lead.name} reçoit ${RELICS[r].n} !`,'#fde68a'); } }
+    msg(`${BOSSES[BOSS.kind].ico} Les ${TD[team].name} : ${Math.round(d)} dégâts au boss → ${Math.round(share*100)} % du butin`,TD[team].light);
   });
   BOSS.dmg={};
 }

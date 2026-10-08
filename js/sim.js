@@ -1499,7 +1499,7 @@ function botThink(b,dt){
   botJumpEnv(b,dt);
   const coreX=(tm.bx+.5)*T,coreY=(tm.by+.5)*T;
   let foe=null,fd=1e9,fdk=1e9;
-  for(const o of ents){ if(!o.alive||o.team===b.team) continue; let d=dist(b,o); if(o.cloak>0&&d>3*T) continue; const dk=(player&&o.team===player.team&&!game.tut)?1.35:1; /* les bots s'attaquent aussi entre eux */ if(d*dk<fdk){fdk=d*dk;fd=d;foe=o;} }
+  for(const o of ents){ if(!o.alive||o.team===b.team) continue; let d=dist(b,o); if(o.cloak>0&&d>3*T) continue; const dk=((player&&o.team===player.team&&!game.tut)?1.35:1)*(o.bounty>0?.7:1); /* les bots s'attaquent aussi entre eux */ if(d*dk<fdk){fdk=d*dk;fd=d;foe=o;} }
   const nearCore=foe&&Math.hypot(foe.x-coreX,foe.y-coreY)<8*T;
   if(foe&&fd<(nearCore?D.engage*1.8:D.engage)*T){
     if(ai.foe!==foe){ai.foe=foe;ai.react=D.react;}
