@@ -1,6 +1,7 @@
 'use strict';
 /* =====================  MODE FPS (touche P)  =====================
    Vue à la première personne : souris = regard (pointer lock), ZQSD relatif au regard, la visée part du viseur central. */
+const fpsActive=()=>FPS.on&&game.state==='play'&&player&&player.alive;
 const FPS={on:false,yaw:0,pitch:0,fov:76,eye:1.55,sens:.0026};
 function fpsToggle(on){
   FPS.on=on===undefined?!FPS.on:on; if(FPS.on&&player){ FPS.yaw=player.ang||0; FPS.pitch=-.12; }
@@ -13,8 +14,13 @@ addEventListener('keydown',ev=>{ if(ev.repeat||ev.key.toLowerCase()!=='p'||game.
 addEventListener('mousemove',ev=>{ if(!FPS.on||document.pointerLockElement==null||shopOpen||game.paused) return;
   FPS.yaw+=ev.movementX*FPS.sens; FPS.pitch=Math.max(-1.25,Math.min(1.1,FPS.pitch-ev.movementY*FPS.sens)); });
 addEventListener('mousedown',ev=>{ if(FPS.on&&document.pointerLockElement==null&&!shopOpen&&!game.paused&&game.state==='play'&&ev.target&&ev.target.id==='ui'){ try{ ev.target.requestPointerLock(); }catch(e){} } });
+/* souris verrouillée : le curseur est figé, donc le clic gauche tire (viseur) et le clic droit change de bloc, sans passer par la détection de la barre d'objets */
+addEventListener('mousedown',ev=>{ if(!fpsActive()||document.pointerLockElement==null||shopOpen||game.paused) return;
+  ev.stopImmediatePropagation(); ev.preventDefault(); mouse.x=VW/2; mouse.y=VH/2;
+  if(ev.button===2) actCycle(); else if(ev.button===0){ mouse.down=true; mouse.clicked=true; } },true);
+addEventListener('wheel',ev=>{ if(!fpsActive()||document.pointerLockElement==null||shopOpen||game.paused) return; ev.preventDefault(); const l=hotList(player); if(!l.length) return;
+  let i=Math.max(0,l.findIndex(it=>it.id===selId)); i=(i+(ev.deltaY>0?1:-1)+l.length)%l.length; setSel(l[i].id); ev.stopImmediatePropagation(); },{capture:true,passive:false});
 addEventListener('pointerlockchange',()=>{ if(document.pointerLockElement==null&&FPS.on&&!shopOpen&&game.state==='play'&&!game.paused){ /* Échap : le navigateur libère la souris */ } });
-const fpsActive=()=>FPS.on&&game.state==='play'&&player&&player.alive;
 { const _c=updateCamera;
   updateCamera=function(dt){ _c(dt); if(!fpsActive()){ if(camera3&&Math.abs(camera3.fov-(FPS.on?FPS.fov:46))>.1){ camera3.fov=FPS.on?FPS.fov:46; camera3.updateProjectionMatrix(); } if(!FPS.on||game.state!=='play') return; return; }
     if(Math.abs(camera3.fov-FPS.fov)>.1){ camera3.fov=FPS.fov; camera3.updateProjectionMatrix(); }
