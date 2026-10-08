@@ -109,3 +109,8 @@ const barrelM=new Map();
     if(has('barrel')&&fd>3*T&&fd<10*T&&r<dt*.6) return useGadget(b,'barrel',foe.x,foe.y);
     return _bg(b,foe,fd,nearCore,r,dt); };
 }
+
+/* ---------- Canon d'embarquement = la rampe à fusées (boulet téléguidé, ou on monte dedans) ---------- */
+{ const it=ITEMMAP.rocketpilot; it.n='Canon d\'embarquement'; it.ico='🚀';
+  TIPS2.rocketpilot='E : monter dans le canon · clic gauche : boulet téléguidé (souris = cap, Z/S = vitesse : plus vite = plus de dégâts mais moins maniable) · clic droit : tu montes dedans et tu atterris avec une légère explosion';
+  const s=SHOPMAP.rocketpilot; if(s){ const o=s.info; s.info=function(e){ const r=o.call(this,e); return Object.assign({},r,{name:'Canon d\'embarquement ×1',desc:'Pose un canon sur ton île : E pour t\'y mettre. Clic gauche : boulet de canon téléguidé (souris = cap, Z/S = vitesse, clic = exploser) : plus il va vite, plus il fait mal mais moins il tourne. Clic droit : tu montes dedans et tu atterris avec une légère explosion. 3 boulets, recharge 6 s.'}); }; } }

@@ -75,7 +75,8 @@ function pilotInput(o){
   return o.inp?{ix:o.inp.ix||0,iy:o.inp.iy||0}:{ix:0,iy:0};
 }
 function missileBoom(m){
-  const o=m.owner; MIS=MIS.filter(q=>q!==m); explode({x:m.x,y:m.y,team:m.team,owner:o,kind:'bomb',R:2.9*T,dm:16,bd:1.4}); ring(m.x,m.y,T*3.2,'#fb7185',.5,true); ring(m.x,m.y,T*2,'#fff',.35); burst(m.x,m.y,'#fb923c',30,300,.7,5); smoke(m.x,m.y,10,14,1.2); sfx('boom',m.x,m.y);
+  const o=m.owner; MIS=MIS.filter(q=>q!==m); const sp=clamp(((m.spd||300)-130)/430,0,1), lt=m.ride?.55:1, R=(2.2+1.1*sp)*T*(m.ride?.75:1), dm=(8+14*sp)*lt; // vite = dégâts ; embarqué = légère explosion
+  explode({x:m.x,y:m.y,team:m.team,owner:o,kind:'bomb',R,dm,bd:1.4*(.6+.8*sp)}); ring(m.x,m.y,R*1.1,'#fb7185',.5,true); ring(m.x,m.y,R*.7,'#fff',.35); burst(m.x,m.y,'#fb923c',Math.round(14+22*sp*lt),300,.7,5); smoke(m.x,m.y,10,14,1.2); sfx('boom',m.x,m.y);
   if(o){ o.pilot=0; if(m.ride){ o.z=34; o.vz=0; o.glide=Math.max(o.glide||0,2.8); o.inv=Math.max(o.inv,.7); o.grace=Math.max(o.grace,.9); o.tkH=groundH(o); o.squash=.4; ring(o.x,o.y,T*1.6,'#fff',.5,true); burst(o.x,o.y,'#fecdd3',14,160,.6,3); floatTxt(o.x,o.y-48,'ATTERRISSAGE !','#fda4af',16); } if(o===player){ flashScreen('#fff',.35); JUICE.kick(.9); } }
 }
 function rocketRemote(e,wx,wy,from){
@@ -113,7 +114,7 @@ function placeRamp(e,wx,wy){
       const o=m.owner; if(!o||!o.alive||game.state!=='play'){ MIS=MIS.filter(q=>q!==m); if(o){ o.pilot=0; if(!o.alive){ smoke(m.x,m.y,8,10,.8); burst(m.x,m.y,'#9ca3af',12,160,.6,3); floatTxt(m.x,m.y-30,'Pilote touché : la fusée s\'écrase','#fecaca',14); } } continue; }
       m.t+=dt; let wx=aim.x, wy=aim.y, click=!!o.pClick; o.pClick=0; if(o===player){ click=click||mouse.clicked; } else if(o.inp){ wx=o.inp.wx; wy=o.inp.wy; }
       const pin=pilotInput(o); let da=Math.atan2(wy-m.y,wx-m.x)-m.a; while(da>Math.PI) da-=6.283; while(da<-Math.PI) da+=6.283;
-      m.a+=clamp(da,-4.6*dt,4.6*dt)+pin.ix*2.2*dt; // la souris donne le cap, Q/D l'affine
+      const spf=clamp((m.spd-130)/430,0,1), tr=4.8-3.4*spf; m.a+=clamp(da,-tr*dt,tr*dt)+pin.ix*(2.4-1.5*spf)*dt; // la souris donne le cap, Q/D l'affine ; plus on va vite, moins on tourne
       const want=pin.iy<-.3?560:pin.iy>.3?130:300; m.spd+=clamp(want-m.spd,-520*dt,420*dt); const nx=m.x+Math.cos(m.a)*m.spd*dt, ny=m.y+Math.sin(m.a)*m.spd*dt;
       o.ix=o.iy=0; if(m.ride){ o.x=m.x; o.y=m.y; o.z=26; o.vz=0; o.vx=o.vy=0; o.grace=Math.max(o.grace,.5); o.ang=m.a; }
       for(let k=0;k<2;k++) parts.push({x:m.x-Math.cos(m.a)*10,y:m.y-Math.sin(m.a)*10,z:22,vx:rnd(-20,20),vy:rnd(-20,20),vz:rnd(0,30),life:.5,max:.5,col:k?'#fb923c':'#e5e7eb',size:k?4:6,smoke:!k});
