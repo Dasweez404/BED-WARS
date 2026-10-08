@@ -1,24 +1,6 @@
 'use strict';
-/* =====================  DÉTAILS 3D (2) : pirates, galion, coffres, barques, canons, pièges, mouettes  ===================== */
-/* ---------- pirates : grands yeux, nez, bouche, joues, boucle d'oreille ; ceinture, boucle, boutons, écharpe ; mains ; plume au chapeau ---------- */
-{ const _bp=buildPirateGeos;
-  buildPirateGeos=function(){ _bp(); const B=GEO.box;
-    PG.eye=mergeParts([{geo:B,pos:[0,0,0],scale:[.03,.13,.11],color:'#ffffff'},{geo:B,pos:[.012,-.01,0],scale:[.03,.085,.07],color:'#15121a'},{geo:B,pos:[.025,.02,.02],scale:[.02,.025,.025],color:'#ffffff'}]); };
-  const _hg=headGeo;
-  headGeo=function(l,td){ const key='H2'+lookKey(l)+td.col; if(PG[key]) return PG[key]; const base=_hg(l,td), B=GEO.box;
-    const P=[{geo:base,pos:[0,0,0]},{geo:B,pos:[.425,-.05,0],scale:[.08,.1,.09],color:td.dark},{geo:B,pos:[.415,-.21,0],scale:[.02,.045,.22],color:'#3b1d1d'},{geo:B,pos:[.418,-.195,.0],scale:[.02,.02,.16],color:'#ffffff'}];
-    for(const z of [-1,1]) P.push({geo:B,pos:[.413,-.09,z*.27],scale:[.01,.06,.1],color:'#f9a8d4'});
-    P.push({geo:GEO.torus,pos:[0,-.26,.42],scale:[.05,.05,.05],rot:[0,0,0],color:'#fbbf24'});
-    return PG[key]=mergeParts(P); };
-  const _pv=pirateVariant;
-  pirateVariant=function(td,neutral,look){ const l=lookOf(look), key='V2'+(neutral?'n':'t')+td.col+'|'+lookKey(l); if(PG[key]) return PG[key]; const v0=_pv(td,neutral,look), B=GEO.box, skin=SKINS[l.skin]||'#f5c08f';
-    const v={}; for(const k in v0) v[k]=v0[k];
-    v.body=mergeParts([{geo:v0.body,pos:[0,0,0]},{geo:B,pos:[0,.16,0],scale:[.48,.06,.4],color:'#3b2a1a'},{geo:B,pos:[.24,.16,0],scale:[.02,.07,.09],color:'#fbbf24'},{geo:B,pos:[.236,.3,0],scale:[.01,.03,.03],color:'#fbbf24'},{geo:B,pos:[.236,.4,0],scale:[.01,.03,.03],color:'#fbbf24'},
-      {geo:B,pos:[.2,.33,.1],scale:[.07,.36,.06],rot:[.6,0,0],color:td.light},{geo:B,pos:[-.22,.03,0],scale:[.06,.18,.34],color:td.dark},{geo:B,pos:[0,.51,0],scale:[.3,.05,.3],color:td.light}]);
-    v.arm=mergeParts([{geo:v0.arm,pos:[0,0,0]},{geo:B,pos:[0,-.33,0],scale:[.15,.1,.15],color:skin},{geo:B,pos:[0,-.26,0],scale:[.22,.04,.22],color:td.light}]);
-    if(l.hat===0||l.hat===1) v.hat=mergeParts([{geo:v0.hat,pos:[0,0,0]},{geo:B,pos:[.26,.17,0],scale:[.02,.09,.08],color:'#f8fafc'},{geo:B,pos:[.27,.15,0],scale:[.02,.03,.1],color:'#f8fafc'},{geo:B,pos:[-.05,.36,.2],scale:[.05,.28,.04],rot:[.5,0,-.4],color:'#fde68a'},{geo:B,pos:[-.08,.46,.27],scale:[.04,.16,.03],rot:[.7,0,-.5],color:'#f87171'}]);
-    return PG[key]=v; };
-}
+/* =====================  DÉTAILS 3D (2) : galion, coffres, barques, canons, pièges, mouettes  ===================== */
+/* (pirates : on garde leur style simple, deux petits yeux) */
 /* ---------- galion : gréement, nid-de-pie, figure de proue, cargaison, lanternes, rayons de barre ---------- */
 { const _bs=buildShip;
   buildShip=function(){ _bs(); const g=shipGroup; if(!g) return; const P=[], B=GEO.box, Cy=GEO.cyl, S=GEO.sphere0;

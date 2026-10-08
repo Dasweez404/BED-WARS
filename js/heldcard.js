@@ -16,8 +16,8 @@
     ctx.save(); ctx.setTransform(DPR,0,0,DPR,0,0);
     const w=250, x=VW-w-14; ctx.font='12px '+FONT; const lines=wrapTxt(tip,w-92).slice(0,6), st=stats(e,id), h=Math.max(92,50+lines.length*15+(st?18:0)), y=VH-h-14;
     ctx.fillStyle='rgba(15,23,42,.72)'; ctx.beginPath(); ctx.roundRect?ctx.roundRect(x,y,w,h,14):ctx.rect(x,y,w,h); ctx.fill(); ctx.strokeStyle='rgba(255,255,255,.28)'; ctx.lineWidth=1.5; ctx.stroke();
-    ctx.fillStyle='rgba(255,255,255,.08)'; ctx.fillRect(x+10,y+10,66,66);
-    ctx.textAlign='center'; ctx.font='46px '+FONT; ctx.fillStyle='#fff'; ctx.fillText(it.ico||'',x+43,y+57);
+    
+    if(typeof itemIcon==='function') ctx.drawImage(itemIcon(id,e,128),x+10,y+10,66,66); else { ctx.textAlign='center'; ctx.font='46px '+FONT; ctx.fillStyle='#fff'; ctx.fillText(it.ico||'',x+43,y+57); }
     ctx.textAlign='left'; ctx.font='bold 15px '+FONT; ctx.fillStyle='#fde68a'; ctx.fillText(name,x+86,y+25,w-96);
     ctx.font='12px '+FONT; ctx.fillStyle='#dbe7ff'; lines.forEach((l,i)=>ctx.fillText(l,x+86,y+44+i*15));
     if(st){ ctx.font='bold 11px '+FONT; ctx.fillStyle='#86efac'; ctx.fillText(st,x+86,y+48+lines.length*15,w-96); }
