@@ -51,7 +51,7 @@ function ctrSync(e,c){
   netPlayFx=function(f){ if(f[0]==='Q'){ const a=f.slice(1); if(ents[a[0]]===player) CTRL={ico:a[1],txt:a[2],prog:a[3],goal:a[4],rw:a[5],done:!!a[6]}; return; } _p(f); };
   const _h=drawHud;
   drawHud=function(){ _h(); if(game.state!=='play'||!ctx||!CTRL||!ctrOn()||!player||!player.alive) return;
-    ctx.save(); ctx.setTransform(DPR,0,0,DPR,0,0); const w=190, x=12, y=VH*.5-40, c=CTRL;
+    ctx.save(); ctx.setTransform(DPR,0,0,DPR,0,0); const w=190, x=12, y=VH-150, c=CTRL;
     ctx.fillStyle='rgba(15,23,42,.62)'; ctx.fillRect(x,y,w,44); ctx.strokeStyle=c.done?'#fde047':'rgba(255,255,255,.25)'; ctx.lineWidth=1.5; ctx.strokeRect(x,y,w,44);
     ctx.textAlign='left'; ctx.font='bold 11px '+FONT; ctx.fillStyle=c.done?'#fde047':'#fff'; ctx.fillText('📜 '+c.ico+' '+(c.done?'Contrat rempli ! '+c.rw:c.txt),x+7,y+15);
     if(!c.done){ ctx.fillStyle='rgba(255,255,255,.18)'; ctx.fillRect(x+7,y+24,w-14,7); ctx.fillStyle='#fbbf24'; ctx.fillRect(x+7,y+24,(w-14)*clamp(c.prog/c.goal,0,1),7); ctx.font='10px '+FONT; ctx.fillStyle='#cbd5e1'; ctx.fillText(c.prog+'/'+c.goal+' · récompense : '+c.rw,x+7,y+40); }

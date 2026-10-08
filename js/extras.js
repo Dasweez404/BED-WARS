@@ -138,7 +138,7 @@ const EVENTS={
   kraken:{n:'Kraken',ico:'🐙',d:'Des tentacules surgissent près des pirates.',dur:16},
   rush:{n:'Ruée vers l\'or',ico:'💰',d:'L\'or et les diamants poussent 3× plus vite.',dur:30}
 };
-const EV_FREQ=[{n:'Désactivés',v:0},{n:'Rares',v:1.7},{n:'Normaux',v:1},{n:'Fréquents',v:.55}];
+const EV_FREQ=[{n:'Désactivés',v:0},{n:'Rares',v:1.7},{n:'Normaux',v:1},{n:'Fréquents',v:.55},{n:'Très fréquents',v:.32}];
 let EV={cur:null,next:60,last:'',rush:false,fog:0,dark:0,tick:0,wind:0}, sharks=[], drops=[];
 function resetEvents(){ delayed=[]; sharks=[]; drops=[]; boats=[]; const f=EV_FREQ[game.opts.evf]||EV_FREQ[2]; EV={cur:null,next:(40+Math.random()*30)*(f.v||1),last:'',rush:false,fog:0,dark:0,tick:0,wind:0}; }
 function islandTile(){ const il=ISLANDS[Math.floor(Math.random()*ISLANDS.length)]; for(let k=0;k<12;k++){ const x=il.x+Math.floor(rnd(-il.r,il.r+1)), y=il.y+Math.floor(rnd(-il.r,il.r+1)); if(fl(x,y)>0&&!wl(x,y)) return [x,y]; } return null; }

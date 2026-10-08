@@ -4,7 +4,8 @@
    • chaque effet d'état a son habillage sur le pirate : glace (déjà là), filet, flaque collante, flammes, miroir, armure, rage, égide, bottes/rhum, parapluie, aimant */
 /* ---------- structures de base ---------- */
 const STRUCT=new Map(); // clé "équipe:nom" -> {g,lvl}
-const SLOTS={lighthouse:[-3,-3],art:[-3,3],catapult:[-4,0],shipyard:[1,-4],radar:[2,4],watch:[-2,-4]};
+const SLOTS={lighthouse:[-4,-4],art:[-4,4],catapult:[-5,0],shipyard:[0,-5],radar:[4,-4],watch:[4,4]}; // sur le pourtour de l'île, pas dans la base
+const STRFOOT=new Set(); // cases occupées par une structure : plus de blocs possibles
 function stBox(g,col,sx,sy,sz,x,y,z,opts){ const m=new THREE.Mesh(GEO.box,M(col,opts)); m.scale.set(sx,sy,sz); m.position.set(x,y,z); m.castShadow=true; g.add(m); return m; }
 function stCyl(g,col,sx,sy,sz,x,y,z,opts){ const m=new THREE.Mesh(GEO.cyl,M(col,opts)); m.scale.set(sx,sy,sz); m.position.set(x,y,z); m.castShadow=true; g.add(m); return m; }
 function stFlag(g,td,x,y,z){ const p=stCyl(g,'#5b4326',.04,.7,.04,x,y+.35,z); const f=stBox(g,td.col,.34,.2,.03,x+.19,y+.62,z); g.userData.flags=(g.userData.flags||[]); g.userData.flags.push(f); return f; }
@@ -38,14 +39,20 @@ function updStruct(key,g,td,t,lvl){
   if(u.hook) u.hook.position.y=.9+Math.sin(t*1.5)*.15;
   if(u.flags) for(const f of u.flags) f.rotation.y=Math.sin(t*3+f.position.x)*.35;
 }
+function structTile(td,key){ const d=td.dir, p=[-d[1],d[0]], s=SLOTS[key]; return [td.bx+d[0]*s[0]+p[0]*s[1], td.by+d[1]*s[0]+p[1]*s[1]]; }
+function structClear(td,key){ const [cx,cy]=structTile(td,key); let n=0;
+  for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){ const x=cx+dx,y=cy+dy; if(!inb(x,y)) continue; const i=idx(x,y);
+    if(wallT[i]&&wallT[i]!==CORE){ chunks((x+.5)*T,(y+.5)*T,blockColor(wallT[i],Math.max(0,ownW[i]))[0],6); wallT[i]=0; hpW[i]=0; ownW[i]=-1; n++; }
+    if(floorT[i]>=2){ floorT[i]=1; hpF[i]=0; ownF[i]=-1; region[i]=td.id; n++; } else if(floorT[i]===0){ floorT[i]=1; region[i]=td.id; hpF[i]=0; ownF[i]=-1; } }
+  ring((cx+.5)*T,(cy+.5)*T,T*2,'#fde68a',.7,true); burst((cx+.5)*T,(cy+.5)*T,'#fde68a',16,180,.6,4); sfx('place',(cx+.5)*T,(cy+.5)*T); shake=Math.max(shake,5); if(n&&td.id===player.team) msg(`Les travaux détruisent ${n} bloc(s) à l'emplacement de la structure.`,'#fde68a'); }
 function structSync(){
-  if(!renderer||!scene||!TD.length) return; const t=game.t;
+  if(!renderer||!scene||!TD.length) return; const t=game.t; STRFOOT.clear();
   for(const td of TD){ const u=td.ent&&td.ent.up; if(!u) continue; const d=td.dir, p=[-d[1],d[0]];
     const lv={lighthouse:u.lighthouse|0,art:u.art|0,catapult:u.catapult|0,shipyard:u.shipyard|0,radar:u.radar|0,watch:u.watch|0};
-    for(const key in SLOTS){ const k=td.id+':'+key, L=lv[key], cur=STRUCT.get(k), show=L>0&&td.coreAlive&&game.state!=='menu';
+    for(const key in SLOTS){ const k=td.id+':'+key, L=lv[key], cur=STRUCT.get(k), show=L>0&&td.coreAlive&&game.state!=='menu'&&!(typeof EG!=='undefined'&&EG.arena);
       if(cur&&(!show||cur.lvl!==L)){ scene.remove(cur.g); STRUCT.delete(k); }
-      if(show&&!STRUCT.get(k)){ const g=buildStruct(key,L,td); scene.add(g); STRUCT.set(k,{g,lvl:L}); const pop=new THREE.Vector3(); g.scale.setScalar(.01); g.userData.born=t; }
-      const e=STRUCT.get(k); if(!e) continue; const s=SLOTS[key], tx=td.bx+d[0]*s[0]+p[0]*s[1]+.5, ty=td.by+d[1]*s[0]+p[1]*s[1]+.5;
+      if(show&&!STRUCT.get(k)){ const g=buildStruct(key,L,td); scene.add(g); STRUCT.set(k,{g,lvl:L}); g.scale.setScalar(.01); g.userData.born=t; if(!NETCLIENT) structClear(td,key); }
+      const e=STRUCT.get(k); if(!e) continue; { const [fx,fy]=structTile(td,key); for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++) if(inb(fx+dx,fy+dy)) STRFOOT.add(idx(fx+dx,fy+dy)); } const s=SLOTS[key], tx=td.bx+d[0]*s[0]+p[0]*s[1]+.5, ty=td.by+d[1]*s[0]+p[1]*s[1]+.5;
       e.g.position.set(tx,.07,ty); e.g.rotation.y=-Math.atan2(d[1],d[0])+Math.PI/2*(key==='lighthouse'?0:1); const age=t-(e.g.userData.born||0); e.g.scale.setScalar(Math.min(1,.01+age*3)*(key==='lighthouse'?1:1)); updStruct(key,e.g,td,t,L); } }
   for(const [k,e] of STRUCT){ const id=+k.split(':')[0]; if(!TD[id]){ scene.remove(e.g); STRUCT.delete(k); } }
 }
@@ -91,19 +98,25 @@ function auraBuild(m){
     A.glide.visible=e.glide>0&&e.z>2; if(A.glide.visible) A.glide.rotation.y=t*.8;
   };
 }
-/* ---------- badges des capacités de base (touches T et B) + boutons tactiles ---------- */
-{ const _dh=drawHud;
-  drawHud=function(){ _dh(); if(game.state!=='play'||!ctx||!player||!player.alive) return; const e=player, list=[];
-    if((e.up.art|0)>0) list.push(['T','🎯',e.pcd.artillery||0,[40,32,25][e.up.art-1]||40,'#fb923c']);
-    if((e.up.catapult|0)>0) list.push(['B','🪨',e.pcd.catapult||0,6,'#a8a29e']);
-    if(!list.length) return; const touch=typeof TOUCH!=='undefined'&&TOUCH.on; if(touch) return;
-    ctx.save(); ctx.setTransform(DPR,0,0,DPR,0,0); list.forEach((q,i)=>{ const x=14+i*66, y=VH-86, r=26; ctx.fillStyle='rgba(15,23,42,.78)'; ctx.beginPath(); ctx.arc(x+r,y+r,r,0,6.283); ctx.fill();
-      if(q[2]>0){ ctx.fillStyle='rgba(0,0,0,.5)'; ctx.beginPath(); ctx.moveTo(x+r,y+r); ctx.arc(x+r,y+r,r,-Math.PI/2,-Math.PI/2+(q[2]/q[3])*6.283); ctx.closePath(); ctx.fill(); }
-      ctx.strokeStyle=q[2]>0?'rgba(255,255,255,.3)':q[4]; ctx.lineWidth=2.5; ctx.beginPath(); ctx.arc(x+r,y+r,r,0,6.283); ctx.stroke(); ctx.textAlign='center'; ctx.font='24px '+FONT; ctx.fillStyle='#fff'; ctx.fillText(q[1],x+r,y+r+8);
-      ctx.font='bold 11px '+FONT; ctx.fillStyle='#fde68a'; ctx.fillText(q[2]>0?Math.ceil(q[2])+'s':q[0],x+r,y+2*r+13); }); ctx.restore(); };
-  const _r=render3d; let mk=false;
-  render3d=function(dt){ _r(dt); if(!TOUCH.on||!TEL.root||!player) return;
-    if(!mk){ mk=true; const mkb=(id,ico,css,fn)=>{ const b=tmk('button','tb',TEL.root,ico); b.id=id; Object.assign(b.style,css); b.addEventListener('pointerdown',ev=>{ ev.preventDefault(); ev.stopPropagation(); fn(); }); TEL[id]=b; };
-      mkb('tbArt','🎯',{left:'12px',bottom:'92px'},()=>abilityArt(player)); mkb('tbCat','🪨',{left:'66px',bottom:'92px'},()=>abilityCat(player)); }
-    const on=game.state==='play'&&player.alive&&!isSpec(); TEL.tbArt.classList.toggle('hide',!on||!((player.up.art|0)>0)); TEL.tbCat.classList.toggle('hide',!on||!((player.up.catapult|0)>0)); };
+/* ---------- utilisation : debout sur la structure, touche E (la boutique n'est pas disponible en même temps) ---------- */
+const CAT={on:false};
+function structNear(e){ if(!e||!e.alive||e.riding||!TD[e.team]) return null; const td=TD[e.team]; if(typeof EG!=='undefined'&&EG.arena) return null;
+  for(const key of ['art','catapult']){ if(!((e.up[key]|0)>0)) continue; const [x,y]=structTile(td,key); if(Math.hypot((x+.5)*T-e.x,(y+.5)*T-e.y)<2.2*T) return key; } return null; }
+function useStruct(e,key){
+  if(key==='art'){ if(e===player&&!NETCLIENT){ if(ART.on){ ART.on=false; return true; } return abilityArt(e); } return abilityArt(e,e.inp?e.inp.wx:e.x,e.inp?e.inp.wy:e.y); }
+  if(key==='catapult'){ if(e===player&&!NETCLIENT){ CAT.on=!CAT.on; if(CAT.on) msg('🪨 Catapulte : vise et clique pour lancer · E : descendre','#d6d3d1'); return true; } return abilityCat(e,e.inp?e.inp.wx:e.x,e.inp?e.inp.wy:e.y); }
+  return false; }
+{ const _bi=boatInteract;
+  boatInteract=function(e){ if(e===player&&(ART.on||CAT.on)){ ART.on=false; CAT.on=false; return true; } const k=structNear(e); if(k) return useStruct(e,k); return _bi(e); };
+  const _ab=actBoat; actBoat=function(){ if(NETCLIENT&&player&&player.alive&&structNear(player)){ netSend({t:'act',a:'struct',k:structNear(player),x:Math.round(aim.x),y:Math.round(aim.y)}); return true; } return _ab(); };
+  const _nh=netHostData; netHostData=function(team,m){ if(m&&m.t==='act'&&m.a==='struct'){ const e=ents.find(o=>o.remote&&o.team===team); if(e&&e.alive&&NET.started&&structNear(e)===m.k) useStruct(e,m.k); return; } _nh(team,m); };
+  const _ce=controlEnt; controlEnt=function(e,dt,inp){ if(e===player&&CAT.on){ const k=structNear(e); if(!k||k!=='catapult'||!e.alive||e.frozen>0) CAT.on=false; else { e.ix=e.iy=0; e.held='sword'; if(inp.clicked) abilityCat(e,inp.wx,inp.wy); return; } } _ce(e,dt,inp); };
+  addEventListener('keydown',ev=>{ if(ev.key==='Escape') CAT.on=false; });
+  const _dh=drawHud;
+  drawHud=function(){ _dh(); if(game.state!=='play'||!ctx||!player||!player.alive||shopOpen) return; const k=structNear(player); if(!k&&!ART.on&&!CAT.on) return;
+    const touch=typeof TOUCH!=='undefined'&&TOUCH.on, cd=k==='art'?(player.pcd.artillery||0):(player.pcd.catapult||0);
+    const txt=ART.on?'':CAT.on?`🪨 Catapulte : clic pour lancer ${cd>0?'(recharge '+Math.ceil(cd)+' s)':''} · E : descendre`:`${touch?'🛒':'[E]'}  Utiliser ${k==='art'?'l\'artillerie 🎯':'la catapulte 🪨'}${cd>0?' ('+Math.ceil(cd)+' s)':''}`;
+    if(!txt) return; ctx.save(); ctx.setTransform(DPR,0,0,DPR,0,0); const pp=1+.03*Math.sin(game.t*5), w=Math.max(260,ctx.measureText(txt).width+40); ctx.translate(VW/2,VH-(touch?96:150)); ctx.scale(pp,pp); panel(-w/2,-15,w,30,15,'#fdba74'); ctx.fillStyle='#fdba74'; ctx.font='bold 15px '+FONT; ctx.textAlign='center'; ctx.fillText(txt,0,5); ctx.restore(); };
+  // pas de blocs sur l'emplacement d'une structure
+  const _pt=placeTarget; placeTarget=function(e,wx,wy){ const r=_pt(e,wx,wy); if(r&&STRFOOT.has(idx(r[0],r[1]))) return null; return r; };
 }

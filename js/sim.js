@@ -104,10 +104,10 @@ function applyClass(e){
 }
 const MODES={solo:{n:'Chacun pour soi',d:'4 équipages, 1 pirate chacun.'},trio:{n:'Équipes de 3',d:'Toi + 2 coéquipiers bots. 3 pirates par équipage (12 au total), un coffre partagé.'},duo:{n:'Équipes de 2',d:'Tu es accompagné d\'un coéquipier bot. 2 pirates par équipage, un coffre partagé.'}};
 const OPT_RES=[{n:'Lentes',v:.6},{n:'Normales',v:.9},{n:'Rapides',v:1.3}];
-const DIA_INT=[Infinity,45,26,15];
+const DIA_INT=[Infinity,38,22,13];
 const OPT_START=[{n:'Aucun',r:{}},{n:'Laboratoire (test)',r:{bronze:400,silver:200,gold:40,diamond:80}},{n:'Petit pécule',r:{bronze:40,silver:10}},{n:'Butin de départ',r:{bronze:120,silver:40,gold:6,diamond:3}}];
 const OPT_CORE=[{n:'Fragiles',v:1.3},{n:'Normaux',v:2.5},{n:'Solides',v:4},{n:'Blindés',v:6.5}];
-let game={state:'menu',diff:'normal',cls:'matelot',look:{skin:0,hat:0,hair:0,face:0,patch:1},pname:'Toi',opts:{endg:2,ctr:1,style:'3d',mode:'solo',map:'classic',res:.9,start:0,core:1,stack:3,roster:40,evf:2,ev:{coins:1,curse:1,shark:1,storm:1,volcano:1,fog:1,kraken:1,rush:1}},t:0,win:false,hurtFx:0,hitmark:0,flash:0,flashCol:'#fff'};
+let game={state:'menu',diff:'normal',cls:'matelot',look:{skin:0,hat:0,hair:0,face:0,patch:1},pname:'Toi',opts:{bossf:1,endg:2,ctr:1,style:'3d',mode:'solo',map:'classic',res:.9,start:0,core:1,stack:3,roster:40,evf:2,ev:{coins:1,curse:1,shark:1,storm:1,volcano:1,fog:1,kraken:1,rush:1}},t:0,win:false,hurtFx:0,hitmark:0,flash:0,flashCol:'#fff'};
 let player=null;
 let shake=0, banner={txt:'',col:'#fff',t:0,max:3};
 let selId='block', selAnim=0;
@@ -222,7 +222,7 @@ function newGame(){
   for(const [rx,ry] of MAP.relay) island(rx,ry,2,3,5);
   for(const [dx,dy] of MAP.dia){
     island(dx,dy,2,3,5);
-    spawners.push({x:dx,y:dy,kind:'dia',team:-1,types:{diamond:{t:0,stock:0,cap:Infinity,int:()=>32}}});
+    spawners.push({x:dx,y:dy,kind:'dia',team:-1,types:{diamond:{t:0,stock:0,cap:Infinity,int:()=>22}}});
   }
   for(const [ox,oy] of [[-2,0],[2,0],[0,-2],[0,2]])
     spawners.push({x:CX+ox,y:CY+oy,kind:'gold',team:-1,types:{gold:{t:0,stock:0,cap:Infinity,int:()=>48}}});

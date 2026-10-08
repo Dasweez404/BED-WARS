@@ -9,6 +9,8 @@ Object.assign(game.opts,{obj:0,boss:0});
 const OBJ=k=>{ const v=game.opts.obj|0; return k==='galion'?(v===1||v===3):(v===2||v===3); };
 const GAL={holder:-1,capTeam:-1,capV:0,pres:[0,0,0,0],gold:12};
 const TRE={on:false,x:0,y:0,t:0,prog:0,team:-1,next:55};
+const BOSS_FREQ=[{n:'Rares',v:2},{n:'Normaux',v:1},{n:'Fréquents',v:.55},{n:'Très fréquents',v:.35}];
+const bossK=()=>(BOSS_FREQ[game.opts.bossf===undefined?1:game.opts.bossf|0]||BOSS_FREQ[1]).v;
 const BOSS={on:false,kind:'kraken',x:0,y:0,a:0,rad:1.9*T,hp:0,max:1,cd:3,slams:[],dmg:{},next:200,ph:0,flash:0,st:'cruise',stT:0,aux:[],hitSet:null,lastKind:''};
 const BOSSES={kraken:{n:'KRAKEN GÉANT',ico:'🐙',col:'#a78bfa',txt:'Un kraken géant rôde près du galion'},mega:{n:'MÉGALODON',ico:'🦈',col:'#60a5fa',txt:'Un mégalodon charge dans les eaux : il brise les ponts !'},ghost:{n:'VAISSEAU FANTÔME',ico:'👻',col:'#5eead4',txt:'Un vaisseau fantôme bombarde les îles !'},crab:{n:'ROI CRABE',ico:'🦀',col:'#f87171',txt:'Le Roi Crabe a pris le galion !'}};
 const BOSS_KINDS=['kraken','mega','ghost','crab'];
@@ -51,7 +53,7 @@ function bossHit(dmg,src){
   if(BOSS.hp<=0) bossDie();
 }
 function bossDie(){
-  BOSS.on=false; const x=BOSS.x,y=BOSS.y; BOSS.next=game.t+210; for(let k=0;k<4;k++) ring(x,y,T*(2+k*1.3),'#a78bfa',.5+k*.2,k<1); burst(x,y,'#c4b5fd',50,320,1,5); chunks(x,y,'#6d28d9',14); sfx('boom',x,y); JUICE.kick(1); flashScreen('#ddd6fe',.4);
+  BOSS.on=false; const x=BOSS.x,y=BOSS.y; BOSS.next=game.t+210*bossK(); for(let k=0;k<4;k++) ring(x,y,T*(2+k*1.3),'#a78bfa',.5+k*.2,k<1); burst(x,y,'#c4b5fd',50,320,1,5); chunks(x,y,'#6d28d9',14); sfx('boom',x,y); JUICE.kick(1); flashScreen('#ddd6fe',.4);
   const rank=Object.entries(BOSS.dmg).sort((a,b)=>b[1]-a[1]); announce(BOSSES[BOSS.kind].ico+' '+BOSSES[BOSS.kind].n+' VAINCU !','#c4b5fd');
   rank.forEach(([t,d],i)=>{ if(d<8) return; const team=+t; const mem=TD[team].members.filter(m=>m.alive||!m.elim);
     for(const m of mem){ if(i===0){ m.res.diamond+=4; m.res.gold+=3; } else { m.res.gold+=1; m.res.silver+=15; } if(m.alive) floatTxt(m.x,m.y-46,i===0?'+5 diamants +5 or':'+2 or','#fde68a',16); }
@@ -163,7 +165,7 @@ function galUpdate(dt){
         e.am.mover=Math.max(0,(e.am.mover||1)-1); } }
   };
   const _ng=newGame;
-  newGame=function(){ _ng(); GAL.holder=-1; GAL.capTeam=-1; GAL.capV=0; GAL.gold=12; TRE.on=false; TRE.next=55; TRE.x=0; BOSS.on=false; BOSS.next=200; BOSS.slams=[]; BOSS.dmg={};
+  newGame=function(){ _ng(); GAL.holder=-1; GAL.capTeam=-1; GAL.capV=0; GAL.gold=12; TRE.on=false; TRE.next=55; TRE.x=0; BOSS.on=false; BOSS.next=200*bossK(); BOSS.slams=[]; BOSS.dmg={};
     if(OBJ('galion')) for(const sp of spawners) if(sp.kind==='base') for(const k in sp.types){ const ty=sp.types[k], f=ty.int; ty.int=()=>f()/(GAL.holder===sp.team?1.35:1); }
     const on=[]; if(OBJ('galion')) on.push('⚓ Capture du galion'); if(OBJ('treasure')) on.push('💎 Chasse au trésor'); if(game.opts.boss) on.push('🐙 Kraken géant'); if(on.length) msg('Objectifs bonus : '+on.join(' · '),'#fcd34d'); };
   const _dt=damageTile;

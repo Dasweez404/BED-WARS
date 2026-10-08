@@ -13,9 +13,9 @@ SHOP.push(
   gadItem('mirror','Miroir de brume','Pendant 6 s, un miroir t\'entoure : les balles, flèches et boulets ennemis qui te touchent sont renvoyés contre leur tireur !',{silver:16},1,'Défense'),
   gadItem('barrel','Tonneau piégé','Lance un tonneau de poudre : il roule en direction de l\'ennemi le plus proche (il te contourne mal !) et explose au contact, à un mur ou au bord de l\'île. Les tirs peuvent le faire exploser avant.',{silver:14},2,'Gadgets'),
   upItem('art','Artillerie (vue du dessus)',3,[4,6,9],[
-    'Construit une batterie d\'artillerie sur ta base. Touche T : vue du dessus, désigne une zone, clic : 5 boulets tombent du ciel. Recharge 40 s.',
+    'Construit une batterie autour de ta base (elle détruit les blocs sur son emplacement) : monte dessus (touche E) pour passer en vue du dessus, désigne une zone et clique : 5 boulets tombent du ciel. Recharge 40 s.',
     'Salve de 7 boulets, recharge 32 s.','Salve de 9 boulets, recharge 25 s.']),
-  upItem('catapult','Catapulte à blocs',1,[3],['Construit une catapulte sur ta base. Touche B : lance un bloc de pierre (en consomme 1) jusqu\'à 18 cases, dégâts énormes sur les murs. Recharge 6 s.']),
+  upItem('catapult','Catapulte à blocs',1,[3],['Construit une catapulte autour de ta base (elle détruit les blocs sur son emplacement). Monte dessus (touche E), vise et clique : un bloc de pierre (consommé) part jusqu\'à 18 cases, dégâts énormes sur les murs. Recharge 6 s.']),
   upItem('lighthouse','Phare de garde',1,[3],['Les ennemis qui approchent à 14 cases de ton coffre sont signalés à toute ton équipe (repère à l\'écran et sur la mini-carte).']),
   upItem('shipyard','Chantier naval',2,[4,6],['Toutes les 40 s, un matelot gardien réapparaît à ta base (2 gardiens maximum).','Toutes les 28 s, jusqu\'à 3 gardiens.'])
 );
@@ -35,7 +35,7 @@ function abilityArt(e,wx,wy){
   if((e.up.art|0)<1) return false;
   if(e===player&&NETCLIENT){ netSend({t:'act',a:'art',x:Math.round(aim.x),y:Math.round(aim.y)}); return true; }
   if((e.pcd.artillery||0)>0){ if(e===player) floatTxt(e.x,e.y-36,'🎯 Recharge : '+Math.ceil(e.pcd.artillery)+' s','#cbd5e1',13); return false; }
-  if(e===player&&!e.remote){ if(ART.on){ ART.on=false; return true; } ART.on=true; ART.t=0; ART.px=ART.py=0; msg('🎯 Vue du dessus : ZQSD déplace la vue · clic : tirer · T ou Échap : annuler','#fdba74'); return true; }
+  if(e===player&&!e.remote){ if(ART.on){ ART.on=false; return true; } ART.on=true; ART.t=0; ART.px=ART.py=0; msg('🎯 Vue du dessus : ZQSD déplace la vue · clic : tirer · E ou Échap : annuler','#fdba74'); return true; }
   artFire(e,wx,wy); return true; }
 function abilityCat(e,wx,wy){
   if((e.up.catapult|0)<1||e.frozen>0) return false;
@@ -60,8 +60,7 @@ function abilityCat(e,wx,wy){
         if(inp.clicked){ const tc=typeof TOUCH!=='undefined'&&TOUCH.on, tx=tc?e.x+ART.px:inp.wx, ty=tc?e.y+ART.py:inp.wy; if(!((e.pcd.artillery||0)>0)){ artFire(e,tx,ty); e.cd.gad=.5; ART.on=false; } }
         return; } }
     _ce(e,dt,inp); };
-  addEventListener('keydown',ev=>{ if(ev.key==='Escape'&&ART.on){ ART.on=false; }
-    if(game.state!=='play'||game.paused||!player||!player.alive||ev.repeat||ev.ctrlKey||ev.metaKey) return; if(ev.code==='KeyT') abilityArt(player); else if(ev.code==='KeyB') abilityCat(player); });
+  addEventListener('keydown',ev=>{ if(ev.key==='Escape'&&ART.on){ ART.on=false; } });
   const _cam=updateCamera;
   updateCamera=function(dt){ _cam(dt); if(!ART.on||game.state!=='play'||!player) return; cam3.x=player.x+ART.px; cam3.y=player.y+ART.py; const cx=cam3.x*U, cz=cam3.y*U; camera3.position.set(cx,42,cz+9); camera3.lookAt(cx,0,cz-.2); };
 }

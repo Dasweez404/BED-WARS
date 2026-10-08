@@ -71,6 +71,7 @@ const OPTDEF=[
   {k:'res',t:'Ressources',list:()=>OPT_RES.map(o=>({v:o.v,n:o.n,d:'Vitesse de production des ressources.'}))},
   {k:'start',t:'Départ',list:()=>OPT_START.map((o,i)=>({v:i,n:o.n,d:'Ressources de départ de chaque pirate.'}))},
   {k:'roster',t:'Roster',list:()=>[10,15,20,30,40,50,60,0].map(v=>({v,n:v?v+' objets':'Tous',d:'Objets disponibles en boutique : tirés au hasard à chaque partie ('+(v?v:'tous')+').'}))},
+  {k:'bossf',t:'Cadence des boss',list:()=>BOSS_FREQ.map((o,i)=>({v:i,n:o.n,d:'Temps entre deux apparitions de boss (si un boss est activé).'}))},
   {k:'evf',t:'Événements',list:()=>EV_FREQ.map((o,i)=>({v:i,n:o.n,d:'Fréquence des événements aléatoires (pluie de pièces, requin, tempête…).'}))},
   {k:'style',t:'Style',list:()=>[{v:'2d',n:'Sprites 2D',d:'Personnages, objets, herbe et mouettes dessinés en 2D (style cartoon).'},{v:'3d',n:'Cubes 3D',d:'Pirates cubiques chibi en 3D, aux couleurs de leur équipe.'}],apply:true},
   {k:'stack',t:'Hauteur max',list:()=>[1,2,3,4].map(v=>({v,n:v+(v>1?' blocs':' bloc'),d:'Nombre de blocs empilables : empile des blocs identiques sur tes murs (un mur de 2+ ne se saute plus !).'}))},

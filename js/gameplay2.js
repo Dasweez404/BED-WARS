@@ -27,9 +27,9 @@ let SIGUI=null;
 function sigGrant(e,ids){ e.sig=ids.slice(0,2); e.sigT={}; for(const id of e.sig){ e.am[id]=Math.max(1,e.am[id]||0); e.sigT[id]=0; } if(e===player&&typeof syncBar==='function') syncBar(e); }
 function sigRandom(e){ const pool=SIGS.filter(id=>ITEMMAP[id]), a=[]; while(a.length<2&&pool.length) a.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0]); sigGrant(e,a); }
 (function css(){ const st=document.createElement('style'); st.textContent=`
-  #sigs{position:fixed;left:50%;top:78px;transform:translateX(-50%);z-index:6;display:none;background:rgba(15,23,42,.88);border:2px solid #fde68a;border-radius:14px;padding:8px 10px;color:#fff6e0;font:600 12px sans-serif;text-align:center;max-width:96vw;box-sizing:border-box}
-  body.tc #sigs{top:96px}
-  #sigs .row{display:flex;gap:4px;justify-content:center;flex-wrap:nowrap;margin-top:6px}
+  #sigs{position:fixed;right:12px;top:206px;z-index:6;width:208px;display:none;background:rgba(15,23,42,.88);border:2px solid #fde68a;border-radius:14px;padding:8px 10px;color:#fff6e0;font:600 12px sans-serif;text-align:center;max-width:96vw;box-sizing:border-box}
+  body.tc #sigs{top:150px}
+  #sigs .row{display:flex;gap:4px;justify-content:center;flex-wrap:wrap;margin-top:6px}
   #sigs button{width:44px;height:48px;flex:none;border-radius:12px;border:2px solid #7a5230;background:#4a2f1b;color:#fff6e0;font-size:21px;padding:0;cursor:pointer;position:relative}
   #sigs button.on{border-color:#fde68a;background:#8a5a1f;box-shadow:0 0 10px #fde68a88}
   #sigs button small{position:absolute;bottom:1px;left:0;right:0;font-size:8px;line-height:1;color:#fde68a}
