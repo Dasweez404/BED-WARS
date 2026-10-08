@@ -54,7 +54,7 @@ function seaBuild(){
   // bouées près des îles de départ
   for(const td of TD){ for(const s of [-1,1]){ const d=td.dir, px=-d[1], py=d[0]; for(let r=10;r<=14;r++){ const x=td.bx+d[0]*r*.2+px*s*r, y=td.by+d[1]*r*.2+py*s*r; if(fl(Math.round(x),Math.round(y))===0&&fl(Math.round(x)+1,Math.round(y))===0&&fl(Math.round(x),Math.round(y)+1)===0&&inb(Math.round(x),Math.round(y))){ const m=mkBuoy(); m.position.set(x+.5,-1.1,y+.5); SEAL.g.add(m); SEAL.buoys.push({m,ph:rn()*6.28,x:(x+.5)*T,y:(y+.5)*T}); break; } } } }
   // phares sur les îlots de diamants
-  const mp=MAPS[game.opts.map]||MAPS.classic; for(const [x,y] of mp.dia){ const m=mkLighthouse(); m.position.set(x+.5-1.7,.12,y+.5-1.7); SEAL.g.add(m); SEAL.lights.push({m,ph:rn()*6.28}); }
+  const mp=MAPS[game.opts.map]||MAPS.classic; for(const [x,y] of mp.dia){ const m=mkLighthouse(); m.position.set(x-2+.5,.1,y-1+.5); SEAL.g.add(m); SEAL.lights.push({m,ph:rn()*6.28}); }
 }
 function seaFrame(dt){
   if(!SEAL.g||game.state==='menu'&&false) return; SEAL.t+=dt; const t=SEAL.t, night=1-WX.dayK, cx=cam3.x, cy=cam3.y, q=Q.level;

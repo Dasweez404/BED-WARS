@@ -59,3 +59,30 @@
       for(const z of [-.05,.05]){ const l=new THREE.Mesh(GEO.box,yl); l.scale.set(.02,.08,.02); l.position.set(-.05,-.12,z); b.add(l); }
       for(const z of [-.06,.06]){ const e=new THREE.Mesh(GEO.sphere0,new THREE.MeshBasicMaterial({color:0x111111})); e.scale.setScalar(.022); e.position.set(.36,.04,z); b.add(e); } } };
 }
+
+/* ---------- phare complet : socle rocheux, tour rayée qui s'affine, porte, hublots, galerie à balustrade, lanterne vitrée, toit, girouette ---------- */
+mkLighthouse=function(){
+  const g=new THREE.Group(), st=(c,o)=>new THREE.MeshStandardMaterial(Object.assign({color:c,flatShading:true,roughness:.8},o||{}));
+  const add=(geo,mat,x,y,z,sx,sy,sz,rx,ry,rz)=>{ const m=new THREE.Mesh(geo,mat); m.position.set(x,y,z); m.scale.set(sx,sy,sz); if(rx||ry||rz) m.rotation.set(rx||0,ry||0,rz||0); m.castShadow=true; g.add(m); return m; };
+  // socle : rochers + plinthe
+  for(const [x,z,s,c] of [[.0,.0,.9,'#7b7f88'],[.55,.3,.45,'#8d9199'],[-.5,.4,.4,'#6c7079'],[.2,-.6,.42,'#858993'],[-.4,-.4,.36,'#767b84']]) add(GEO.sphere0,st(c),x,.12,z,s,s*.45,s);
+  add(GEO.cyl,st('#a8a29e'),0,.36,0,.78,.3,.78);
+  // tour : 5 anneaux rouge/blanc qui s'affinent (jointifs, sans trou)
+  const R0=.62, R1=.4, H0=.5, SH=.62, N=5; let y=H0; const stripes=[];
+  for(let k=0;k<N;k++){ const rb=R0+(R1-R0)*(k/N), rt=R0+(R1-R0)*((k+1)/N); const geo=new THREE.CylinderGeometry(rt,rb,SH,12); const m=new THREE.Mesh(geo,st(k%2?'#dc2626':'#f8fafc')); m.position.y=y+SH/2; m.castShadow=true; g.add(m); stripes.push(m); y+=SH; }
+  const topY=y; // ~3.6
+  // porte et hublots
+  add(GEO.box,st('#5b3a1a'),0,H0+.34,R0-.02,.22,.5,.06); add(GEO.box,st('#fbbf24'),.07,H0+.34,R0+.02,.03,.03,.02);
+  for(const [k,a] of [[1,.7],[2,-.9],[3,2.2],[2,2.6]]){ const r=R0+(R1-R0)*((k+.5)/N)+.01; add(GEO.box,st('#1e3a5f',{emissive:0x274a7a,emissiveIntensity:.4}),Math.sin(a)*r,H0+SH*(k+.5),Math.cos(a)*r,.12,.2,.05,0,a,0); }
+  // galerie : plateau + balustrade
+  add(GEO.cyl,st('#475569'),0,topY+.05,0,.56,.1,.56); for(let k=0;k<12;k++){ const a=k*Math.PI/6; add(GEO.cyl,st('#cbd5e1'),Math.cos(a)*.52,topY+.22,Math.sin(a)*.52,.015,.28,.015); }
+  add(GEO.torus,st('#cbd5e1'),0,topY+.36,0,.52,.52,.5,Math.PI/2,0,0);
+  // lanterne : montants + vitrage + lampe
+  for(let k=0;k<4;k++){ const a=k*Math.PI/2+Math.PI/4; add(GEO.cyl,st('#374151'),Math.cos(a)*.3,topY+.5,Math.sin(a)*.3,.03,.8,.03); }
+  add(GEO.cyl,new THREE.MeshBasicMaterial({color:0xfde68a,transparent:true,opacity:.28,depthWrite:false}),0,topY+.5,0,.3,.8,.3);
+  const lamp=add(GEO.sphere0,new THREE.MeshBasicMaterial({color:0xfff2b0}),0,topY+.5,0,.2,.2,.2);
+  // toit, finition, girouette
+  add(GEO.cyl,st('#374151'),0,topY+.95,0,.4,.08,.4); add(GEO.cone,st('#dc2626'),0,topY+1.22,0,.42,.46,.42); add(GEO.sphere0,st('#fbbf24',{metalness:.5}),0,topY+1.5,0,.07,.07,.07); add(GEO.cyl,st('#374151'),0,topY+1.7,0,.012,.4,.012); const vane=add(GEO.box,st('#374151'),.07,topY+1.85,0,.14,.06,.01);
+  const beam=new THREE.Mesh(GEO.cone,new THREE.MeshBasicMaterial({color:0xfef3c7,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide})); beam.scale.set(1.2,7,1.2); beam.rotation.z=-Math.PI/2; beam.position.set(3.6,topY+.5,0);
+  const pv=new THREE.Group(); pv.add(beam); g.add(pv); g.userData={lamp,pv,beam,vane}; return g;
+};

@@ -85,3 +85,13 @@ function igniteTile(tx,ty,owner){ if(!inb(tx,ty)) return; const i=idx(tx,ty); if
   };
   const _n=newGame; newGame=function(){ FIRE.clear(); ICEB.clear(); comboHint={fire:false,ice:false,chain:false}; _n(); };
 }
+
+/* ---------- mode laboratoire : ressources illimitées (achats gratuits, réserves toujours pleines) ---------- */
+const labOn=()=>(game.opts.start|0)===1;
+{ const _ca=canAfford; canAfford=function(e,c){ if(labOn()&&e&&!e.isBot) return true; return _ca(e,c); };
+  const _e=updateEvents; updateEvents=function(dt){ _e(dt); if(game.state!=='play'||!labOn()) return; for(const e of ents){ if(e.isBot) continue; for(const k of ['bronze','silver','gold','diamond']) if(e.res[k]<9999) e.res[k]=9999; } }; }
+/* ---------- phares des îlots : blocs incassables et infranchissables, sur le côté de chaque îlot de diamants ---------- */
+const LH_T=9; BHP[LH_T]=1000; BCOL[LH_T]=['#e5e7eb','#9ca3af'];
+function lhTiles(){ const mp=MAPS[game.opts.map]||MAPS.classic; return mp.dia.map(([x,y])=>[x-2,y-1]); }
+{ const _dt=damageTile; damageTile=function(tx,ty,dmg,src,layer){ if(inb(tx,ty)&&wallT[idx(tx,ty)]===LH_T&&layer!==1) return; return _dt(tx,ty,dmg,src,layer); };
+  const _n=newGame; newGame=function(){ _n(); for(const [x,y] of lhTiles()){ if(!inb(x,y)) continue; const i=idx(x,y); floorT[i]=1; wallT[i]=LH_T; hpW[i]=BHP[LH_T]*8; ownW[i]=-1; hpF[i]=0; } }; }

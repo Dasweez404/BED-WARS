@@ -30,8 +30,8 @@ function buildStruct(key,lvl,td){
 }
 function updStruct(key,g,td,t,lvl){
   const u=g.userData;
-  if(u.lamp&&u.lamp.userData&&u.lamp.userData.beam){ u.lamp.userData.beam.rotation.y=t*1.4; }
-  if(u.gun){ const a=Math.atan2(CY*T-td.by*T,CX*T-td.bx*T); u.gun.rotation.y=-a+Math.sin(t*.4)*.05; }
+  if(u.lamp&&u.lamp.userData&&u.lamp.userData.pv){ const L=u.lamp.userData, night=typeof WX!=='undefined'?1-WX.dayK:0; L.pv.rotation.y=t*1.1; L.beam.material.opacity=Math.max(0,night-.1)*.18; L.lamp.material.color.set(night>.2?0xfff2b0:0xcdbb7a); if(L.vane) L.vane.rotation.y=t*.6; }
+  if(u.gun){ const o=OB(td), a=Math.atan2(CY*T-o.by*T,CX*T-o.bx*T); u.gun.rotation.y=-a+Math.sin(t*.4)*.05; }
   if(u.arm){ const cd=(td.ent.pcd&&td.ent.pcd.catapult)||0; u.arm.rotation.z=cd>.2?-.35+Math.min(1,cd/6)*.0:.55; u.arm.rotation.z=cd>0?-.3:.55+Math.sin(t*1.2)*.03; if(u.stone) u.stone.visible=cd<=0; }
   if(u.dish) u.dish.rotation.y=t*(.8+.3*lvl);
   if(u.tip) u.tip.visible=Math.floor(t*3)%2===0;
@@ -39,7 +39,8 @@ function updStruct(key,g,td,t,lvl){
   if(u.hook) u.hook.position.y=.9+Math.sin(t*1.5)*.15;
   if(u.flags) for(const f of u.flags) f.rotation.y=Math.sin(t*3+f.position.x)*.35;
 }
-function structTile(td,key){ const d=td.dir, p=[-d[1],d[0]], s=SLOTS[key]; return [td.bx+d[0]*s[0]+p[0]*s[1], td.by+d[1]*s[0]+p[1]*s[1]]; }
+const OB=td=>td.ob||(td.ob={bx:td.bx,by:td.by,dir:td.dir.slice()}); // emplacement d'origine du coffre : les structures n'en bougent pas
+function structTile(td,key){ const o=OB(td), d=o.dir, p=[-d[1],d[0]], s=SLOTS[key]; return [o.bx+d[0]*s[0]+p[0]*s[1], o.by+d[1]*s[0]+p[1]*s[1]]; }
 function structClear(td,key){ const [cx,cy]=structTile(td,key); let n=0;
   for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){ const x=cx+dx,y=cy+dy; if(!inb(x,y)) continue; const i=idx(x,y);
     if(wallT[i]&&wallT[i]!==CORE){ chunks((x+.5)*T,(y+.5)*T,blockColor(wallT[i],Math.max(0,ownW[i]))[0],6); wallT[i]=0; hpW[i]=0; ownW[i]=-1; n++; }
@@ -47,12 +48,12 @@ function structClear(td,key){ const [cx,cy]=structTile(td,key); let n=0;
   ring((cx+.5)*T,(cy+.5)*T,T*2,'#fde68a',.7,true); burst((cx+.5)*T,(cy+.5)*T,'#fde68a',16,180,.6,4); sfx('place',(cx+.5)*T,(cy+.5)*T); shake=Math.max(shake,5); if(n&&td.id===player.team) msg(`Les travaux détruisent ${n} bloc(s) à l'emplacement de la structure.`,'#fde68a'); }
 function structSync(){
   if(!renderer||!scene||!TD.length) return; const t=game.t; STRFOOT.clear();
-  for(const td of TD){ const u=td.ent&&td.ent.up; if(!u) continue; const d=td.dir, p=[-d[1],d[0]];
+  for(const td of TD){ const u=td.ent&&td.ent.up; if(!u) continue; const o0=OB(td), d=o0.dir, p=[-d[1],d[0]];
     const lv={lighthouse:u.lighthouse|0,art:u.art|0,catapult:u.catapult|0,shipyard:u.shipyard|0,radar:u.radar|0,watch:u.watch|0};
-    for(const key in SLOTS){ const k=td.id+':'+key, L=lv[key], cur=STRUCT.get(k), show=L>0&&td.coreAlive&&game.state!=='menu'&&!(typeof EG!=='undefined'&&EG.arena);
+    for(const key in SLOTS){ const k=td.id+':'+key, L=lv[key], cur=STRUCT.get(k), show=L>0&&td.coreAlive&&game.state!=='menu';
       if(cur&&(!show||cur.lvl!==L)){ scene.remove(cur.g); STRUCT.delete(k); }
       if(show&&!STRUCT.get(k)){ const g=buildStruct(key,L,td); scene.add(g); STRUCT.set(k,{g,lvl:L}); g.scale.setScalar(.01); g.userData.born=t; if(!NETCLIENT) structClear(td,key); }
-      const e=STRUCT.get(k); if(!e) continue; { const [fx,fy]=structTile(td,key); for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++) if(inb(fx+dx,fy+dy)) STRFOOT.add(idx(fx+dx,fy+dy)); } const s=SLOTS[key], tx=td.bx+d[0]*s[0]+p[0]*s[1]+.5, ty=td.by+d[1]*s[0]+p[1]*s[1]+.5;
+      const e=STRUCT.get(k); if(!e) continue; { const [fx,fy]=structTile(td,key); for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++) if(inb(fx+dx,fy+dy)) STRFOOT.add(idx(fx+dx,fy+dy)); } const s=SLOTS[key], tx=o0.bx+d[0]*s[0]+p[0]*s[1]+.5, ty=o0.by+d[1]*s[0]+p[1]*s[1]+.5;
       e.g.position.set(tx,.07,ty); e.g.rotation.y=-Math.atan2(d[1],d[0])+Math.PI/2*(key==='lighthouse'?0:1); const age=t-(e.g.userData.born||0); e.g.scale.setScalar(Math.min(1,.01+age*3)*(key==='lighthouse'?1:1)); updStruct(key,e.g,td,t,L); } }
   for(const [k,e] of STRUCT){ const id=+k.split(':')[0]; if(!TD[id]){ scene.remove(e.g); STRUCT.delete(k); } }
 }
@@ -64,6 +65,7 @@ function coreArmorSync(){ if(!renderer||!scene) return;
       if(lv>=2){ const br=new THREE.Mesh(GEO.box,M(col,{metalness:.8,roughness:.25})); br.scale.set(1.0,.1,.84); br.position.y=.28; g.add(br); } if(lv>=3){ const cr=new THREE.Mesh(GEO.octa,new THREE.MeshBasicMaterial({color:0x67e8f9})); cr.scale.setScalar(.18); cr.position.y=.72; g.add(cr); g.userData.cr=cr; }
       g.position.set(td.bx+.5,.07,td.by+.5); scene.add(g); COREARM.set(td.id,{g,lvl:lv}); }
     const c=COREARM.get(td.id); if(c&&c.g.userData.cr) c.g.userData.cr.rotation.y=game.t*2; } }
+const _ngS=newGame; newGame=function(){ _ngS(); for(const td of TD) td.ob={bx:td.bx,by:td.by,dir:td.dir.slice()}; };
 { const _oc=onNewGame; onNewGame=function(){ for(const [,e] of STRUCT) scene&&scene.remove(e.g); STRUCT.clear(); for(const [,e] of COREARM) scene&&scene.remove(e.g); COREARM.clear(); _oc(); };
   const _r=render3d; render3d=function(dt){ _r(dt); if(game.state==='menu'){ if(STRUCT.size||COREARM.size){ for(const [,e] of STRUCT) scene.remove(e.g); STRUCT.clear(); for(const [,e] of COREARM) scene.remove(e.g); COREARM.clear(); } return; } structSync(); coreArmorSync(); };
   // réseau : niveaux d'amélioration des autres équipes
