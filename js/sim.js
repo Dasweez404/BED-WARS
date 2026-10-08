@@ -735,13 +735,13 @@ function explode(b){
         damageTile(tx,ty,dmg,b.owner,0);
       } else if(floorT[i]>=2) damageTile(tx,ty,dmg,b.owner,1);
     }
-    hitGuards(b.owner,cx,cy,R,10*(b.dm||10)/10); hitBoats(cx,cy,R,b.dm||10,b.team);
+    hitGuards(b.owner,cx,cy,R,1.5*(b.dm||10)); hitBoats(cx,cy,R,1.5*(b.dm||10),b.team);
     for(const o of ents){
       if(!o.alive||(o.team===b.team&&o!==b.owner)) continue;
       const dx=o.x-cx,dy=o.y-cy,d=Math.hypot(dx,dy); if(d>R*1.25) continue;
       if(inShield(o.x,o.y,o.team)) continue;
-      const k=1-d/(R*1.3), u=d||1;
-      hurt(o,(o===b.owner?.5:1)*(b.dm||10)*k,b.owner,dx/u*520*k,dy/u*520*k);
+      const k=1-d/(R*1.7), u=d||1; // chute de dégâts plus douce avec la distance
+      hurt(o,(o===b.owner?.5:1)*(b.dm||10)*1.5*k,b.owner,dx/u*520*k,dy/u*520*k); // explosifs : +50 % de dégâts
       o.vz=Math.max(o.vz,180*k);
     }
   } else {
