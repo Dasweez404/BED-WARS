@@ -14,10 +14,12 @@ function a2waves(){
 function a2type(os,type){ if(type==='square') os.setPeriodicWave(a2waves().reed); else if(type==='sawtooth') os.setPeriodicWave(a2waves().str); else os.type=type; }
 function a2init(){
   if(A2.bus||!AC) return; A2.bus=AC.createGain(); A2.bus.gain.value=.95;
-  const comp=AC.createDynamicsCompressor(); comp.threshold.value=-16; comp.knee.value=24; comp.ratio.value=3.5; comp.attack.value=.004; comp.release.value=.2;
-  A2.rev=AC.createConvolver(); A2.rev.buffer=a2impulse(1.7,2.6); A2.send=AC.createGain(); A2.send.gain.value=.2;
-  A2.bus.connect(comp); comp.connect(AC.destination); A2.bus.connect(A2.send); A2.send.connect(A2.rev); A2.rev.connect(comp);
+  let out=AC.destination;
+  try{ const comp=AC.createDynamicsCompressor(); comp.threshold.value=-16; comp.knee.value=24; comp.ratio.value=3.5; comp.attack.value=.004; comp.release.value=.2; comp.connect(AC.destination); out=comp; }catch(e){ out=AC.destination; }
+  A2.bus.connect(out);
+  try{ A2.rev=AC.createConvolver(); A2.rev.buffer=a2impulse(1.7,2.6); A2.send=AC.createGain(); A2.send.gain.value=.2; A2.bus.connect(A2.send); A2.send.connect(A2.rev); A2.rev.connect(out); }catch(e){ A2.rev=null; }
 }
+function a2safe(f){ return function(){ try{ return f.apply(this,arguments); }catch(e){ if(!A2.err){ A2.err=1; console.warn('audio2',e); } } }; }
 /* tone / noise de sim.js : on les remplace par des versions douces et réverbérées */
 function tone(f,d,type,vol,slide,delay){
   a2init(); const t0=AC.currentTime+(delay||0), o=AC.createOscillator(), g=AC.createGain(), lp=AC.createBiquadFilter();
@@ -116,3 +118,6 @@ setInterval(()=>{
   hurt=function(e,amount,by,kx,ky){ const hp0=e.hp; _h(e,amount,by,kx,ky); if(e===player&&hp0-e.hp>.4&&AC&&AC.state==='running'&&!muted&&(A2S.ouch||0)<performance.now()){ A2S.ouch=performance.now()+260; nb(.12,.22,'lowpass',900,.8); th(200,.16,.3,.5); }
     else if(by===player&&e!==player&&hp0-e.hp>.4&&AC&&AC.state==='running'&&!muted&&(A2S.dmk||0)<performance.now()){ A2S.dmk=performance.now()+90; ping(1900,.12,.07,0,[1,2.5]); } };
 }
+
+/* filet de sécurité : une erreur de synthèse ne doit jamais couper le jeu ni la musique */
+{ const w=f=>a2safe(f); tone=w(tone); nb=w(nb); th=w(th); ping=w(ping); a2wave=w(a2wave); a2gull=w(a2gull); a2creak=w(a2creak); a2bird=w(a2bird); a2step=w(a2step); const _sp=sfxPlay2; sfxPlay2=function(n,v){ try{ return _sp(n,v); }catch(e){ return true; } }; }

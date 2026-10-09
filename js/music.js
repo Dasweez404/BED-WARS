@@ -28,7 +28,7 @@ const MUS=(()=>{
     // écho (réverbération du pauvre)
     S.send=AC.createGain(); S.send.gain.value=1; const dl=AC.createDelay(1); dl.delayTime.value=.31; const fb=AC.createGain(); fb.gain.value=.3; const df=AC.createBiquadFilter(); df.type='lowpass'; df.frequency.value=2200;
     S.send.connect(dl); dl.connect(df); df.connect(fb); fb.connect(dl); df.connect(S.bus);
-    { const cv=AC.createConvolver(); cv.buffer=a2impulse(2.4,2.3); const cg=AC.createGain(); cg.gain.value=.7; S.send.connect(cv); cv.connect(cg); cg.connect(S.bus); }
+    try{ const cv=AC.createConvolver(); cv.buffer=a2impulse(2.4,2.3); const cg=AC.createGain(); cg.gain.value=.7; S.send.connect(cv); cv.connect(cg); cg.connect(S.bus); }catch(e){}
     for(const n of LAY){ const g=AC.createGain(); g.gain.value=0; g.connect(S.bus); S.L[n]=g; }
     // ambiance : vagues, pluie, vent
     const mk=(type,f,q)=>{ const src=AC.createBufferSource(); src.buffer=noiseBuf; src.loop=true; const fl=AC.createBiquadFilter(); fl.type=type; fl.frequency.value=f; if(q) fl.Q.value=q; const g=AC.createGain(); g.gain.value=0; src.connect(fl); fl.connect(g); g.connect(AC.destination); src.start(); return {g,fl}; };
