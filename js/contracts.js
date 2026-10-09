@@ -9,7 +9,7 @@ const CT_TYPES=[
   {id:'build',ico:'🧱',mk:()=>{ const g=14+Math.floor(Math.random()*3)*4; return {goal:g,txt:'Pose '+g+' blocs'}; }},
   {id:'survive',ico:'🛡️',mk:()=>({goal:80,txt:'Reste en vie 80 secondes'})}
 ];
-const CT_REW=[{n:'+4 or',f:e=>e.res.gold+=4},{n:'+1 diamant',f:e=>e.res.diamond+=1},{n:'+24 argent',f:e=>e.res.silver+=24},{n:'+24 blocs',f:e=>e.blocks[2]=(e.blocks[2]||0)+24},{n:'+2 diamants',f:e=>e.res.diamond+=2,hard:1}];
+const CT_REW=[{n:'+1 or',f:e=>e.res.gold+=1},{n:'+10 argent',f:e=>e.res.silver+=10},{n:'+50 bronze',f:e=>e.res.bronze+=50},{n:'+12 blocs',f:e=>e.blocks[2]=(e.blocks[2]||0)+12},{n:'+1 diamant',f:e=>e.res.diamond+=1,hard:1}];
 const ctrOn=()=>game.opts.ctr===undefined?true:!!(game.opts.ctr|0);
 const sumRes=e=>e.res.bronze+e.res.silver+e.res.gold+e.res.diamond, sumBl=e=>{ let s=0; for(const k in e.blocks) s+=e.blocks[k]; return s; };
 function ctrNew(e){

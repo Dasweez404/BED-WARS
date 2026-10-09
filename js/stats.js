@@ -39,7 +39,7 @@ function drawBilan(){
 }
 /* boutons de fin (écrase ceux de social.js) */
 drawOverButtons=function(){
-  if(game.replay) return; HUDB.length=0; if(game.state!=='over') return;
+  if(game.replay) return; HUDB.length=0; if(game.state!=='over'||ovfWait()||!OVF.at) return;
   const small=VH<460, h=small?34:42, y=Math.min(VH-h-8,(BIL.y||VH*.7)+4), list=[['↩ Menu (Entrée)',()=>showMenu(),'#fde68a'],['▶ Revoir les 10 dernières s',startReplay,'#c4b5fd']];
   if(game.specOffer) list.unshift(['👁 Regarder la fin (Espace)',startSpectate,'#7dd3fc']);
   const w=Math.min(250,(VW-40)/list.length-8), tot=list.length*w+(list.length-1)*8; let x=VW/2-tot/2;
@@ -77,3 +77,24 @@ function drawReplayHud(){
 { const _ng=newGame; newGame=function(){ REP.on=false; game.replay=false; REP.frames=[]; REP.acc=0; _ng(); }; }
 addEventListener('keydown',ev=>{ if(!REP.on) return; if(ev.key==='Enter'||ev.key==='Escape'||ev.code==='Space'){ stopReplay(); ev.stopImmediatePropagation(); ev.preventDefault(); } },true);
 { const ui=document.getElementById('ui'); ui.addEventListener('mousedown',ev=>{ if(REP.on){ ev.stopImmediatePropagation(); stopReplay(); } },true); }
+
+/* ---------- fin de partie : quelques secondes de focus sur l'équipage avant l'écran de bilan ---------- */
+const OVF={at:0,conf:0};
+const ovfDelay=()=>game.win?6.5:3.5;
+const ovfWait=()=>game.state==='over'&&!game.replay&&OVF.at>0&&(performance.now()-OVF.at)/1000<ovfDelay();
+{ const _b=drawBilan;
+  drawBilan=function(){
+    if(game.replay){ _b(); return; }
+    if(!OVF.at){ OVF.at=performance.now(); OVF.conf=0; }
+    const el=(performance.now()-OVF.at)/1000, D=ovfDelay();
+    if(el<D){ // phase de focus : titre sur la scène, confettis si victoire
+      const a=Math.min(1,el/.5), small=VH<460; ctx.save(); ctx.globalAlpha=a; ctx.textAlign='center'; ctx.font=(small?'bold 44px ':'bold 72px ')+PFONT; ctx.lineWidth=7; ctx.strokeStyle='rgba(10,20,60,.9)'; const title=game.win?'VICTOIRE !':'DÉFAITE', y=small?70:110, s=1+Math.max(0,.25-el)*1.2;
+      ctx.translate(VW/2,y); ctx.scale(s,s); ctx.strokeText(title,0,0); ctx.fillStyle=game.win?'#fde68a':'#ff8a8a'; ctx.fillText(title,0,0); ctx.restore();
+      if(game.win&&player&&!NETCLIENT&&el>OVF.conf){ OVF.conf=el+.22; const cols=['#fde68a','#f87171','#60a5fa','#4ade80','#f472b6']; burst(player.x+rnd(-30,30),player.y+rnd(-30,30),cols[Math.floor(Math.random()*cols.length)],14,240,1,4); ring(player.x,player.y,T*(1.2+Math.random()),'#fde68a',.6); }
+      return; }
+    const f=Math.min(1,(el-D)/.6); ctx.save(); ctx.globalAlpha=f; _b(); ctx.restore(); };
+  { const _n=newGame; newGame=function(){ OVF.at=0; _n(); }; }
+  /* pas de retour au menu par erreur pendant le focus */
+  const block=ev=>{ if(ovfWait()){ ev.stopImmediatePropagation(); ev.preventDefault(); } };
+  addEventListener('keydown',block,true); addEventListener('mousedown',block,true); addEventListener('pointerdown',block,true);
+}

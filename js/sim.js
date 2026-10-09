@@ -342,7 +342,7 @@ function die(e,by,sea){
     if(!(game.opts&&game.opts.rkeep)) for(const k in e.res){killer.res[k]+=e.res[k]; if(killer===player&&e.res[k]>0) floatTxt(e.x,e.y-40-k.length*0,'+'+e.res[k]+' '+RESNAME[k],RESCOL[k],15);}
     msg(`${killer.name} a éliminé ${e.name}`,TEAMS[killer.team].light);
     if(killer===player){ announce('ÉLIMINATION !','#fde68a'); flashScreen('#fff',.15); }
-  } else msg(e.bossKill?`${e.name} a été écrasé par le kraken`:e.fallDeath?`${e.name} s'est écrasé au sol`:`${e.name} est tombé à la mer`,'#9aa7cf');
+  } else msg(e.zoneKill?`${e.name} a été consumé par la zone`:e.bossKill?`${e.name} a été écrasé par le kraken`:e.fallDeath?`${e.name} s'est écrasé au sol`:`${e.name} est tombé à la mer`,'#9aa7cf');
   if(e.riding){ e.riding.rider=null; e.riding=null; }
   // mort hors de sa base : on perd tout son équipement (les améliorations de base sont conservées)
   if((game.opts.loss|0)===1||((game.opts.loss|0)===0&&!nearBase(e))){
