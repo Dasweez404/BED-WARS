@@ -1,13 +1,13 @@
 'use strict';
 /* =====================  FIN DE PARTIE  =====================
    Pour que les parties ne s'éternisent pas (option « Fin de partie », par défaut : normale) :
-   ⛈ 5:00  Tempête finale : des éclairs de plus en plus fréquents, qui frappent aussi les coffres
-   🌊 6:00  Marée montante : à intervalles réguliers, une vague emporte tous les ponts et planchers posés
-   🔴 7:00  La zone rétrécit : la mer avale la carte, tout coffre hors de la zone est détruit
-   ⚔ 10:00  Arène finale : les équipages encore en lice sont téléportés avec leur coffre sur une île-arène qui s'érode */
+   ⛈ 10:00 Tempête finale : des éclairs de plus en plus fréquents, qui frappent aussi les coffres
+   🌊 12:00 Marée montante : à intervalles réguliers, une vague emporte tous les ponts et planchers posés
+   🔴 14:00 La zone rétrécit : la mer avale la carte, tout coffre hors de la zone est détruit
+   ⚔ 20:00  Arène finale : les équipages encore en lice sont téléportés avec leur coffre sur une île-arène qui s'érode */
 const EG={sc:1,zc:[50,50],arena:false,arT:0,stT:0,tideN:0,tideWarn:false,zT:0,arCurR:9,arStep:0,ac:[11,11],on:false};
 const EG_T={storm:300,tide:360,tideInt:45,zone:420,zoneDur:240,arena:600};
-const egScale=()=>[0,1.5,1,.6][game.opts.endg===undefined?2:game.opts.endg|0]||0;
+const egScale=()=>[0,3,2,1.2][game.opts.endg===undefined?2:game.opts.endg|0]||0;
 function zoneR(t){ if(!EG.sc||EG.arena) return Infinity; const t0=EG_T.zone*EG.sc, d=EG_T.zoneDur*EG.sc; if(t<t0) return Infinity; return 50+(7-50)*clamp((t-t0)/d,0,1); }
 function egKillCore(td){ if(!td.coreAlive) return; const i=idx(td.bx,td.by); if(wallT[i]===CORE) damageTile(td.bx,td.by,1e6,null,0); else td.coreAlive=false; }
 function egWipeTile(i){ floorT[i]=0; wallT[i]=0; hpF[i]=0; hpW[i]=0; ownF[i]=-1; ownW[i]=-1; }

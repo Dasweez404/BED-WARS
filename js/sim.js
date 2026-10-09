@@ -635,14 +635,14 @@ function useGadget(e,id,wx,wy){
     case 'wallgad':{ if(!placeHerse(e,wx,wy,ax,ay)) return false; break;}
     case 'storm':{
       const dx=wx-e.x,dy=wy-e.y,d=Math.hypot(dx,dy)||1,m=Math.min(d,10*T),tx=e.x+dx/d*m,ty=e.y+dy/d*m;
-      bombs.push({x:tx,y:ty,tx,ty,fuse:1,team:e.team,owner:e,kind:'bomb',R:1.7*T,dm:9,bd:.8,bolt:true,h:0}); break;}
+      ring(tx,ty,1.7*T,'#fbbf24',1.2,true); bombs.push({x:tx,y:ty,tx,ty,fuse:1.5,team:e.team,owner:e,kind:'bomb',R:1.7*T,dm:9,bd:.8,bolt:true,h:0}); break;}
     case 'cluster':{
       const dx=wx-e.x,dy=wy-e.y,d=Math.hypot(dx,dy)||1,m=Math.min(d,9*T);
       bombs.push({x:e.x,y:e.y,tx:e.x+dx/d*m,ty:e.y+dy/d*m,fuse:1.1,team:e.team,owner:e,kind:'cluster',h:20}); break;}
     case 'flag': traps.push({kind:'flag',x:e.x,y:e.y,t:1e6,hp:10,age:0,team:e.team,owner:e}); ring(e.x,e.y,T*4,'#111827',.5,true); ring(e.x,e.y,T*4,'#fde68a',.7); break;
     case 'anchor':{
       const dx=wx-e.x,dy=wy-e.y,d=Math.hypot(dx,dy)||1,m=Math.min(d,8*T);
-      bombs.push({x:e.x+dx/d*m,y:e.y+dy/d*m,tx:e.x+dx/d*m,ty:e.y+dy/d*m,fuse:.8,team:e.team,owner:e,kind:'anchor',drop:true,h:0}); break;}
+      ring(e.x+dx/d*m,e.y+dy/d*m,1.8*T,'#fbbf24',1.4,true); bombs.push({x:e.x+dx/d*m,y:e.y+dy/d*m,tx:e.x+dx/d*m,ty:e.y+dy/d*m,fuse:1.4,team:e.team,owner:e,kind:'anchor',drop:true,h:0}); break;}
     case 'kraken':{
       const dx=wx-e.x,dy=wy-e.y,d=Math.hypot(dx,dy)||1,m=Math.min(d,9*T), tx=e.x+dx/d*m, ty=e.y+dy/d*m;
       if(fl(Math.floor(tx/T),Math.floor(ty/T))===0) return false;
@@ -826,7 +826,7 @@ const SHOP=[
   gadItem('turret2','Canon givrant','Gèle brièvement les ennemis proches jusqu\'à ce qu\'il soit détruit.',{silver:16},1,'Défense'),
   gadItem('guard','Matelots mercenaires','Deux matelots mercenaires (18 PV chacun) se battent pour toi pendant 45 s.',{silver:14},1,'Défense'),
   gadItem('repair','Réparation du coffre','Répare ton coffre en 4,5 s (reste près de lui, sans te faire toucher) : jusqu\'à +35 % de sa vie.',{silver:8},1,'Défense'),
-  gadItem('vortex','Maelström','Aspire les ennemis vers son centre pendant 3,5 s.',{gold:2},1),
+  gadItem('vortex','Maelström','Aspire les ennemis vers son centre pendant 3,5 s (après un court avertissement : la zone clignote).',{gold:2},1),
   gadItem('springs','Bottes de mousse','Sauts très hauts 25 s, et l\'atterrissage fait mal.',{silver:8},1),
   gadItem('cloak','Brume magique','Toi et ton équipe devenez invisibles 7 s et courez plus vite 2,5 s : les ennemis ne vous voient plus de loin.',{silver:10},1),
   gadItem('haste','Rhum de contrebande','+50 % de vitesse pendant 8 s.',{bronze:30},1),
@@ -1134,6 +1134,11 @@ function updateHooks(dt){
 function updateTraps(dt){
   for(const t of traps){
     t.t-=dt; t.age+=dt; t.anim=Math.max(0,(t.anim||0)-dt*3);
+    if((t.kind==='vortex'||t.kind==='kraken')&&t.arm!==0){ // piège qui s'arme : on prévient quelques secondes avant qu'il agisse
+      if(t.arm===undefined){ t.arm=t.kind==='kraken'?1.5:1.3; t.warnT=0; sfx('alarm',t.x,t.y); }
+      t.arm-=dt; t.t+=dt; t.age-=dt; t.warnT-=dt;
+      if(t.warnT<=0){ t.warnT=.35; ring(t.x,t.y,(t.kind==='vortex'?5:1.9)*T,'#fbbf24',.4,true); }
+      if(t.arm<=0) t.arm=0; continue; }
     if(t.kind==='turret'){
       t.cd-=dt; let best=null,bd=7*T;
       for(const o of ents){ if(!o.alive||o.team===t.team||o.cloak>0) continue; const d=Math.hypot(o.x-t.x,o.y-t.y); if(d<bd){ const r=rayFirst(t.x,t.y,Math.atan2(o.y-t.y,o.x-t.x),d+4,t.team); if(r.kind!=='wall'){bd=d;best=o;} } }
