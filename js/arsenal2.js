@@ -17,7 +17,7 @@ SHOP.push(
     'Salve de 7 boulets, recharge 32 s.','Salve de 9 boulets, recharge 25 s.']),
   upItem('catapult','Catapulte à blocs',1,[3],['Construit une catapulte autour de ta base (elle détruit les blocs sur son emplacement). Monte dessus (touche E), vise et clique : un bloc de pierre (consommé) part jusqu\'à 18 cases, dégâts énormes sur les murs. Recharge 6 s.']),
   upItem('scope','Observatoire',1,[3],['Construit un observatoire autour de ta base : monte dessus (touche E) pour regarder partout sur la carte, déplacer la vue (ZQSD) et zoomer (molette).']),
-  upItem('lighthouse','Phare de garde',1,[3],['Les ennemis qui approchent à 14 cases de ton coffre sont signalés à toute ton équipe (repère à l\'écran et sur la mini-carte).']),
+  upItem('lighthouse','Tour de guet',1,[3],['Une tour en bois de 5,5 blocs sur ton île : debout dessus, E te téléporte tout en haut (E de nouveau pour redescendre). De là-haut tu vois bien plus loin, tes armes portent bien plus loin et tes tirs passent par-dessus les murs.']),
   upItem('shipyard','Chantier naval',2,[4,6],['Toutes les 40 s, un matelot gardien réapparaît à ta base (2 gardiens maximum).','Toutes les 28 s, jusqu\'à 3 gardiens.'])
 );
 SHOP.forEach(s=>SHOPMAP[s.id]=s);
@@ -80,8 +80,8 @@ function abilityCat(e,wx,wy){
       if(blocked||(tg&&bd<1.1*T)||r.hp<=0||r.t<=0){ r.dead=true; explode({x:r.x,y:r.y,team:r.team,owner:r.owner,kind:'bomb',R:2.1*T,dm:9,bd:1.3}); ring(r.x,r.y,T*2.2,'#f59e0b',.5,true); } }
     barrels2=barrels2.filter(r=>!r.dead);
     // phare de garde
-    for(const t of TD){ const set=[]; if(t.ent.up.lighthouse>0&&t.coreAlive){ const cx=(t.bx+.5)*T, cy=(t.by+.5)*T;
-        for(const o of ents){ if(!o.alive||o.team===t.id||o.cloak>0||Math.hypot(o.x-cx,o.y-cy)>14*T) continue; set.push(o); const l=LHSEEN.get(o); if(!l||game.t-l>14){ LHSEEN.set(o,game.t); if(t.id===player.team){ floatTxt(o.x,o.y-50,'🗼 ENNEMI !','#fca5a5',14); sfx('tick'); } } } }
+    for(const t of TD){ const set=[]; if(t.ent.up.watch>0&&t.coreAlive){ const cx=(t.bx+.5)*T, cy=(t.by+.5)*T;
+        for(const o of ents){ if(!o.alive||o.team===t.id||o.cloak>0||Math.hypot(o.x-cx,o.y-cy)>10*T) continue; set.push(o); const l=LHSEEN.get(o); if(!l||game.t-l>14){ LHSEEN.set(o,game.t); t.intr=3; if(t.id===player.team){ floatTxt(o.x,o.y-50,'🔔 INTRUS !','#fca5a5',14); announce('🔔 UN ENNEMI ENTRE DANS TA BASE !','#fca5a5'); sfx('alarm'); } } } if(t.intr>0) t.intr-=dt; }
       LHM[t.id]=set; }
     // chantier naval
     for(const t of TD){ const lv=t.ent.up.shipyard|0; if(!lv||!t.members.some(m=>m.alive)||!t.coreAlive) continue; SY[t.id]-=dt; if(SY[t.id]<=0){ SY[t.id]=[40,28][lv-1]; const max=[2,3][lv-1];

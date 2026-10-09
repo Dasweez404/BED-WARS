@@ -1037,7 +1037,7 @@ function updateProj(dt){
     const n=Math.ceil(Math.hypot(p.vx,p.vy)*dt/8);
     for(let i=0;i<n&&p.life>0;i++){
       p.x+=p.vx*dt/n; p.y+=p.vy*dt/n;
-      if(wl(Math.floor(p.x/T),Math.floor(p.y/T))>0){
+      if(wl(Math.floor(p.x/T),Math.floor(p.y/T))>0&&!(p.owner&&p.owner.tower)){ // les tirs depuis la tour de guet passent par-dessus les murs
         burst(p.x,p.y,'#ddd',3,60,.2,2);
         { // les armes à feu et flèches abîment les blocs murs (pas le coffre, pas les ponts) selon leurs dégâts
           const wx=Math.floor(p.x/T), wy=Math.floor(p.y/T), wi=idx(wx,wy);

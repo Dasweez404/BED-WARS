@@ -25,7 +25,7 @@ SHOP.push(
   gadItem('bombraft','Radeau-bombe','Pose un radeau piégé sur l\'eau : il dérive vers l\'ennemi le plus proche et explose au contact. Les tirs peuvent le détruire.',{gold:2},1,'Gadgets'),
   gadItem('repairhammer','Marteau de réparation','Rebâtit instantanément les ponts et murs de ton équipe détruits ces dernières 45 s dans 6 cases autour de toi.',{silver:14},2,'Défense'),
   upItem('radar','Totem de vigie',3,[4,6,9],['Un totem veille sur ton île : toutes les 30 s, les esprits révèlent les ennemis 3 s sur la mini-carte','Toutes les 22 s pendant 4 s','Toutes les 15 s pendant 6 s']),
-  upItem('watch','Cloche de vigie',1,[3],['Tu es prévenu quand ton coffre est attaqué (alarme, bannière, jauge de vie du coffre). Sans elle, tu ne sais jamais quand on te pille !'])
+  upItem('watch','Phare à cloche',1,[3],['Un phare avec une cloche d\'alerte : elle sonne dès qu\'un ennemi entre dans ta base (10 cases autour du coffre : alarme, repère sur l\'écran et la mini-carte) et quand ton coffre est attaqué (bannière, jauge de vie du coffre).'])
 );
 SHOP.forEach(s=>SHOPMAP[s.id]=s);
 H_THROW.push('parrotmsg','fishrod','bombraft'); H_PLACE.push('anchortrap','mistbell','repairhammer'); H_BUFF.push('magnet');

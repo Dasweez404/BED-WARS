@@ -11,7 +11,8 @@ function stCyl(g,col,sx,sy,sz,x,y,z,opts){ const m=new THREE.Mesh(GEO.cyl,M(col,
 function stFlag(g,td,x,y,z){ const p=stCyl(g,'#5b4326',.04,.7,.04,x,y+.35,z); const f=stBox(g,td.col,.34,.2,.03,x+.19,y+.62,z); g.userData.flags=(g.userData.flags||[]); g.userData.flags.push(f); return f; }
 function buildStruct(key,lvl,td){
   const g=new THREE.Group(); g.userData={};
-  if(key==='lighthouse'){ const lh=mkLighthouse(); lh.scale.setScalar(.9); g.add(lh); g.userData.lamp=lh; }
+  if(key==='watch'){ const lh=mkLighthouse(); lh.scale.setScalar(.9); g.add(lh); g.userData.lamp=lh; // phare avec cloche d'alerte
+    const pv=new THREE.Group(); pv.position.set(.62,2.55,0); g.add(pv); g.userData.bell=pv; stBox(g,'#5b3a1a',.5,.07,.12,.4,2.78,0); const bell=new THREE.Mesh(GEO.cone,M('#fbbf24',{metalness:.7,roughness:.3})); bell.scale.set(.34,.4,.34); bell.position.y=-.22; bell.rotation.x=Math.PI; pv.add(bell); stFlag(g,td,0,3.25,0); }
   else if(key==='art'){ stBox(g,'#6b4423',1.7,.22,1.5,0,.11,0); stBox(g,td.col,1.74,.05,1.54,0,.24,0);
     const gun=new THREE.Group(); gun.position.set(0,.5,0); g.add(gun); g.userData.gun=gun;
     for(let k=0;k<lvl;k++){ const z=(k-(lvl-1)/2)*.5; const b=stCyl(gun,'#374151',.2,1.5,.2,.5,0,z,{metalness:.6,roughness:.4}); b.rotation.z=-1.05; const mo=stCyl(gun,'#111827',.14,.1,.14,1.0,.62,z); mo.rotation.z=-1.05; }
@@ -35,8 +36,15 @@ function buildStruct(key,lvl,td){
     const tel=new THREE.Group(); tel.position.set(0,1.18,0); g.add(tel); g.userData.tel=tel; const br={metalness:.7,roughness:.3};
     const tb=stCyl(tel,'#b87333',.12,1.5,.12,.2,0,0,br); tb.rotation.z=Math.PI/2+.25; stCyl(tel,'#7c4a21',.14,.5,.14,-.25,-.04,0,{}).rotation.z=Math.PI/2+.25; const lens=stCyl(tel,'#bfe9ff',.1,.04,.1,.97,.24,0,{emissive:0x3a7fa8,emissiveIntensity:.5}); lens.rotation.z=Math.PI/2+.25;
     stCyl(tel,'#d6a43c',.16,.06,.16,.88,.22,0,br).rotation.z=Math.PI/2+.25; stBox(g,'#e8d6a0',.5,.02,.34,.5,.19,.4,{}); stFlag(g,td,-.65,.2,.6); }
-  else if(key==='watch'){ for(const [x,z] of [[-.4,-.4],[.4,-.4],[-.4,.4],[.4,.4]]) stBox(g,'#7c4a21',.1,1.7,.1,x,.85,z); stBox(g,'#5b3a1a',1.1,.1,1.1,0,1.75,0); stBox(g,'#8a5a2b',1.0,.07,1.0,0,.55,0);
-    const pv=new THREE.Group(); pv.position.set(0,1.65,0); g.add(pv); g.userData.bell=pv; const bell=new THREE.Mesh(GEO.cone,M('#fbbf24',{metalness:.7,roughness:.3})); bell.scale.set(.5,.55,.5); bell.position.y=-.3; bell.rotation.x=Math.PI; pv.add(bell); stFlag(g,td,0,1.8,0); }
+  else if(key==='lighthouse'){ // tour de guet en bois : plateforme à 5,5 blocs, accessible par E
+    for(const [x,z] of [[-.62,-.62],[.62,-.62],[-.62,.62],[.62,.62]]) stBox(g,'#7c4a21',.14,5.6,.14,x,2.8,z);
+    for(const y of [1.6,3.4]) for(const [sx,sz,w,d] of [[0,-.62,1.3,.07],[0,.62,1.3,.07],[-.62,0,.07,1.3],[.62,0,.07,1.3]]) stBox(g,'#6b4423',w,.08,d,sx,y,sz);
+    for(const s of [-1,1]){ const br=stBox(g,'#6b4423',.07,2.0,.07,s*.3,2.5,-.62); br.rotation.z=s*.55; }
+    stBox(g,'#5b3a1a',1.7,.14,1.7,0,5.55,0); stBox(g,'#8a5a2b',1.5,.05,1.5,0,5.64,0);
+    for(const [sx,sz,w,d] of [[0,-.78,1.7,.07],[0,.78,1.7,.07],[-.78,0,.07,1.7],[.78,0,.07,1.7]]) stBox(g,'#7c4a21',w,.1,d,sx,6.05,sz);
+    for(const [x,z] of [[-.78,-.78],[.78,-.78],[-.78,.78],[.78,.78]]) stBox(g,'#7c4a21',.1,.55,.1,x,5.9,z);
+    const lad=stBox(g,'#8a5a2b',.12,5.6,.06,.2,2.8,.7); for(let i=0;i<9;i++) stBox(g,'#8a5a2b',.34,.05,.06,.2,.5+i*.6,.72);
+    stFlag(g,td,0,5.65,0); }
   return g;
 }
 function updStruct(key,g,td,t,lvl){
@@ -46,7 +54,7 @@ function updStruct(key,g,td,t,lvl){
   if(u.arm){ const cd=(td.ent.pcd&&td.ent.pcd.catapult)||0; u.arm.rotation.z=cd>.2?-.35+Math.min(1,cd/6)*.0:.55; u.arm.rotation.z=cd>0?-.3:.55+Math.sin(t*1.2)*.03; if(u.stone) u.stone.visible=cd<=0; }
   if(u.dish) u.dish.rotation.y=Math.sin(t*.8)*.6; if(u.eyes){ const k=.6+.4*Math.sin(t*3); for(const e of u.eyes) e.scale.set(.07*k+.03,.07*k+.03,.03); }
   if(u.tel){ const a=Math.atan2(CY*T-OB(td).by*T,CX*T-OB(td).bx*T); u.tel.rotation.y=-a+Math.sin(t*.5)*.2; }
-  if(u.bell) u.bell.rotation.z=Math.sin(t*(td.alert>0?9:1.6))*(td.alert>0?.5:.12);
+  if(u.bell){ const al=(td.alert>0||td.intr>0); u.bell.rotation.z=Math.sin(t*(al?9:1.6))*(al?.5:.12); }
   if(u.hook) u.hook.position.y=.9+Math.sin(t*1.5)*.15;
   if(u.flags) for(const f of u.flags) f.rotation.y=Math.sin(t*3+f.position.x)*.35;
 }
@@ -128,7 +136,7 @@ function useStruct(e,key){
   const _dh=drawHud;
   drawHud=function(){ _dh(); if(game.state!=='play'||!ctx||!player||!player.alive||shopOpen||(typeof SCOPE!=='undefined'&&SCOPE.on)) return; const k=structNear(player); if(!k&&!ART.on&&!CAT.on) return;
     const touch=typeof TOUCH!=='undefined'&&TOUCH.on, cd=k==='art'?(player.pcd.artillery||0):(player.pcd.catapult||0);
-    const txt=ART.on?'':CAT.on?`🪨 Catapulte : clic pour lancer ${cd>0?'(recharge '+Math.ceil(cd)+' s)':''} · E : descendre`:`${touch?'🛒':'[E]'}  Utiliser ${k==='art'?'l\'artillerie 🎯':k==='scope'?'l\'observatoire 🔭':'la catapulte 🪨'}${cd>0?' ('+Math.ceil(cd)+' s)':''}`;
+    const txt=ART.on?'':CAT.on?`🪨 Catapulte : clic pour lancer ${cd>0?'(recharge '+Math.ceil(cd)+' s)':''} · E : descendre`:`${touch?'🛒':'[E]'}  Utiliser ${k==='art'?'l\'artillerie 🎯':k==='scope'?'l\'observatoire 🔭':k==='lighthouse'?(player.tower?'la tour : redescendre 🗼':'la tour de guet : monter 🗼'):'la catapulte 🪨'}${cd>0?' ('+Math.ceil(cd)+' s)':''}`;
     if(!txt) return; ctx.save(); ctx.setTransform(DPR,0,0,DPR,0,0); const pp=1+.03*Math.sin(game.t*5), w=Math.max(260,ctx.measureText(txt).width+40); ctx.translate(VW/2,VH-(touch?96:150)); ctx.scale(pp,pp); panel(-w/2,-15,w,30,15,'#fdba74'); ctx.fillStyle='#fdba74'; ctx.font='bold 15px '+FONT; ctx.textAlign='center'; ctx.fillText(txt,0,5); ctx.restore(); };
   // pas de blocs sur l'emplacement d'une structure
   const _pt=placeTarget; placeTarget=function(e,wx,wy){ const r=_pt(e,wx,wy); if(r&&STRFOOT.has(idx(r[0],r[1]))) return null; return r; };
