@@ -137,7 +137,7 @@ function wakeEmit(dt){
   const _r=FX0.ring; FX0.ring=function(x,y,r,col,t,fill){ if(col==='#bfe9ff'&&fill&&r<T*2) { ripple(x,y,0,1.5,1.1,.85,0,2.8); ripple(x,y,1,1.1,.7,.6,0,1.8); } return _r(x,y,r,col,t,fill); }; }
 /* ---------- application de la lumière ---------- */
 const COL={sunDay:new THREE.Color('#fff0d8'),sunDusk:new THREE.Color('#ff9a5c'),sunNight:new THREE.Color('#8fa8ff'),hDay:new THREE.Color('#eaf6ff'),hNight:new THREE.Color('#3a4a8a'),gDay:new THREE.Color('#3f6f98'),gNight:new THREE.Color('#0e1a36'),
-  seaDay:new THREE.Color('#3aa6cf'),seaNight:new THREE.Color('#0c2a50'),seaDusk:new THREE.Color('#3b7fa6'),seaIce:new THREE.Color('#9ed8ec'),seaGray:new THREE.Color('#4d7a92')};
+  seaDay:new THREE.Color('#33b0cb'),seaNight:new THREE.Color('#0c2a50'),seaDusk:new THREE.Color('#3b7fa6'),seaIce:new THREE.Color('#9ed8ec'),seaGray:new THREE.Color('#4d7a92')};
 let ambFrame=0;
 function ambApply(){
   const dk=WX.dayK, ni=1-dk, dusk=WX.dusk; ambFrame++;

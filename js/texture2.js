@@ -22,11 +22,11 @@ blockTex=function(t){
     for(let k=0;k<4;k++){ const y=3+k*8+RI(3); for(let x=0;x<N;x++) if(R()<.55) px(x,y+Math.round(Math.sin(x*.35+k)*1.4),'#cdb375'); }
     for(let k=0;k<46;k++) px(RI(N),RI(N),R()<.5?'#d3bd80':'#f7edc8'); for(let k=0;k<5;k++) px(RI(N),RI(N),'#b89b58',2,1);
     t2bevel(g,N,'rgba(255,250,220,.4)','rgba(110,80,30,.32)'); }
-  else if(t===4){ // bloc de temple : pierre grise taillée, joints nets, 4 dalles
-    g.fillStyle='#9ea3ab'; g.fillRect(0,0,N,N);
-    const sl=[[0,0,16,16,'#a6abb3'],[16,0,16,16,'#9aa0a8'],[0,16,16,16,'#9aa0a8'],[16,16,16,16,'#a6abb3']];
-    for(const [x,y,w,h,c] of sl){ g.fillStyle=c; g.fillRect(x+1,y+1,w-2,h-2); g.fillStyle='rgba(255,255,255,.28)'; g.fillRect(x+1,y+1,w-2,1); g.fillRect(x+1,y+1,1,h-2); g.fillStyle='rgba(40,45,55,.3)'; g.fillRect(x+1,y+h-2,w-2,1); g.fillRect(x+w-2,y+1,1,h-2); }
-    g.fillStyle='#6b7079'; g.fillRect(0,15,N,2); g.fillRect(15,0,2,N); g.fillRect(0,0,N,1); g.fillRect(0,N-1,N,1); g.fillRect(0,0,1,N); g.fillRect(N-1,0,1,N); }
+  else if(t===4){ // pierre de taille : briques décalées, mortier fin, peu de relief
+    g.fillStyle='#7d828a'; g.fillRect(0,0,N,N);
+    const tone=['#9a9ea5','#92979e','#a2a6ac','#8d9299'];
+    for(let r=0;r<4;r++){ const off=r%2?8:0; for(let k=-1;k<3;k++){ const x=off+k*16, y=r*8; g.fillStyle=tone[(r*3+k+4)%4]; g.fillRect(x+1,y+1,15,7); g.fillStyle='rgba(255,255,255,.14)'; g.fillRect(x+1,y+1,15,1); } }
+    g.fillStyle='rgba(40,44,52,.16)'; for(let r=0;r<4;r++) g.fillRect(0,r*8+7,N,1); }
   else if(t===7){ // bloc de corail : polypes, branches et petits trous
     g.fillStyle='#ee707c'; g.fillRect(0,0,N,N); for(let k=0;k<70;k++) px(RI(N),RI(N),R()<.5?'#e25e6e':'#f58a92');
     for(let k=0;k<9;k++){ const x=RI(N), y=RI(N), r=2+RI(3); for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){ const d=dx*dx+dy*dy; if(d<=r*r) px(x+dx,(y+dy+N)%N,d>(r-1)*(r-1)?'#c64a5d':(dx+dy<0?'#ffb0b4':'#f8969c')); } }
@@ -66,3 +66,6 @@ function groundTex2(){ if(T2GROUND) return T2GROUND; const N=32, c=t2canvas(N), 
     const key=id+'|'+size+'|'+bs+'|t2'; let cv=ICONC.get(key); if(cv) return cv; cv=document.createElement('canvas'); cv.width=cv.height=size; const c=cv.getContext('2d'); c.scale(size/64,size/64); c.lineJoin='round';
     c.shadowColor='rgba(0,0,0,.45)'; c.shadowBlur=3; c.shadowOffsetY=2; if(!icoCubeTex(c,bs)){ return _ii(id,e,size); } ICONC.set(key,cv); return cv; };
   ICONC.clear(); ICOURL.clear(); }
+
+/* sable un peu plus chaud (beige orangé très léger) */
+{ const _gc=groundColor, warm=new THREE.Color('#e9b97c'); groundColor=function(reg,tx,ty,out){ _gc(reg,tx,ty,out); if(out.r>.8&&out.g>.72&&out.b>.5&&out.b<.78&&out.r-out.b>.1) out.lerp(warm,.14); return out; }; }

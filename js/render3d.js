@@ -71,7 +71,7 @@ function resize3d(){
 let sea=null, seaBase=null;
 function buildSea(){
   const geo=new THREE.PlaneGeometry(420,420); geo.rotateX(-Math.PI/2);
-  sea=new THREE.Mesh(geo,new THREE.MeshLambertMaterial({color:0x3aa6cf}));
+  sea=new THREE.Mesh(geo,new THREE.MeshLambertMaterial({color:0x33b0cb}));
   sea.position.set(CX+.5,-1.15,CY+.5); sea.frustumCulled=false; scene.add(sea);
 }
 function updateSea(t){ if(iFoam) iFoam.material.opacity=.3+.13*Math.sin(t*1.5); }
