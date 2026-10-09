@@ -6,7 +6,7 @@ const SW2={
   rapier:{n:'Rapière de duelliste',ico:'🤺',col:'#e2e8f0',cost:{silver:16},cd:.24,dmg:3.4,reach:2.7,cone:.82,lunge:300,d:'Très rapide : attaques en fente qui te propulsent vers l\'avant. Touche en ligne droite, pas de dégâts de zone.'},
   axe:{n:'Hache de guerre',ico:'🪓',col:'#94a3b8',cost:{silver:24},cd:.95,dmg:10,reach:2.15,cone:-1,wall:9,kb:520,d:'Lente mais dévastatrice : frappe tout autour de toi, repousse fort et brise les murs adverses.'},
   frost:{n:'Lame de givre',ico:'❄️',col:'#7dd3fc',cost:{gold:3},cd:.5,dmg:5,reach:2,cone:.3,slow:2.6,freeze:.22,d:'Ralentit les ennemis touchés et peut les geler un instant.'},
-  flame:{n:'Lame ardente',ico:'🔥',col:'#fb923c',cost:{gold:3},cd:.5,dmg:4.8,reach:2,cone:.3,burn:3.6,d:'Enflamme les ennemis touchés : brûlure pendant plusieurs secondes.'},
+  flameblade:{n:'Lame ardente',ico:'🔥',col:'#fb923c',cost:{gold:3},cd:.5,dmg:4.8,reach:2,cone:.3,burn:3.6,d:'Enflamme les ennemis touchés : brûlure pendant plusieurs secondes.'},
   blood:{n:'Sabre sanglant',ico:'🧛',col:'#f87171',cost:{gold:4},cd:.5,dmg:5.2,reach:2,cone:.3,leech:.4,d:'Te rend 40 % des dégâts infligés en PV.'},
   spear:{n:'Lance d\'abordage',ico:'🦯',col:'#fde68a',cost:{silver:22},cd:.62,dmg:6.6,reach:3.6,line:true,kb:380,d:'Allonge énorme : transperce tous les ennemis alignés devant toi.'},
   storm:{n:'Katana-tempête',ico:'⚡',col:'#a78bfa',cost:{gold:5},cd:.44,dmg:5.4,reach:2,cone:.3,bolt:4,d:'Rapide : tous les 4 coups, la foudre s\'abat sur ta cible.'},
@@ -49,7 +49,7 @@ function doSword2(e,id){
   const _mh=makeHeld;
   makeHeld=function(id,e){ const S=SW2[id]; if(!S) return _mh(id,e);
     const g=new THREE.Group(), add=(geo,mat,px,py,pz,sx,sy,sz)=>{ const m=new THREE.Mesh(geo,mat); m.position.set(px,py,pz); m.scale.set(sx,sy,sz); m.castShadow=true; g.add(m); return m; };
-    const wd=M('#7c4a21'), gold=M('#fbbf24',{metalness:.4}), bl=M(S.col,{metalness:.4,roughness:.35,emissive:S.col,emissiveIntensity:['frost','flame','storm','blood'].includes(id)?.35:0});
+    const wd=M('#7c4a21'), gold=M('#fbbf24',{metalness:.4}), bl=M(S.col,{metalness:.4,roughness:.35,emissive:S.col,emissiveIntensity:['frost','flameblade','storm','blood'].includes(id)?.35:0});
     switch(id){
       case 'rapier': add(GEO.box,wd,.08,0,0,.14,.06,.06); add(GEO.torus,gold,.17,0,0,.17,.17,.17).rotation.y=Math.PI/2; add(GEO.box,bl,.62,0,0,.9,.03,.03); break;
       case 'axe': add(GEO.box,wd,.3,0,0,.7,.06,.06); add(GEO.box,bl,.62,0,.08,.18,.04,.34); add(GEO.box,bl,.62,0,-.08,.18,.04,.34).rotation.y=0; add(GEO.cone,bl,.62,0,.3,.16,.24,.16).rotation.x=Math.PI/2; break;

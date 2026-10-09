@@ -132,3 +132,29 @@ const rhNeed=w=>Math.max(.12,(BHP[w.wall||w.floor]||10)*.03); // ≈ moitié du 
     ctx.save(); ctx.setTransform(DPR,0,0,DPR,0,0); const s=w2s(player.x,player.y,66); if(s[2]){ const w=54, p=player.rhNeed?Math.min(1,(player.rhP||0)/player.rhNeed):0; ctx.fillStyle='#0009'; ctx.fillRect(s[0]-w/2,s[1]-4,w,7); ctx.fillStyle='#fbbf24'; ctx.fillRect(s[0]-w/2,s[1]-4,w*p,7); ctx.font='bold 11px system-ui'; ctx.textAlign='center'; ctx.fillStyle='#fde68a'; ctx.fillText('🔨 maintiens le clic',s[0],s[1]-9); ctx.textAlign='left'; }
     ctx.restore(); };
 }
+
+/* =====================  BOUTIQUE : NOUVELLES CATÉGORIES  =====================
+   Construction · Mêlée · Distance · Offensif · Pièges · Mobilité · Soutien · Défense · Base · Reliques
+   Dans chaque catégorie, les objets sont classés du moins cher au plus cher. */
+{ const CAT={
+  Construction:['wool','wood','stone','obs','coral','iceblk','pick','bridge','bridge2','trampo','boat'],
+  'Mêlée':['sword','glove','baa','rapier','axe','frost','flameblade','blood','spear','storm','hook'],
+  Distance:['bow','gun','smg','shotgun','sniper','rocket','boomerang','ice','flame','trident','gatling','javelin','flarebow','dueling','musketeer','harpoongun','sling','rubberchicken'],
+  Offensif:['bomb','repel','vortex','cluster','anchor','chicken','coco','sharkbait','laughgas','bottlestorm','rocketpilot','bombraft'],
+  'Pièges':['anchortrap','net','mine','banana','barrel','wallgad'],
+  'Mobilité':['grap','jet','dash','tp','glide','haste','recall','plume'],
+  Soutien:['heal','grog','blessing','rage','cloak','shrink','giant','spy','parrotmsg','magnet','fishrod','swap','pickpocket'],
+  'Défense':['turret','guard','repair','flag','buoy','aegis','shield','core','wall','hull','repairhammer','mirror','arm_leather','arm_iron','arm_gold','arm_diamond']
+};
+  const where={}; for(const c in CAT) for(const id of CAT[c]) where[id]=c;
+  const OLD={Blocs:'Construction',Combat:'Mêlée',Armes:'Distance',Outils:'Soutien',Gadgets:'Offensif'};
+  for(const s of SHOP){ s.cat=where[s.id]||OLD[s.cat]||s.cat; }
+  const order=['Construction','Mêlée','Distance','Offensif','Pièges','Mobilité','Soutien','Défense','Base','Reliques'];
+  TABS.length=0; TABS.push(...order); shopTab='Construction';
+  Object.assign(CAT_BADGE,{Construction:'🧱','Mêlée':'⚔️',Distance:'💥',Offensif:'✨','Pièges':'🪤','Mobilité':'👟',Soutien:'🧪'});
+  const val={bronze:1,silver:5,gold:25,diamond:70}, dm=makeEnt(0,false,'x');
+  const worth=s=>{ try{ const c=s.info(dm).cost||{}; let v=0; for(const k in c) v+=(val[k]||0)*c[k]; return v; }catch(e){ return 0; } };
+  const idx0=new Map(SHOP.map((s,i)=>[s,i])), rank=c=>order.indexOf(c);
+  const sorted=[...SHOP].sort((a,b)=>{ const ra=rank(a.cat),rb=rank(b.cat); if(ra!==rb) return ra-rb; if(a.cat==='Base') return idx0.get(a)-idx0.get(b); return worth(a)-worth(b)||idx0.get(a)-idx0.get(b); });
+  SHOP.length=0; SHOP.push(...sorted);
+}
