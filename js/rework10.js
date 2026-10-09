@@ -138,7 +138,7 @@ const rhNeed=w=>Math.max(.12,(BHP[w.wall||w.floor]||10)*.03); // ≈ moitié du 
    Dans chaque catégorie, les objets sont classés du moins cher au plus cher. */
 { const CAT={
   Construction:['wool','wood','stone','obs','coral','iceblk','pick','bridge','bridge2','trampo','boat'],
-  'Mêlée':['sword','glove','baa','rapier','axe','frost','flameblade','blood','spear','storm','hook'],
+  'Mêlée':['sword','glove','baa','rapier','warhammer','frost','flameblade','blood','spear','storm','hook'],
   Distance:['bow','gun','smg','shotgun','sniper','rocket','boomerang','ice','flame','trident','gatling','javelin','flarebow','dueling','musketeer','harpoongun','sling','rubberchicken'],
   Offensif:['bomb','repel','vortex','cluster','anchor','chicken','coco','sharkbait','laughgas','bottlestorm','rocketpilot','bombraft'],
   'Pièges':['anchortrap','net','mine','banana','barrel','wallgad'],

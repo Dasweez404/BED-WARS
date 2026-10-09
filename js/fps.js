@@ -17,7 +17,7 @@ addEventListener('mousedown',ev=>{ if(FPS.on&&document.pointerLockElement==null&
 /* souris verrouillée : le curseur est figé, donc le clic gauche tire (viseur) et le clic droit change de bloc, sans passer par la détection de la barre d'objets */
 addEventListener('mousedown',ev=>{ if(!fpsActive()||document.pointerLockElement==null||shopOpen||game.paused) return;
   ev.stopImmediatePropagation(); ev.preventDefault(); mouse.x=VW/2; mouse.y=VH/2;
-  if(ev.button===2) actCycle(); else if(ev.button===0){ mouse.down=true; mouse.clicked=true; } },true);
+  if(ev.button===2){ if(!(typeof cycleGroup==='function'&&cycleGroup(player,selId))) actCycle(); } else if(ev.button===0){ mouse.down=true; mouse.clicked=true; } },true);
 addEventListener('wheel',ev=>{ if(!fpsActive()||document.pointerLockElement==null||shopOpen||game.paused) return; ev.preventDefault(); const l=hotList(player); if(!l.length) return;
   let i=Math.max(0,l.findIndex(it=>it.id===selId)); i=(i+(ev.deltaY>0?1:-1)+l.length)%l.length; setSel(l[i].id); ev.stopImmediatePropagation(); },{capture:true,passive:false});
 addEventListener('pointerlockchange',()=>{ if(document.pointerLockElement==null&&FPS.on&&!shopOpen&&game.state==='play'&&!game.paused){ /* Échap : le navigateur libère la souris */ } });

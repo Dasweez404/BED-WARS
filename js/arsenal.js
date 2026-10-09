@@ -4,7 +4,7 @@ Object.assign(game.opts,{rocket:0});
 /* ---------- épées spéciales (armes de mêlée achetables, avec leur effet) ---------- */
 const SW2={
   rapier:{n:'Rapière de duelliste',ico:'🤺',col:'#e2e8f0',cost:{silver:16},cd:.24,dmg:3.4,reach:2.7,cone:.82,lunge:300,d:'Très rapide : attaques en fente qui te propulsent vers l\'avant. Touche en ligne droite, pas de dégâts de zone.'},
-  axe:{n:'Hache de guerre',ico:'🪓',col:'#94a3b8',cost:{silver:24},cd:.95,dmg:10,reach:2.15,cone:-1,wall:9,kb:520,d:'Lente mais dévastatrice : frappe tout autour de toi, repousse fort et brise les murs adverses.'},
+  warhammer:{n:'Marteau de guerre',ico:'🔨',col:'#94a3b8',cost:{silver:24},cd:.95,dmg:10,reach:2.15,cone:-1,wall:9,kb:520,stun:.8,d:'Lent mais dévastateur : l\'onde de choc frappe tout autour de toi, ASSOMME les ennemis 0,8 s, les repousse fort et brise les murs adverses.'},
   frost:{n:'Lame de givre',ico:'❄️',col:'#7dd3fc',cost:{gold:3},cd:.5,dmg:5,reach:2,cone:.3,slow:2.6,freeze:.22,d:'Ralentit les ennemis touchés et peut les geler un instant.'},
   flameblade:{n:'Lame ardente',ico:'🔥',col:'#fb923c',cost:{gold:3},cd:.5,dmg:4.8,reach:2,cone:.3,burn:3.6,d:'Enflamme les ennemis touchés : brûlure pendant plusieurs secondes.'},
   blood:{n:'Sabre sanglant',ico:'🧛',col:'#f87171',cost:{gold:4},cd:.5,dmg:5.2,reach:2,cone:.3,leech:.4,d:'Te rend 40 % des dégâts infligés en PV.'},
@@ -32,6 +32,7 @@ function doSword2(e,id){
     else if(((dx*ax+dy*ay)/d)<S.cone) continue;
     const kb=S.kb||300; hurt(o,dmg,e,dx/d*kb*(S.pull?-.2:1),dy/d*kb*(S.pull?-.2:1)); hits++; burst(o.x,o.y-8,S.col,6,150,.3,3); if(e===player) shake=Math.max(shake,3);
     if(S.slow){ o.slow=Math.max(o.slow,S.slow); if(Math.random()<S.freeze){ o.frozen=Math.max(o.frozen,.9); floatTxt(o.x,o.y-40,'GELÉ !','#bae6fd',15); } }
+    if(S.stun){ o.root=Math.max(o.root,S.stun); o.vx*=.3; o.vy*=.3; floatTxt(o.x,o.y-40,'ASSOMMÉ !','#fde68a',15); ring(o.x,o.y,T*.9,'#fde68a',.3,true); }
     if(S.burn){ o.burn=Math.max(o.burn,S.burn); o.burnBy=e; }
     if(S.leech&&e.alive){ e.hp=Math.min(maxhp(e),e.hp+dmg*S.leech); }
     if(S.pull){ o.vx=(e.x-o.x)*6; o.vy=(e.y-o.y)*6; o.root=Math.max(o.root,.5); o.lastBy=e; o.lastByT=5; }
@@ -52,7 +53,7 @@ function doSword2(e,id){
     const wd=M('#7c4a21'), gold=M('#fbbf24',{metalness:.4}), bl=M(S.col,{metalness:.4,roughness:.35,emissive:S.col,emissiveIntensity:['frost','flameblade','storm','blood'].includes(id)?.35:0});
     switch(id){
       case 'rapier': add(GEO.box,wd,.08,0,0,.14,.06,.06); add(GEO.torus,gold,.17,0,0,.17,.17,.17).rotation.y=Math.PI/2; add(GEO.box,bl,.62,0,0,.9,.03,.03); break;
-      case 'axe': add(GEO.box,wd,.3,0,0,.7,.06,.06); add(GEO.box,bl,.62,0,.08,.18,.04,.34); add(GEO.box,bl,.62,0,-.08,.18,.04,.34).rotation.y=0; add(GEO.cone,bl,.62,0,.3,.16,.24,.16).rotation.x=Math.PI/2; break;
+      case 'warhammer': add(GEO.box,wd,.3,0,0,.7,.07,.07); add(GEO.box,bl,.68,0,0,.2,.26,.34); add(GEO.box,M('#475569',{metalness:.5}),.68,0,0,.05,.3,.38); add(GEO.box,gold,.0,0,0,.05,.09,.09); break;
       case 'spear': add(GEO.box,wd,.4,0,0,1.0,.04,.04); add(GEO.cone,bl,.98,0,0,.07,.28,.07).rotation.z=-Math.PI/2; add(GEO.box,M('#f87171'),.8,0,0,.04,.07,.07); break;
       case 'hook': add(GEO.box,wd,.08,0,0,.14,.06,.06); add(GEO.box,bl,.5,0,0,.7,.04,.06); add(GEO.torus,bl,.86,-.1,0,.18,.18,.18); break;
       default: add(GEO.box,wd,.08,0,0,.14,.07,.07); add(GEO.box,gold,.16,0,0,.05,.07,.2); add(GEO.box,bl,.5,0,0,.6,.045,.09); add(GEO.cone,bl,.86,0,0,.06,.16,.06).rotation.z=-Math.PI/2; if(id==='storm') add(GEO.octa,new THREE.MeshBasicMaterial({color:0xfde047}),.5,.08,0,.06,.06,.06);
