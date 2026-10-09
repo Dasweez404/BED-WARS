@@ -111,8 +111,9 @@ for(const id of NEW_IDS){ const g=GUNS[id]; BOT_BUY.splice(BOT_BUY.length-2,0,[i
 let ROSTER=null;
 const POOL_CATS=['Armes','Gadgets','Défense','Outils','Reliques'];
 const POOL_EXTRA=['glove','hammer','baa','heal'];
-const poolIds=()=>SHOP.filter(s=>(POOL_CATS.includes(s.cat)||POOL_EXTRA.includes(s.id))&&s.id!=='core'&&s.id!=='wall'&&s.id!=='pick').map(s=>s.id);
-const inRoster=id=>!ROSTER||!poolIds_set.has(id)||ROSTER.has(id);
+const poolIds=()=>SHOP.filter(s=>(POOL_CATS.includes(s.cat)||POOL_EXTRA.includes(s.id))&&s.id!=='core'&&s.id!=='wall'&&s.id!=='pick'&&!itemOff(s.id)).map(s=>s.id);
+const itemOff=id=>!!(game.opts&&game.opts.off&&game.opts.off[id]); // objets désactivés dans l'onglet « Objets »
+const inRoster=id=>!itemOff(id)&&(!ROSTER||!poolIds_set.has(id)||ROSTER.has(id));
 let poolIds_set=new Set();
 function makeRoster(){
   poolIds_set=new Set(poolIds()); const n=game.opts.roster|0;
