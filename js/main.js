@@ -41,7 +41,7 @@ function bindMouse(c){
     if(ev.button===1){ ev.preventDefault(); return; }
     if(game.state==='over'){showMenu();return;}
     if(game.state!=='play'||game.paused) return;
-    if(ev.button===2){actCycle();return;}
+    if(ev.button===2){ const l=hotList(player), hb=hotbarRect(l.length); if(mouse.y>=hb.y-6&&mouse.y<=hb.y+hb.s&&mouse.x>=hb.x&&mouse.x<hb.x+l.length*(hb.s+hb.g)){ const i=Math.floor((mouse.x-hb.x)/(hb.s+hb.g)); if(l[i]&&typeof cycleGroup==='function'&&cycleGroup(player,l[i].id)) return; } actCycle(); return; }
     const l=hotList(player), hb=hotbarRect(l.length);
     if(mouse.y>=hb.y-6&&mouse.y<=hb.y+hb.s&&mouse.x>=hb.x&&mouse.x<hb.x+l.length*(hb.s+hb.g)){
       const i=Math.floor((mouse.x-hb.x)/(hb.s+hb.g)); if(l[i]){ if(selId==='block'&&l[i].id==='block') actCycle(); setSel(l[i].id);} return;
