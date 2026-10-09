@@ -13,8 +13,8 @@ SHOP.push(
   gadItem('mirror','Miroir de brume','Pendant 6 s, un miroir t\'entoure : les balles, flèches et boulets ennemis qui te touchent sont renvoyés contre leur tireur !',{silver:16},1,'Défense'),
   gadItem('barrel','Tonneau piégé','Lance un tonneau de poudre : il roule en direction de l\'ennemi le plus proche (il te contourne mal !) et explose au contact, à un mur ou au bord de l\'île. Les tirs peuvent le faire exploser avant.',{silver:14},2,'Gadgets'),
   upItem('art','Artillerie (vue du dessus)',3,[4,6,9],[
-    'Construit une batterie autour de ta base (elle détruit les blocs sur son emplacement) : monte dessus (touche E) pour passer en vue du dessus, désigne une zone et clique : 5 boulets tombent du ciel. Recharge 40 s.',
-    'Salve de 7 boulets, recharge 32 s.','Salve de 9 boulets, recharge 25 s.']),
+    'Construit une batterie autour de ta base (elle détruit les blocs sur son emplacement) : monte dessus (touche E) pour passer en vue du dessus, désigne une zone et clique : 4 boulets tombent du ciel. Recharge 48 s.',
+    'Salve de 5 boulets, recharge 40 s.','Salve de 6 boulets, recharge 32 s.']),
   upItem('catapult','Catapulte à blocs',1,[3],['Construit une catapulte autour de ta base (elle détruit les blocs sur son emplacement). Monte dessus (touche E), vise et clique : un bloc de pierre (consommé) part jusqu\'à 18 cases, dégâts énormes sur les murs. Recharge 6 s.']),
   upItem('scope','Observatoire',1,[3],['Construit un observatoire autour de ta base : monte dessus (touche E) pour regarder partout sur la carte, déplacer la vue (ZQSD) et zoomer (molette).']),
   upItem('lighthouse','Tour de guet',1,[3],['Une tour en bois de 5,5 blocs sur ton île : debout dessus, E te téléporte tout en haut (E de nouveau pour redescendre). De là-haut tu vois bien plus loin, tes armes portent bien plus loin et tes tirs passent par-dessus les murs.']),
@@ -26,10 +26,10 @@ const ART={on:false,t:0,px:0,py:0}; let barrels2=[]; const LHM={}; const LHSEEN=
 { const _ng=newGame; newGame=function(){ _ng(); for(const t of TD){ const u=t.ent.up; u.art=0; u.catapult=0; u.scope=0; u.radar=0; u.lighthouse=0; u.shipyard=0; SY[t.id]=20; } ART.on=false; barrels2=[]; LHSEEN.clear(); for(const k in LHM) delete LHM[k]; }; }
 /* ---------- salves d'artillerie ---------- */
 function artFire(e,tx,ty){
-  const lv=Math.max(1,e.up.art|0), n=3+2*lv, R=2.4*T; ring(tx,ty,R*1.2,'#fb923c',1.3,true); ring(tx,ty,R*.5,'#fff',.8); sfx('gadget',e.x,e.y); floatTxt(e.x,e.y-46,`🎯 SALVE ×${n}`,'#fdba74',16);
+  const lv=Math.max(1,e.up.art|0), n=3+lv, R=2.4*T; ring(tx,ty,R*1.2,'#fb923c',1.3,true); ring(tx,ty,R*.5,'#fff',.8); sfx('gadget',e.x,e.y); floatTxt(e.x,e.y-46,`🎯 SALVE ×${n}`,'#fdba74',16);
   for(let k=0;k<n;k++) delayed.push({t:.5+k*.22,fn:()=>{ const a=rnd(0,6.28), r=Math.sqrt(Math.random())*R, x=tx+Math.cos(a)*r, y=ty+Math.sin(a)*r; ring(x,y,T*1.5,'#fb923c',.8);
-    bombs.push({x,y,tx:x,ty:y,fuse:1.1,team:e.team,owner:e,kind:'bomb',R:1.9*T,dm:10,bd:1.2,shell:true,drop:true,h:0}); }});
-  const cd=[40,32,25][lv-1]; delayed.push({t:.02,fn:()=>{ e.pcd.artillery=cd; }});
+    bombs.push({x,y,tx:x,ty:y,fuse:1.1,team:e.team,owner:e,kind:'bomb',R:1.8*T,dm:7,bd:1,shell:true,drop:true,h:0}); }});
+  const cd=[48,40,32][lv-1]; delayed.push({t:.02,fn:()=>{ e.pcd.artillery=cd; }});
 }
 /* ---------- capacités des améliorations de base (touches T et B, pas d'inventaire) ---------- */
 function abilityArt(e,wx,wy){

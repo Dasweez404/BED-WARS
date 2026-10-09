@@ -722,7 +722,7 @@ function explode(b){
       if(!inb(tx,ty)) continue;
       const d=Math.hypot((tx+.5)*T-cx,(ty+.5)*T-cy); if(d>R) continue;
       if(protectedTile(tx,ty,b.team)) continue;
-      const dmg=50*(b.bd||1)*(1-d/(R*1.05)), i=idx(tx,ty); // explosions : un peu plus destructrices pour les blocs
+      const dmg=40*(b.bd||1)*(1-d/(R*1.05)), i=idx(tx,ty); // explosions : un peu plus destructrices pour les blocs
       if(wallT[i]>0){
         if(wallT[i]===CORE&&(ownW[i]===b.team||b.team<0)) continue;
         damageTile(tx,ty,dmg,b.owner,0);
@@ -731,10 +731,10 @@ function explode(b){
     hitGuards(b.owner,cx,cy,R,1.5*(b.dm||10)); hitBoats(cx,cy,R,1.5*(b.dm||10),b.team);
     for(const o of ents){
       if(!o.alive||(o.team===b.team&&o!==b.owner)) continue;
-      const dx=o.x-cx,dy=o.y-cy,d=Math.hypot(dx,dy); if(d>R*1.25) continue;
+      const dx=o.x-cx,dy=o.y-cy,d=Math.hypot(dx,dy); if(d>R*1.1) continue;
       if(inShield(o.x,o.y,o.team)) continue;
-      const k=1-d/(R*1.7), u=d||1; // chute de dégâts plus douce avec la distance
-      hurt(o,(o===b.owner?.5:1)*(b.dm||10)*1.3*k,b.owner,dx/u*520*k,dy/u*520*k); // explosifs : un peu moins dangereux pour les pirates
+      const k=1-d/(R*1.4), u=d||1; // chute de dégâts plus douce avec la distance
+      hurt(o,(o===b.owner?.5:1)*(b.dm||10)*1.0*k,b.owner,dx/u*420*k,dy/u*420*k); // explosifs : un peu moins dangereux pour les pirates
       o.vz=Math.max(o.vz,180*k);
     }
   } else {
