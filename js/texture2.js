@@ -63,7 +63,7 @@ function groundTex2(){ if(T2GROUND) return T2GROUND; const N=32, c=t2canvas(N), 
     const faces=[{pts:[[12,22],[32,33],[32,56],[12,45]],m:[20/N,11/N,0,23/N,12,22],shade:'rgba(0,0,0,.08)'},{pts:[[32,33],[52,22],[52,45],[32,56]],m:[20/N,-11/N,0,23/N,32,33],shade:'rgba(10,10,30,.34)'},{pts:[[32,12],[52,22],[32,33],[12,22]],m:[20/N,10/N,-20/N,10/N,32,12],shade:'rgba(255,255,255,.12)'}];
     c.save(); const sm=c.imageSmoothingEnabled; c.imageSmoothingEnabled=false;
     for(const f of faces){ c.save(); c.beginPath(); f.pts.forEach((p,i)=>i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1])); c.closePath(); c.clip(); c.shadowColor='transparent'; c.transform(...f.m); c.drawImage(img,0,0); c.restore(); c.save(); c.beginPath(); f.pts.forEach((p,i)=>i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1])); c.closePath(); c.fillStyle=f.shade; c.fill(); c.restore(); }
-    for(const f of faces){ c.beginPath(); f.pts.forEach((p,i)=>i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1])); c.closePath(); c.lineWidth=2.5; c.strokeStyle='#1b1512'; c.stroke(); }
+    for(const f of faces){ c.beginPath(); f.pts.forEach((p,i)=>i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1])); c.closePath(); c.lineWidth=1; c.strokeStyle='rgba(255,255,255,.18)'; c.stroke(); }
     c.imageSmoothingEnabled=sm; c.restore(); return true; };
   const _ii=itemIcon;
   itemIcon=function(id,e,size){ size=size||64; const bs=id==='block'?((e&&e.bsel)||2):BLOCK_SHOP[id]; if(!bs) return _ii(id,e,size);
