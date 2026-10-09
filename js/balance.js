@@ -9,8 +9,8 @@
   const dummy=makeEnt(0,false,'x');
   const mix=s=>({bronze:Math.round(s*2.5/5)*5,silver:Math.ceil(s/2)}); // s = équivalent argent
   const PRICE={ // nombre = équivalent argent (mélangé bronze/argent) ; objet = prix exact
-    turret:14,turret2:16,guard:12,decoy:12,mine:6,flag:12,anchortrap:16,mistbell:16,battery:20,stonewall:10,hull:11,
-    net:{bronze:20},banana:{bronze:16},bananarow:{bronze:32},heal:{bronze:30},sling:{bronze:50},coco:{bronze:36},
+    turret:14,turret2:16,guard:12,decoy:12,mine:4,flag:12,anchortrap:10,mistbell:9,battery:20,stonewall:10,hull:11,
+    net:{bronze:12},banana:{bronze:10},bananarow:{bronze:20},barrel:9,heal:{bronze:30},sling:{bronze:50},coco:{bronze:36},
     sniper:{gold:2},rocket:{gold:3},gatling:{gold:3},meteor:{gold:3},spy:{gold:3},r_parrot:{gold:4},storm:{gold:4},
     blood:{gold:3},frost:{gold:2},flame:{gold:2},raid:{gold:2},r_fang:{gold:3},
     shield:14,wallgad:6,
