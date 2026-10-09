@@ -133,29 +133,28 @@ const rhNeed=w=>Math.max(.12,(BHP[w.wall||w.floor]||10)*.03); // ≈ moitié du 
     ctx.restore(); };
 }
 
-/* =====================  BOUTIQUE : NOUVELLES CATÉGORIES  =====================
-   Construction · Mêlée · Distance · Offensif · Pièges · Mobilité · Soutien · Défense · Base · Reliques
+/* =====================  BOUTIQUE : CATÉGORIES  =====================
+   Blocs · Armes · Gadgets · Outils · Objets · Défense · Améliorations · Reliques
    Dans chaque catégorie, les objets sont classés du moins cher au plus cher. */
 { const CAT={
-  Construction:['wool','wood','stone','obs','coral','iceblk','pick','bridge','bridge2','trampo','boat'],
-  'Mêlée':['sword','glove','baa','rapier','warhammer','frost','flameblade','blood','spear','storm','hook'],
-  Distance:['bow','gun','smg','shotgun','sniper','rocket','boomerang','ice','flame','trident','gatling','javelin','flarebow','dueling','musketeer','harpoongun','sling','rubberchicken'],
-  Offensif:['bomb','repel','vortex','cluster','anchor','chicken','coco','sharkbait','laughgas','bottlestorm','rocketpilot','bombraft'],
-  'Pièges':['anchortrap','net','mine','banana','barrel','wallgad'],
-  'Mobilité':['grap','jet','dash','tp','glide','haste','recall','plume'],
-  Soutien:['heal','grog','blessing','rage','cloak','shrink','giant','spy','parrotmsg','magnet','fishrod','swap','pickpocket'],
+  Blocs:['wool','wood','stone','obs','coral','iceblk','pick','bridge','bridge2'],
+  Armes:['sword','glove','baa','rapier','warhammer','frost','flameblade','blood','spear','storm','hook','bow','gun','smg','shotgun','sniper','rocket','boomerang','ice','flame','trident','gatling','javelin','flarebow','dueling','musketeer','harpoongun','sling','rubberchicken'],
+  Gadgets:['bomb','repel','vortex','cluster','anchor','chicken','coco','sharkbait','laughgas','bottlestorm','rocketpilot','bombraft','anchortrap','net','mine','banana','barrel','wallgad'],
+  Outils:['grap','jet','dash','tp','glide','recall','plume','trampo','boat','magnet','fishrod'],
+  Objets:['heal','blessing','grog','rage','cloak','haste','shrink','giant','swap','pickpocket','spy','parrotmsg'],
   'Défense':['turret','guard','repair','flag','buoy','aegis','shield','core','wall','hull','repairhammer','mirror','arm_leather','arm_iron','arm_gold','arm_diamond']
 };
+  const MELEE=new Set(['sword','glove','baa','rapier','warhammer','frost','flameblade','blood','spear','storm','hook']);
   const where={}; for(const c in CAT) for(const id of CAT[c]) where[id]=c;
-  const OLD={Blocs:'Construction',Combat:'Mêlée',Armes:'Distance',Outils:'Soutien',Gadgets:'Offensif'};
+  const OLD={Combat:'Armes',Outils:'Outils',Gadgets:'Gadgets'};
   for(const s of SHOP){ s.cat=where[s.id]||OLD[s.cat]||s.cat; }
-  const order=['Construction','Mêlée','Distance','Offensif','Pièges','Mobilité','Soutien','Défense','Base','Reliques'];
-  TABS.length=0; TABS.push(...order); shopTab='Construction';
-  Object.assign(CAT_BADGE,{Construction:'🧱','Mêlée':'⚔️',Distance:'💥',Offensif:'✨','Pièges':'🪤','Mobilité':'👟',Soutien:'🧪'});
+  const order=['Blocs','Armes','Gadgets','Outils','Objets','Défense','Base','Reliques'];
+  TABS.length=0; TABS.push(...order); shopTab='Blocs';
+  Object.assign(CAT_BADGE,{Blocs:'🧱',Objets:'🧪'});
   const val={bronze:1,silver:5,gold:25,diamond:70}, dm=makeEnt(0,false,'x');
   const worth=s=>{ try{ const c=s.info(dm).cost||{}; let v=0; for(const k in c) v+=(val[k]||0)*c[k]; return v; }catch(e){ return 0; } };
-  const idx0=new Map(SHOP.map((s,i)=>[s,i])), rank=c=>order.indexOf(c);
-  const sorted=[...SHOP].sort((a,b)=>{ const ra=rank(a.cat),rb=rank(b.cat); if(ra!==rb) return ra-rb; if(a.cat==='Base') return idx0.get(a)-idx0.get(b); return worth(a)-worth(b)||idx0.get(a)-idx0.get(b); });
+  const idx0=new Map(SHOP.map((s,i)=>[s,i])), rank=c=>order.indexOf(c), sub=s=>(s.cat==='Armes'&&!MELEE.has(s.id))?1:0;
+  const sorted=[...SHOP].sort((a,b)=>{ const ra=rank(a.cat),rb=rank(b.cat); if(ra!==rb) return ra-rb; if(a.cat==='Base') return idx0.get(a)-idx0.get(b); const sa=sub(a),sb=sub(b); if(sa!==sb) return sa-sb; return worth(a)-worth(b)||idx0.get(a)-idx0.get(b); });
   SHOP.length=0; SHOP.push(...sorted);
 }
 
