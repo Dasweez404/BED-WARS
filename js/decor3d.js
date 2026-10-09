@@ -36,6 +36,10 @@ function decModels(){
     a(Cy,'#fbbf24',[0,.3,0],[1.1,.04,1.1]); a(Cy,'#f59e0b',[0,.33,0],[.8,.03,.8]); a(Cy,'#fde68a',[0,.36,0],[.4,.03,.4]);
     for(let k=0;k<8;k++){ const t=k*Math.PI/4; a(Co,'#fbbf24',[Math.cos(t)*1.4,.34,Math.sin(t)*1.4],[.1,.35,.1],[Math.sin(t)*1.3,0,-Math.cos(t)*1.3]); }
     for(const [x,z] of [[-3.6,-3.6],[3.6,-3.6],[-3.6,3.6],[3.6,3.6]]){ a(B,'#7c8189',[x,.5,z],[.6,1,.6]); a(B,'#9aa0a8',[x,1.05,z],[.76,.12,.76]); a(B,'#2b2f3a',[x,1.2,z],[.42,.18,.42]); a(Co,'#fb923c',[x,1.45,z],[.2,.45,.2]); a(Co,'#fde047',[x,1.4,z],[.1,.3,.1]); } });
+  Mo.volcano=mk(a=>{ for(let k=0;k<5;k++){ const r=3.4-k*.5, h=.6; a(Cy,k%2?'#4a3a32':'#5a463b',[0,.3+k*.5,0],[r,h,r*.98]); }
+    a(Cy,'#ff5a1f',[0,2.52,0],[1.05,.1,1.05]); a(Cy,'#ffb347',[0,2.58,0],[.7,.08,.7]); a(S0,'#ff7a2a',[0,2.7,0],[.45,.3,.45]);
+    for(let k=0;k<10;k++){ const t=k*.628; a(B,'#ff6a1f',[Math.cos(t)*(1.2+k%3*.5),.5+(k%4)*.25,Math.sin(t)*(1.2+k%3*.5)],[.12,.5,.1],[0,t,.0]); }
+    for(let k=0;k<6;k++){ const t=k*1.05+.3; a(O,'#3a2d27',[Math.cos(t)*3.7,.2,Math.sin(t)*3.7],[.35,.3,.35],[k,k,0]); } });
   Mo.house=mk(a=>{ a(B,'#e8dcc0',[0,.5,0],[1.4,1,1.2]); a(B,'#6b4423',[0,1.05,0],[1.5,.08,1.3]); a(B,'#7c2d12',[0,1.45,0],[1.5,.5,.9],[0,0,0]); a(Co,'#7c2d12',[0,1.45,0],[.95,.8,.95],[0,Math.PI/4,0]);
     a(B,'#3b2412',[-.3,.35,.61],[.3,.7,.04]); a(B,'#fde68a',[.35,.6,.61],[.28,.28,.04]); a(B,'#6b4423',[.35,.6,.63],[.34,.04,.03]); a(B,'#fde68a',[1.0*0,.6,-.61],[.28,.28,.04]); a(B,'#4a4238',[.5,1.65,-.2],[.2,.5,.2]); a(B,'#dc2626',[0,.9,.64],[1.5,.06,.04]); });
   Mo.lamp=mk(a=>{ a(Cy,'#2b2f3a',[0,.55,0],[.04,1.1,.04]); a(B,'#2b2f3a',[0,1.12,0],[.2,.04,.2]); a(B,'#ffc861',[0,1.24,0],[.14,.18,.14]); a(Co,'#2b2f3a',[0,1.42,0],[.14,.1,.14]); });
@@ -60,13 +64,16 @@ function decBuild(){
   const near=(x,y,d)=>{ for(const t of TD) if(Math.hypot(x-t.bx,y-t.by)<d) return true; return false; };
   const rock=(x,y)=>{ if(free(x,y)) put('shell',x,y); };
   if(id==='atoll'||id==='scatter'){
+    if(id==='atoll'){ put('tiki',CX,CY,{s:3.2,ry:0}); for(const [dx,dy] of [[-4,-4],[4,-4],[-4,4],[4,4]]) put('tiki',CX+dx,CY+dy,{s:1.4,ry:Math.atan2(-dx,-dy)}); for(const [dx,dy] of [[0,-5],[5,0],[0,5],[-5,0]]) put('lamp',CX+dx,CY+dy,{s:1.3}); }
     for(const [x,y] of tiles){ if(!free(x,y)) continue; const e=edge(x,y), r=R();
       if(near(x,y,9)&&!near(x,y,4)&&r<.03) put('tiki',x,y,{s:1.1}); else if(near(x,y,10)&&!near(x,y,5)&&r<.07) put('hut',x,y,{s:1.05});
       else if(e&&r<.05) put('canoe',x,y); else if(r<(id==='atoll'?.08:.04)) put('tiare',x,y,{s:1.2}); else if(r<.1&&e) put('shell',x,y); }
   } else if(id==='jungle'){
+    put('volcano',CX,CY,{s:1.5,ry:0}); put('fern',CX+5,CY+3,{s:1.6}); put('fern',CX-5,CY-3,{s:1.6});
     for(const [x,y] of tiles){ if(!free(x,y)) continue; const r=R(), nb=near(x,y,5);
       if(nb&&r>.04) continue; if(r<.07) put('jtree',x,y,{s:.9+R()*.7}); else if(r<.2) put('fern',x,y,{s:.9+R()*.8}); else if(r<.23) put('shroom',x,y,{s:1+R()}); else if(r<.25) put('vine',x,y); else if(r<.28) put('tiare',x,y,{s:1.3}); }
   } else if(id==='tempest'){
+    put('wreck',CX,CY,{s:2.2,ry:.5,rz:.12,rx:.05}); put('bow',CX+4,CY-5,{s:1.6}); put('ribs',CX-5,CY+4,{s:1.5}); put('anchor',CX+3,CY+5,{s:1.4});
     for(const [x,y] of tiles){ if(!free(x,y)) continue; const e=edge(x,y), r=R(); if(near(x,y,6)) continue;
       if(r<.012) put('wreck',x,y,{s:1.1,rz:(R()-.5)*.25}); else if(r<.02) put('bow',x,y,{rz:(R()-.5)*.4}); else if(r<.03) put('ribs',x,y); else if(e&&r<.06) put('anchor',x,y,{s:.9}); else if(r<.09) put('shell',x,y); }
     for(let y=14;y<86;y+=3)for(let x=14;x<86;x+=3){ const p=[x+Math.floor(R()*3),y+Math.floor(R()*3)]; if(!water(p[0],p[1])) continue; if(R()<.06){ put(R()<.5?'wreck':'bow',p[0],p[1],{y:-.7,rz:.5*(R()-.5),rx:.2*(R()-.5),s:1.15}); } else if(R()<.04) put('buoy',p[0],p[1],{y:-.15}); }
@@ -88,4 +95,4 @@ function decBuild(){
 { const _on=onNewGame; onNewGame=function(){ _on(); try{ decBuild(); }catch(e){ console.error(e); } }; }
 
 /* Citadelle : pas de galion au centre, une place de temple à la place */
-{ const _bs=buildShip; buildShip=function(){ _bs(); if((game.opts.map)==='citadel'&&shipGroup){ scene.remove(shipGroup); shipGroup=null; } }; }
+{ const _bs=buildShip; buildShip=function(){ _bs(); if(['citadel','tempest','jungle','atoll'].includes(game.opts.map)&&shipGroup){ scene.remove(shipGroup); shipGroup=null; } }; }
