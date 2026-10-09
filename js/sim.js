@@ -572,7 +572,7 @@ function useGrapple(e){
 function jump(e,power){
   if(e.plume>0&&e.z>groundH(e)+3&&e.vz<=140&&!e.pull&&e.bubble<=0&&e.frozen<=0&&!e.riding&&e.alive){ e.plume--; e.vz=320; e.squash=-.3; sfx('jump',e.x,e.y); burst(e.x,e.y+6-e.z,'#bbf7d0',8,90,.5,3); ring(e.x,e.y+8-e.z,T*.7,'#4ade80',.25); floatTxt(e.x,e.y-40,'×'+e.plume,'#4ade80',13); return; }
   if(e.bubble>0||e.root>0||e.z>groundH(e)+1||e.vz>0||e.pull||e.frozen>0||e.riding) return;
-  if(fl(Math.floor(e.x/T),Math.floor(e.y/T))===0&&e.jetT<=0){ if(e.waterJumps>=1) return; e.waterJumps=(e.waterJumps||0)+1; } // un seul saut de rattrapage au-dessus de l'eau
+  if(fl(Math.floor(e.x/T),Math.floor(e.y/T))===0&&e.jetT<=0){ if(e.waterJumps>=1||e.voidT>.12) return; e.waterJumps=(e.waterJumps||0)+1; } // saut de rattrapage uniquement juste au bord (≈0,12 s) : plus de saut une fois dans l'eau
   sfx('jump',e.x,e.y); e.vz=Math.sqrt(Math.pow((power||(e.springT>0?540:320))*cv(e,'jump')*(e.relics&&e.relics.r_feather?1.1:1),2)+56000*(e.up.jmp||0)); // chaque niveau : +1 bloc de hauteur de saut e.squash=-.5; burst(e.x,e.y+6-e.z,'#e5e7eb',6,70,.3,3);
 }
 function useGadget(e,id,wx,wy){
