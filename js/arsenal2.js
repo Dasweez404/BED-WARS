@@ -43,7 +43,7 @@ function abilityCat(e,wx,wy){
   if(e===player&&NETCLIENT){ netSend({t:'act',a:'cat',x:Math.round(aim.x),y:Math.round(aim.y)}); return true; }
   if((e.pcd.catapult||0)>0){ if(e===player) floatTxt(e.x,e.y-36,'🪨 Recharge : '+Math.ceil(e.pcd.catapult)+' s','#cbd5e1',13); return false; }
   if((e.blocks[4]||0)<1){ floatTxt(e.x,e.y-34,'Il faut de la pierre','#fca5a5',14); return false; }
-  const x=wx===undefined?aim.x:wx, y=wy===undefined?aim.y:wy, [tx,ty]=aimPoint(e,x,y,76*T); e.blocks[4]--; e.pcd.catapult=6; bombs.push({x:e.x,y:e.y,tx,ty,fuse:1.15+Math.min(1.6,Math.hypot(tx-e.x,ty-e.y)/(40*T)),team:e.team,owner:e,kind:'bomb',R:1.6*T,dm:12,bd:3,h:20}); e.swing=.2; e.swingMax=.2; sfx('shot',e.x,e.y); floatTxt(e.x,e.y-38,'🪨 CATAPULTE !','#d6d3d1',14); return true; }
+  const x=wx===undefined?aim.x:wx, y=wy===undefined?aim.y:wy, [tx,ty]=aimPoint(e,x,y,95*T); e.blocks[4]--; e.pcd.catapult=6; bombs.push({x:e.x,y:e.y,tx,ty,fuse:1.15+Math.min(1.6,Math.hypot(tx-e.x,ty-e.y)/(45*T)),team:e.team,owner:e,kind:'bomb',R:1.6*T,dm:12,bd:3,h:20}); e.swing=.2; e.swingMax=.2; sfx('shot',e.x,e.y); floatTxt(e.x,e.y-38,'🪨 CATAPULTE !','#d6d3d1',14); return true; }
 { const _nh=netHostData; netHostData=function(team,m){ if(m&&m.t==='act'&&(m.a==='art'||m.a==='cat')){ const e=ents.find(o=>o.remote&&o.team===team); if(e&&e.alive&&NET.started){ if(m.a==='art') abilityArt(e,+m.x||e.x,+m.y||e.y); else abilityCat(e,+m.x||e.x,+m.y||e.y); } return; } _nh(team,m); }; }
 { const _u=useGadget2;
   useGadget2=function(e,id,wx,wy,ax,ay){

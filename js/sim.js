@@ -266,7 +266,7 @@ function spawnEnt(e){
   burst(e.x,e.y,TEAMS[e.team].light,14,160,.6,3);
   if(e.ai){e.ai.mode='home'; e.ai.leaveAt=e.ai.t+rnd(12,22)*(getD().leave[0]/40);}
 }
-const maxhp=e=>(e.pers==='batisseur'?4:e.pers==='kamikaze'?-3:0)+(e.isBot?getD().hp:20)+6*e.up.hp+cv(e,'hp')+(e.relics&&e.relics.r_hp?4:0);
+const maxhp=e=>(e.pers==='batisseur'?4:e.pers==='kamikaze'?-3:0)+(e.isBot?getD().hp+6:26)+6*e.up.hp+cv(e,'hp')+(e.relics&&e.relics.r_hp?4:0);
 const speedOf=e=>(game.mspd||1)*(e.carry?.78:1)*(e.pers==='kamikaze'?1.08:1)*(e.relics&&e.relics.r_speed?1.1:1)*(e.tiny>0?1.25:1)*(e.giant>0?.9:1)*(e.rage>0?1.2:1)*(e.curse>0?.75:1)*cv(e,'spd')*138*(1+.08*e.up.sp)*(e.jetT>0?1.3:1)*(e.isBot?getD().speed:1)*(e.slip>0?1.35:1)*(e.haste>0?1.5:1)*(e.slow>0?.55:1)*(e.flagBuff>0?1.2:1);
 function msg(txt,col){feed.push({txt,col:col||'#dbe4ff',t:7}); if(feed.length>4)feed.shift();}
 function announce(txt,col){banner.txt=txt;banner.col=col||'#fff';banner.t=banner.max;sfx('fanfare');}

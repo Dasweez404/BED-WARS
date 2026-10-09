@@ -125,7 +125,7 @@ function structNear(e){ if(!e||!e.alive||e.riding||!TD[e.team]) return null; con
   for(const key of ['art','catapult','scope']){ if(!((e.up[key]|0)>0)) continue; const [x,y]=structTile(td,key); if(Math.hypot((x+.5)*T-e.x,(y+.5)*T-e.y)<2.2*T) return key; } return null; }
 function useStruct(e,key){
   if(key==='art'){ if(e===player&&!NETCLIENT){ if(ART.on){ ART.on=false; return true; } return abilityArt(e); } return abilityArt(e,e.inp?e.inp.wx:e.x,e.inp?e.inp.wy:e.y); }
-  if(key==='catapult'){ if(e===player&&!NETCLIENT){ CAT.on=!CAT.on; if(CAT.on) msg('🪨 Catapulte : vise et clique pour lancer · E : descendre','#d6d3d1'); return true; } return abilityCat(e,e.inp?e.inp.wx:e.x,e.inp?e.inp.wy:e.y); }
+  if(key==='catapult'){ if(e===player&&!NETCLIENT){ CAT.on=!CAT.on; if(CAT.on) msg('🪨 Catapulte : ZQSD déplace la vue, vise et clique pour lancer (portée énorme) · E : descendre','#d6d3d1'); return true; } return abilityCat(e,e.inp?e.inp.wx:e.x,e.inp?e.inp.wy:e.y); }
   return false; }
 { const _bi=boatInteract;
   boatInteract=function(e){ if(e===player&&(ART.on||CAT.on)){ ART.on=false; CAT.on=false; return true; } const k=structNear(e); if(k) return useStruct(e,k); return _bi(e); };
@@ -136,7 +136,7 @@ function useStruct(e,key){
   const _dh=drawHud;
   drawHud=function(){ _dh(); if(game.state!=='play'||!ctx||!player||!player.alive||shopOpen||(typeof SCOPE!=='undefined'&&SCOPE.on)) return; const k=structNear(player); if(!k&&!ART.on&&!CAT.on) return;
     const touch=typeof TOUCH!=='undefined'&&TOUCH.on, cd=k==='art'?(player.pcd.artillery||0):(player.pcd.catapult||0);
-    const txt=ART.on?'':CAT.on?`🪨 Catapulte : clic pour lancer ${cd>0?'(recharge '+Math.ceil(cd)+' s)':''} · E : descendre`:`${touch?'🛒':'[E]'}  Utiliser ${k==='art'?'l\'artillerie 🎯':k==='scope'?'l\'observatoire 🔭':k==='lighthouse'?(player.tower?'la tour : redescendre 🗼':'la tour de guet : monter 🗼'):'la catapulte 🪨'}${cd>0?' ('+Math.ceil(cd)+' s)':''}`;
+    const txt=ART.on?'':CAT.on?`🪨 Catapulte : ZQSD = vue · clic = lancer ${cd>0?'(recharge '+Math.ceil(cd)+' s)':''} · E : descendre`:`${touch?'🛒':'[E]'}  Utiliser ${k==='art'?'l\'artillerie 🎯':k==='scope'?'l\'observatoire 🔭':k==='lighthouse'?(player.tower?'la tour : redescendre 🗼':'la tour de guet : monter 🗼'):'la catapulte 🪨'}${cd>0?' ('+Math.ceil(cd)+' s)':''}`;
     if(!txt) return; ctx.save(); ctx.setTransform(DPR,0,0,DPR,0,0); const pp=1+.03*Math.sin(game.t*5), w=Math.max(260,ctx.measureText(txt).width+40); ctx.translate(VW/2,VH-(touch?96:150)); ctx.scale(pp,pp); panel(-w/2,-15,w,30,15,'#fdba74'); ctx.fillStyle='#fdba74'; ctx.font='bold 15px '+FONT; ctx.textAlign='center'; ctx.fillText(txt,0,5); ctx.restore(); };
   // pas de blocs sur l'emplacement d'une structure
   const _pt=placeTarget; placeTarget=function(e,wx,wy){ const r=_pt(e,wx,wy); if(r&&STRFOOT.has(idx(r[0],r[1]))) return null; return r; };
