@@ -601,7 +601,7 @@ function useGadget(e,id,wx,wy){
     case 'chicken':{
       chickens.push({x:e.x,y:e.y,vx:ax*220,vy:ay*220,team:e.team,owner:e,t:7,ph:0,arm:.5}); break;}
     case 'guard':{
-      for(let k=0;k<2;k++) guards.push({x:e.x+rnd(-18,18),y:e.y+rnd(-18,18),team:e.team,owner:e,hp:18,t:1e6,cd:.5,vx:0,vy:0,ph:rnd(0,6),ang:e.ang});
+      for(let k=0;k<2;k++) guards.push({x:e.x+rnd(-18,18),y:e.y+rnd(-18,18),team:e.team,owner:e,hp:12,t:45,cd:.5,vx:0,vy:0,ph:rnd(0,6),ang:e.ang});
       ring(e.x,e.y,T*1.6,'#fff',.4,true); burst(e.x,e.y,'#fff',14,160,.5,4); break;}
     case 'repair':{
       const td=TD[e.team],ci=idx(td.bx,td.by); if(!td.coreAlive||hpW[ci]>=BHP[CORE]-.5) return false;
@@ -665,7 +665,7 @@ function useGadget(e,id,wx,wy){
       for(const o of ents){ if(!o.alive||o.team===e.team||Math.hypot(o.x-e.x,o.y-e.y)>3.6*T) continue; o.frozen=1.8; floatTxt(o.x,o.y-36,'GELÉ !','#7dd3fc',16); }
       break;}
     case 'decoy':
-      guards.push({x:e.x+ax*20,y:e.y+ay*20,team:e.team,owner:e,hp:32,t:1e6,cd:.5,vx:0,vy:0,ph:rnd(0,6),ang:e.ang}); ring(e.x,e.y,T*1.4,'#a3e635',.4,true); burst(e.x,e.y,'#bef264',14,160,.5,4); break;
+      guards.push({x:e.x+ax*20,y:e.y+ay*20,team:e.team,owner:e,hp:24,t:1e6,cd:.5,vx:0,vy:0,ph:rnd(0,6),ang:e.ang}); ring(e.x,e.y,T*1.4,'#a3e635',.4,true); burst(e.x,e.y,'#bef264',14,160,.5,4); break;
     case 'siren':{
       ring(e.x,e.y,T*6,'#c084fc',.8,true); ring(e.x,e.y,T*3,'#fff',.6); burst(e.x,e.y,'#e9d5ff',24,200,.8,4);
       for(const o of ents){ if(!o.alive||o.team===e.team) continue; const d=Math.hypot(o.x-e.x,o.y-e.y); if(d>6*T) continue; o.slow=3.5; o.vx+=(e.x-o.x)/(d||1)*380; o.vy+=(e.y-o.y)/(d||1)*380; floatTxt(o.x,o.y-36,'ENVOÛTÉ','#e9d5ff',15); }
@@ -824,7 +824,7 @@ const SHOP=[
   mk('repel','Gadgets',e=>({name:'Vague scélérate ×1',desc:'Projette tout le monde loin (dans le vide !).',cost:{silver:5}}),e=>e.repel+=1),
   gadItem('turret','Canon de pont','Tire seul sur les ennemis proches jusqu\'à ce qu\'il soit détruit.',{silver:14},1,'Défense'),
   gadItem('turret2','Canon givrant','Gèle brièvement les ennemis proches jusqu\'à ce qu\'il soit détruit.',{silver:16},1,'Défense'),
-  gadItem('guard','Matelots mercenaires','Deux matelots mercenaires (18 PV chacun) se battent pour toi pendant 45 s.',{silver:14},1,'Défense'),
+  gadItem('guard','Matelots mercenaires','Deux matelots mercenaires (12 PV chacun) se battent pour toi pendant 45 s.',{silver:14},1,'Défense'),
   gadItem('repair','Réparation du coffre','Répare ton coffre en 4,5 s (reste près de lui, sans te faire toucher) : jusqu\'à +35 % de sa vie.',{silver:8},1,'Défense'),
   gadItem('vortex','Maelström','Aspire les ennemis vers son centre pendant 3,5 s (après un court avertissement : la zone clignote).',{gold:2},1),
   gadItem('springs','Bottes de mousse','Sauts très hauts 25 s, et l\'atterrissage fait mal.',{silver:8},1),
@@ -1198,12 +1198,12 @@ function updateGuards(dt){
     g.t-=dt; g.cd-=dt; g.ph+=dt*8;
     const td=TD[g.team], cx=(td.bx+.5)*T, cy=(td.by+.5)*T;
     let foe=null,fd=1e9;
-    for(const o of ents){ if(!o.alive||o.team===g.team||o.cloak>0) continue; const d=Math.hypot(o.x-g.x,o.y-g.y), dc=Math.hypot(o.x-cx,o.y-cy); if((d<7*T||dc<9*T)&&d<fd){fd=d;foe=o;} }
+    for(const o of ents){ if(!o.alive||o.team===g.team||o.cloak>0) continue; const d=Math.hypot(o.x-g.x,o.y-g.y), dc=Math.hypot(o.x-cx,o.y-cy); if((d<5*T||dc<6.5*T)&&d<fd){fd=d;foe=o;} }
     let tx=cx+Math.cos(g.ph*.1)*T*2.5, ty=cy+Math.sin(g.ph*.1)*T*2.5;
     if(foe){ tx=foe.x; ty=foe.y; g.ang=Math.atan2(foe.y-g.y,foe.x-g.x); }
     const dx=tx-g.x,dy=ty-g.y,d=Math.hypot(dx,dy);
-    if(d>T*.9){ g.vx=dx/d*130; g.vy=dy/d*130; const nx=g.x+g.vx*dt,ny=g.y+g.vy*dt; if(fl(Math.floor(nx/T),Math.floor(ny/T))>0&&!wl(Math.floor(nx/T),Math.floor(ny/T))){g.x=nx;g.y=ny;} else g.vx=g.vy=0; } else g.vx=g.vy=0;
-    if(foe&&fd<T*1.4&&g.cd<=0){ g.cd=.8; g.swing=.2; hurt(foe,3,g.owner,Math.cos(g.ang)*260,Math.sin(g.ang)*260); sfx('swing',g.x,g.y); }
+    if(d>T*.9){ g.vx=dx/d*100; g.vy=dy/d*100; const nx=g.x+g.vx*dt,ny=g.y+g.vy*dt; if(fl(Math.floor(nx/T),Math.floor(ny/T))>0&&!wl(Math.floor(nx/T),Math.floor(ny/T))){g.x=nx;g.y=ny;} else g.vx=g.vy=0; } else g.vx=g.vy=0;
+    if(foe&&fd<T*1.3&&g.cd<=0){ g.cd=1.3; g.swing=.2; hurt(foe,1.5,g.owner,Math.cos(g.ang)*150,Math.sin(g.ang)*150); sfx('swing',g.x,g.y); }
     g.swing=Math.max(0,(g.swing||0)-dt);
   }
   guards=guards.filter(g=>{ if(g.t<=0||g.hp<=0){ burst(g.x,g.y,'#fff',12,160,.5,4); return false; } return true; });
