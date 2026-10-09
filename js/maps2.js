@@ -33,8 +33,8 @@ function whirlOn(){ return !!(MAPS[game.opts.map]||{}).whirl; }
       for(let dy=-11;dy<=11;dy++)for(let dx=-11;dx<=11;dx++){ const r=Math.max(Math.abs(dx),Math.abs(dy)); if(r!==10) continue;
         if(dx===0||dy===0) { if(Math.abs(dx)<=1&&Math.abs(dy)<=1) continue; if(Math.abs(dx)<=1||Math.abs(dy)<=1) continue; }
         const i=idx(CX+dx,CY+dy); if(floorT[i]){ wallT[i]=4; hpW[i]=BHP[4]*2; ownW[i]=-1; } }
-      spawners.push({x:CX,y:CY-5,kind:'dia',team:-1,types:{diamond:{t:0,stock:0,cap:Infinity,int:()=>34}}});
-      spawners.push({x:CX,y:CY+5,kind:'dia',team:-1,types:{diamond:{t:0,stock:0,cap:Infinity,int:()=>34}}});
+      spawners.push({x:CX,y:CY-5,kind:'dia',team:-1,types:{diamond:{t:0,stock:0,cap:Infinity,int:()=>48}}});
+      spawners.push({x:CX,y:CY+5,kind:'dia',team:-1,types:{diamond:{t:0,stock:0,cap:Infinity,int:()=>48}}});
     }
   };
   const _e=updateEvents;

@@ -104,7 +104,7 @@ function applyClass(e){
 }
 const MODES={solo:{n:'Chacun pour soi',d:'4 équipages, 1 pirate chacun.'},trio:{n:'Équipes de 3',d:'Toi + 2 coéquipiers bots. 3 pirates par équipage (12 au total), un coffre partagé.'},duo:{n:'Équipes de 2',d:'Tu es accompagné d\'un coéquipier bot. 2 pirates par équipage, un coffre partagé.'}};
 const OPT_RES=[{n:'Lentes',v:.6},{n:'Normales',v:.9},{n:'Rapides',v:1.3}];
-const DIA_INT=[Infinity,38,22,13];
+const DIA_INT=[Infinity,48,30,19];
 const OPT_START=[{n:'Aucun',r:{}},{n:'Laboratoire (illimité)',r:{bronze:9999,silver:9999,gold:9999,diamond:9999}},{n:'Petit pécule',r:{bronze:40,silver:10}},{n:'Butin de départ',r:{bronze:120,silver:40,gold:6,diamond:3}}];
 const OPT_CORE=[{n:'Fragiles',v:1.3},{n:'Normaux',v:2.5},{n:'Solides',v:4},{n:'Blindés',v:6.5}];
 let game={state:'menu',diff:'normal',cls:'matelot',look:{skin:0,hat:0,hair:0,face:0,patch:1},pname:'Toi',opts:{bossf:1,endg:2,ctr:1,style:'3d',mode:'solo',map:'classic',res:.9,start:0,core:1,stack:3,roster:40,evf:2,ev:{coins:1,curse:1,shark:1,storm:1,volcano:1,fog:1,kraken:1,rush:1}},t:0,win:false,hurtFx:0,hitmark:0,flash:0,flashCol:'#fff'};
@@ -222,7 +222,7 @@ function newGame(){
   for(const [rx,ry] of MAP.relay) island(rx,ry,2,3,5);
   for(const [dx,dy] of MAP.dia){
     island(dx,dy,2,3,5);
-    spawners.push({x:dx,y:dy,kind:'dia',team:-1,types:{diamond:{t:0,stock:0,cap:Infinity,int:()=>22}}});
+    spawners.push({x:dx,y:dy,kind:'dia',team:-1,types:{diamond:{t:0,stock:0,cap:Infinity,int:()=>34}}});
   }
   for(const [ox,oy] of [[-2,0],[2,0],[0,-2],[0,2]])
     spawners.push({x:CX+ox,y:CY+oy,kind:'gold',team:-1,types:{gold:{t:0,stock:0,cap:Infinity,int:()=>48}}});
@@ -885,6 +885,7 @@ function buy(e,id){
   it.buy(e); return true;
 }
 const nearBase=e=>{const td=TD[e.team];return Math.hypot(e.x-(td.bx+.5)*T,e.y-(td.by+.5)*T)<9*T;};
+const nearShop=e=>nearBase(e)||TD.some(td=>td.id!==e.team&&teamElim(td.id)&&Math.hypot(e.x-(td.bx+.5)*T,e.y-(td.by+.5)*T)<9*T); // la boutique d'une équipe éliminée est ouverte à tous
 
 /* UI boutique */
 const shopEl=document.getElementById('shop'); let shopOpen=false, shopTab='Blocs';
@@ -909,7 +910,7 @@ function renderShop(){
 function toggleShop(force){
   if(game.state!=='play') return;
   const want=force!==undefined?force:!shopOpen;
-  if(want&&!nearBase(player)){floatTxt(player.x,player.y-34,'Retourne à ta base !','#fbbf24',15);return;}
+  if(want&&!nearShop(player)){floatTxt(player.x,player.y-34,'Retourne à ta base !','#fbbf24',15);return;}
   if(want&&!player.alive) return;
   shopOpen=want; shopEl.classList.toggle('hidden',!shopOpen); document.body.classList.toggle('shop',shopOpen); sfx('ui'); renderShop();
 }
@@ -995,7 +996,7 @@ function updateSpawners(dt){
     for(const r in sp.types){
       const ty=sp.types[r], iv=ty.int();
       if(iv===Infinity) continue;
-      ty.t+=dt*(game.opts.res||1)*(sp.kind!=='base'&&EV.rush?3:1);
+      ty.t+=dt*(game.opts.res||1)*((game.opts.rate&&game.opts.rate[r])||1)*(sp.kind!=='base'&&EV.rush?3:1);
       while(ty.t>=iv){ty.t-=iv; ty.stock++;}
     }
     const R=(sp.kind==='base'?6:2.3)*T, cx=(sp.x+.5)*T, cy=(sp.y+.5)*T;
@@ -1243,7 +1244,7 @@ function update(dt){
   }
   updateFx(dt);
   syncBar(player); if(!player.bar.includes(selId)) selId='sword';
-  if(shopOpen&&(!player.alive||!nearBase(player))) toggleShop(false);
+  if(shopOpen&&(!player.alive||!nearShop(player))) toggleShop(false);
 }
 
 /* =====================  JOUEUR  ===================== */
@@ -1402,7 +1403,7 @@ function botDefend(b,dt){
   else if((am.repair||0)>0&&hpW[idx(td.bx,td.by)]<BHP[CORE]*.6) useGadget(b,'repair',b.x,b.y);
 }
 function botBuy(b){
-  if(!nearBase(b)) return;
+  if(!nearShop(b)) return;
   for(const [id,cond] of BOT_BUY){
     if(!inRoster(id)||!cond(b)) continue;
     const inf=SHOPMAP[id].info(b); if(inf.ok===false||!canAfford(b,inf.cost)) continue;

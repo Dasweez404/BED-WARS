@@ -86,7 +86,7 @@ function netHostData(team,m){
     else if(m.a==='sw') swapPack(e,e.inp.sel);
     else if(m.a==='boat') boatInteract(e);
   }
-  else if(m.t==='buy'){ if(e.alive&&nearBase(e)&&buy(e,String(m.id))){ ring(e.x,e.y,T*1.2,'#fde68a',.35); floatTxt(e.x,e.y-40,'Acheté !','#fde68a',15); } }
+  else if(m.t==='buy'){ if(e.alive&&nearShop(e)&&buy(e,String(m.id))){ ring(e.x,e.y,T*1.2,'#fde68a',.35); floatTxt(e.x,e.y-40,'Acheté !','#fde68a',15); } }
 }
 function netHostDrop(team){
   const s=NET.slots[team]; delete NET.slots[team];
@@ -266,7 +266,7 @@ function netClientFrame(dt){
   if(game.state==='play'){
     if(!me.bar.includes(selId)) selId='sword'; me.held=selId; if(me.alive&&me.slip<=0) me.ang=Math.atan2(aim.y-me.y,aim.x-me.x);
     if(me.alive&&me.frozen<=0&&me.bubble<=0&&me.root<=0&&!me.pull&&!NET.ff&&!me.riding&&!me.pilot){ const sp=speedOf(me); moveEnt(me,li.ix*sp*dt,li.iy*sp*dt); }
-    if(shopOpen&&(!me.alive||!nearBase(me))) toggleShop(false);
+    if(shopOpen&&(!me.alive||!nearShop(me))) toggleShop(false);
   }
   mouse.clicked=false;
   const k=Math.min(1,dt*16);
