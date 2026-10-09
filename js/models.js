@@ -202,7 +202,7 @@ let PV0=null;
 function renderPreview(t){
   if(!PV) return; PV.n++; if(PV.n%3) return;
   const look=lookOf(game.look), key=lookKey(look)+'|'+game.cls;
-  if(key!==PV.key){ if(PV.g) PV.sc.remove(PV.g); PV.g=createPirate(TEAMS[0],{look}); PV.g.userData.heldMesh=null; PV.sc.add(PV.g); PV.key=key; if(SPR2D()){ PV.cam.position.set(1.7,1.0,2.6); PV.cam.lookAt(0,.6,0); } else { PV.cam.position.set(1.15,.62,1.75); PV.cam.lookAt(0,.36,0); } }
+  if(key!==PV.key){ if(PV.g) PV.sc.remove(PV.g); PV.g=createPirate(TEAMS[0],{look,cls:game.cls}); PV.g.userData.heldMesh=null; PV.sc.add(PV.g); PV.key=key; if(SPR2D()){ PV.cam.position.set(1.7,1.0,2.6); PV.cam.lookAt(0,.6,0); } else { PV.cam.position.set(1.15,.62,1.75); PV.cam.lookAt(0,.36,0); } }
   const g=PV.g, u=g.userData; g.rotation.y=-.5+Math.sin(t*.8)*.7; u.body.position.y=.07+Math.abs(Math.sin(t*2.4))*.03; u.head.rotation.z=Math.sin(t*2.2)*.06; u.armR.rotation.z=1.0+Math.sin(t*2)*.05;
   if(u.spr) updateSprite({ang:0,z:0,x:0,y:0,ix:0,iy:0,stepPh:0,held:'sword',sword:1,bsel:2,team:0,flash:0,cloak:0,frozen:0,curse:0,squash:0,stickT:0},g);
   const ca=renderer.getClearAlpha(); renderer.setRenderTarget(PV.rt); renderer.render(PV.sc,PV.cam); renderer.setRenderTarget(null);

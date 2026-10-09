@@ -6,7 +6,7 @@ const RAG={list:[],prev:new WeakMap(),max:10,G:-26};
 function ragGround(x,y){ const tx=Math.floor(x/T), ty=Math.floor(y/T); if(tx<0||ty<0||tx>=W||ty>=H||fl(tx,ty)<=0) return -Infinity; const t=wallTop(tx,ty); return (t>0?t:0)*U; }
 function ragSpawn(e){
   if(RAG.list.length>=RAG.max){ const o=RAG.list.shift(); scene.remove(o.g); }
-  const g=createPirate(TEAMS[e.team],{look:e.look}), u=g.userData; scene.add(g);
+  const g=createPirate(TEAMS[e.team],{look:e.look,cls:e.cls}), u=g.userData; scene.add(g);
   const sp=Math.hypot(e.vx||0,e.vy||0)*U; // direction de projection : toujours vers l'ARRIÈRE du pirate
   const dirx=sp>.2?(e.vx*U)/sp:-Math.cos(e.ang||0), dirz=sp>.2?(e.vy*U)/sp:-Math.sin(e.ang||0), k=Math.min(1,10/Math.max(sp,.001));
   const vx=(e.vx||0)*U*k+dirx*2.5+(Math.random()-.5)*1.2, vz=(e.vy||0)*U*k+dirz*2.5+(Math.random()-.5)*1.2, vy=5.2+Math.min(4,sp*.25)+Math.random()*2.2;
