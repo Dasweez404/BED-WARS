@@ -36,7 +36,7 @@ const ITEMS=[
   {id:'mine',n:'Mine marine',ico:'🧿',col:'#9ca3af'},{id:'banana',n:'Peau de banane',ico:'🍌',col:'#fde047'},{id:'net',n:'Filet piégé',ico:'🥅',col:'#d6dde6'},{id:'guard',n:'Matelots gardiens',ico:'💀',col:'#fff'},
   {id:'repair',n:'Réparation du coffre',ico:'🔧',col:'#86efac'},{id:'flag',n:'Pavillon noir',ico:'🏴',col:'#111827'},{id:'buoy',n:'Bouée de sauvetage',ico:'🛟',col:'#fb923c'},{id:'shield',n:'Bouclier de brume',ico:'🛡️',col:'#60a5fa'},
   {id:'trident',n:'Trident de Poséidon',ico:'🔱',col:'#38bdf8'},{id:'gatling',n:'Poivrière rotative',ico:'🌶️',col:'#f87171'},{id:'javelin',n:'Javelot de chasse',ico:'🗡',col:'#e5e7eb'},{id:'flarebow',n:'Arc incendiaire',ico:'🏹',col:'#fb923c'},
-  {id:'swap',n:'Perroquet farceur',ico:'🦜',col:'#f472b6'},{id:'frostnova',n:'Souffle du spectre',ico:'👻',col:'#7dd3fc'},{id:'decoy',n:'Matelot mercenaire',ico:'🧟',col:'#a3e635'},
+  {id:'swap',n:'Singe farceur',ico:'🐒',col:'#f472b6'},{id:'frostnova',n:'Souffle du spectre',ico:'👻',col:'#7dd3fc'},{id:'decoy',n:'Matelot mercenaire',ico:'🧟',col:'#a3e635'},
   {id:'siren',n:'Chant des sirènes',ico:'🧜',col:'#c084fc'},{id:'quake',n:'Séisme',ico:'🌋',col:'#f97316'},{id:'aegis',n:'Médaillon doré',ico:'🏅',col:'#fde047'},{id:'coco',n:'Noix de coco explosive',ico:'🥥',col:'#a16207'}
 ];
 const ITEMMAP={}; ITEMS.forEach(i=>ITEMMAP[i.id]=i);
@@ -89,7 +89,7 @@ const CLASSES={
   matelot:{n:'Matelot',ico:'⚓',d:'Polyvalent : aucun point fort, aucune faiblesse.',pros:[],cons:[]},
   corsaire:{n:'Corsaire',ico:'🗡️',d:'Maître du sabre, un peu lourd à manœuvrer.',melee:1.2,spd:.92,hp:2,start:{sword:1},pros:['+20 % dégâts de mêlée','Sabre d\'abordage au départ','+2 PV'],cons:['−8 % vitesse']},
   canonnier:{n:'Canonnier',ico:'💣',d:'Spécialiste des armes à feu, fragile.',gun:1.25,rel:.8,hp:-4,start:{own:['gun']},pros:['+25 % dégâts à distance','Rechargement −20 %','Pistolet au départ'],cons:['−4 PV']},
-  eclaireur:{n:'Éclaireur',ico:'🧭',d:'Rapide et agile, mais peu résistant.',spd:1.15,jump:1.2,hp:-4,melee:.8,start:{am:{springs:1}},pros:['+15 % vitesse','Sauts +20 %','Bottes de mousse au départ'],cons:['−4 PV','−20 % dégâts de mêlée']},
+  eclaireur:{n:'Éclaireur',ico:'🧭',d:'Rapide et agile, mais peu résistant.',spd:1.15,jump:1.2,hp:-4,melee:.8,start:{am:{}},pros:['+15 % vitesse','Sauts +20 %'],cons:['−4 PV','−20 % dégâts de mêlée']},
   charpentier:{n:'Charpentier',ico:'🔨',d:'Bâtisseur économe, peu combatif à distance.',free:.3,mine:1.5,gun:.85,start:{blocks:16},pros:['30 % de blocs gratuits','Minage +50 %','+16 blocs au départ'],cons:['−15 % dégâts à distance']},
   brute:{n:'Brute',ico:'🛢️',d:'Une montagne de muscles, lente et peu inventive.',hp:10,def:.9,kb:.6,spd:.92,gcd:1.4,pros:['+10 PV','−10 % dégâts reçus','Repoussé 40 % de moins'],cons:['−8 % vitesse','Gadgets : recharge +40 %']},
   mystique:{n:'Mystique',ico:'🔮',d:'Un as des gadgets, fragile au corps à corps.',gcd:.5,hp:-6,melee:.85,start:{am:{haste:1,cloak:1}},pros:['Gadgets 2× plus rapides','Rhum et brume au départ'],cons:['−6 PV','−15 % dégâts de mêlée']},
@@ -615,11 +615,8 @@ function useGadget(e,id,wx,wy){
       const d=Math.min(Math.hypot(wx-e.x,wy-e.y),10*T);
       pearls.push({x:e.x,y:e.y,tx:e.x+ax*d,ty:e.y+ay*d,owner:e,t:0}); break;}
     case 'bridge':{
-      let n=0; const horiz=Math.abs(ax)>Math.abs(ay), sx=horiz?Math.sign(ax):0, sy=horiz?0:Math.sign(ay);
-      let tx=Math.floor(e.x/T),ty=Math.floor(e.y/T);
-      for(let k=0;k<8;k++){
-        tx+=sx;ty+=sy; if(!inb(tx,ty)||wl(tx,ty)>0) break;
-        const i=idx(tx,ty);
+      let n=0; const L=bridgeLine(e,ax,ay,8);
+      for(let k=0;k<L.length;k++){ const [tx,ty]=L[k], i=idx(tx,ty);
         if(floorT[i]===0){ floorT[i]=2; hpF[i]=BHP[2]; ownF[i]=e.team; pop[i]=1+k*.08; n++; }
       }
       if(!n) return false; burst(e.x,e.y,'#fde047',10,140,.4,3); break;}
@@ -632,7 +629,7 @@ function useGadget(e,id,wx,wy){
       const dx=wx-e.x,dy=wy-e.y,d=Math.hypot(dx,dy)||1,m=Math.min(d,9*T);
       traps.push({kind:'vortex',x:e.x+dx/d*m,y:e.y+dy/d*m,t:3.5,age:0,team:e.team,owner:e}); break;}
     case 'springs': e.springT=25; floatTxt(e.x,e.y-34,'SUPER SAUT !','#4ade80',15); burst(e.x,e.y,'#4ade80',12,140,.5,3); break;
-    case 'cloak': e.cloak=7; floatTxt(e.x,e.y-34,'INVISIBLE','#e5e7eb',15); burst(e.x,e.y,'#e5e7eb',14,140,.5,3); break;
+    case 'cloak': for(const m of ents){ if(!m.alive||m.team!==e.team) continue; m.cloak=Math.max(m.cloak,7); m.haste=Math.max(m.haste,2.5); floatTxt(m.x,m.y-34,'INVISIBLE','#e5e7eb',15); burst(m.x,m.y,'#e5e7eb',14,140,.5,3); smoke(m.x,m.y,8,10,1.2); } break;
     case 'haste': e.haste=8; floatTxt(e.x,e.y-34,'VITESSE !','#38bdf8',15); burst(e.x,e.y,'#38bdf8',14,160,.5,3); break;
     case 'wallgad':{
       const tx=Math.floor(wx/T),ty=Math.floor(wy/T); if(Math.hypot((tx+.5)*T-e.x,(ty+.5)*T-e.y)>3.7*T) return false;
@@ -778,6 +775,9 @@ function gunItem(id,name,desc,cost){
 function gadItem(id,name,desc,cost,n,cat){
   return mk(id,cat||'Gadgets',e=>({name:`${name} ×${n}`,desc,cost}),e=>{e.am[id]=(e.am[id]||0)+n;});
 }
+function bridgeLine(e,ax,ay,n){ // cases visées dans n'importe quelle direction (pas seulement les 4 axes) : on suit la ligne vers le curseur
+  const a=Math.atan2(ay,ax), out=[], seen=new Set(); for(let k=1;k<=n*1.6&&out.length<n;k++){ const tx=Math.floor((e.x+Math.cos(a)*k*T*.62)/T), ty=Math.floor((e.y+Math.sin(a)*k*T*.62)/T); if(!inb(tx,ty)) break; const i=idx(tx,ty); if(seen.has(i)) continue; seen.add(i);
+    if(tx===Math.floor(e.x/T)&&ty===Math.floor(e.y/T)) continue; if(wl(tx,ty)>0) break; out.push([tx,ty]); } return out; }
 function wallRing(e){
   const td=TD[e.team];
   for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
@@ -832,7 +832,7 @@ const SHOP=[
   gadItem('repair','Réparation du coffre','Répare ton coffre en 4,5 s (reste près de lui, sans te faire toucher) : jusqu\'à +35 % de sa vie.',{silver:8},1,'Défense'),
   gadItem('vortex','Maelström','Aspire les ennemis vers son centre pendant 3,5 s.',{gold:2},1),
   gadItem('springs','Bottes de mousse','Sauts très hauts 25 s, et l\'atterrissage fait mal.',{silver:8},1),
-  gadItem('cloak','Brume magique','Invisible 7 s : les bots ne te voient plus de loin.',{silver:10},1),
+  gadItem('cloak','Brume magique','Toi et ton équipe devenez invisibles 7 s et courez plus vite 2,5 s : les ennemis ne vous voient plus de loin.',{silver:10},1),
   gadItem('haste','Rhum de contrebande','+50 % de vitesse pendant 8 s.',{bronze:30},1),
   gadItem('wallgad','Palissade','Dresse une palissade de 3 planches en un clic.',{silver:7},2,'Défense'),
   gadItem('storm','Orage','La foudre frappe la zone visée après 1 s.',{gold:2},2),
@@ -850,7 +850,7 @@ const SHOP=[
   gunItem('gatling','Poivrière rotative','Chargeur de 90, rafale folle, le spray s\'ouvre vite.',{gold:4}),
   gunItem('javelin','Javelot de chasse','Deux lancers perçants très puissants.',{silver:16}),
   gunItem('flarebow','Arc incendiaire','Flèches de feu : l\'ennemi brûle plusieurs secondes.',{gold:3}),
-  gadItem('swap','Perroquet farceur','Échange ta place avec l\'ennemi visé (11 cases). Idéal au bord du vide !',{gold:2},1),
+  gadItem('swap','Singe farceur','Échange ta place avec l\'ennemi visé (11 cases). Idéal au bord du vide !',{gold:2},1),
   gadItem('frostnova','Souffle du spectre','Gèle tous les ennemis autour de toi pendant 1,8 s.',{gold:2},1),
   gadItem('decoy','Matelot mercenaire','Un costaud (32 PV) se bat pour toi pendant 30 s.',{silver:12},1,'Défense'),
   gadItem('siren','Chant des sirènes','Attire et ralentit les ennemis dans un grand rayon.',{silver:14},1),
@@ -864,7 +864,7 @@ const SHOP=[
   upItem('sp','Agilité',3,[3,5,8],['+8% vitesse','+8% vitesse','+8% vitesse']),
   upItem('ar','Armure',3,[3,5,8],['-12% dégâts','-12% dégâts','-12% dégâts']),
   upItem('core','Blindage du coffre',3,[4,6,9],['Le coffre au trésor subit -20% de dégâts','-35% de dégâts','-50% de dégâts'],null),
-  upItem('jmp','Ressorts aux bottes',3,[3,5,8],['Tu sautes 1 bloc de plus','Tu sautes 2 blocs de plus','Tu sautes 3 blocs de plus']),
+  upItem('jmp','Ressorts aux bottes',3,[3,5,8],['Tu sautes 1 bloc de plus','Tu sautes 2 blocs de plus · plus aucun dégât de chute','Tu sautes 3 blocs de plus · plus aucun dégât de chute']),
   upItem('reg','Régénération',3,[3,5,8],['Soin plus rapide : +0,5 PV/s, délai −1,1 s','+1 PV/s, délai −2,2 s','+1,5 PV/s, délai −3,3 s']),
   upItem('vamp','Vampirisme',3,[4,6,9],['Tu récupères 8 % des dégâts infligés','16 % des dégâts infligés','24 % des dégâts infligés']),
   upItem('rel','Rechargement express',3,[3,5,8],['Recharge des armes −12 %','−24 %','−36 %']),
@@ -952,7 +952,7 @@ function updateEnt(e,dt){
   else if(e.z>gh||e.vz>0){
     e.vz-=1000*dt; { const gcl=e.flight>0?-42:-80; if(e.glide>0&&e.vz<gcl) e.vz=gcl; } e.z+=e.vz*dt;
     if(e.z<=gh&&e.vz<=0){ const imp=-e.vz; e.z=gh; e.vz=0;
-      { const drop=(e.tkH||0)-gh; e.tkH=gh; if(drop>56&&!(e.glide>0)&&!(e.springT>0)&&!e.riding&&!(e.relics&&e.relics.r_feather)){ const fd=(drop-56)*.12; floatTxt(e.x,e.y-34,'AÏE !','#fca5a5',15); sfx('hit',e.x,e.y); e.fallDeath=true; hurt(e,fd,null,0,0); e.fallDeath=false; } } if(e.springT>0&&imp>380){ ring(e.x,e.y,T*2,'#4ade80',.4,true); shake=Math.max(shake,e===player?7:3); for(const o of ents) if(o.alive&&o.team!==e.team&&Math.hypot(o.x-e.x,o.y-e.y)<T*2) hurt(o,3,e,(o.x-e.x)*6,(o.y-e.y)*6); }
+      { const drop=(e.tkH||0)-gh; e.tkH=gh; if(drop>56&&!(e.glide>0)&&!(e.springT>0)&&!((e.up.jmp|0)>=2)&&!e.riding&&!(e.relics&&e.relics.r_feather)){ const fd=(drop-56)*.12; floatTxt(e.x,e.y-34,'AÏE !','#fca5a5',15); sfx('hit',e.x,e.y); e.fallDeath=true; hurt(e,fd,null,0,0); e.fallDeath=false; } } if(e.springT>0&&imp>380){ ring(e.x,e.y,T*2,'#4ade80',.4,true); shake=Math.max(shake,e===player?7:3); for(const o of ents) if(o.alive&&o.team!==e.team&&Math.hypot(o.x-e.x,o.y-e.y)<T*2) hurt(o,3,e,(o.x-e.x)*6,(o.y-e.y)*6); }
       if(imp>180){e.squash=Math.min(1,imp/550); burst(e.x,e.y+6-gh,'#e5e7eb',8,110,.35,3); ring(e.x,e.y+8-gh,T*.6,'#ffffff',.25);} }
   } else { e.z=gh; e.tkH=gh; }
   // mouvement

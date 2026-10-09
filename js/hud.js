@@ -69,7 +69,7 @@ const TIPS={block:'Clic : poser (pont sur le vide, mur sur le sol) · C / clic d
   grap:'Clic : accroche un bloc ou un ennemi',jet:'Clic : vol 4 s',dash:'Clic : dash',trampo:'Clic : pose un trampoline',tp:'Clic : lance la perle',bridge:'Clic : 8 blocs de pont',
   bomb:'Clic : lance une bombe',repel:'Clic : onde de choc',mine:'Clic : pose une mine',banana:'Clic : pose une banane',chicken:'Clic : lance un mouton kamikaze',heal:'Clic : +12 PV',shield:'Clic : dôme de protection',
   turret:'Clic : pose une tourelle automatique',turret2:'Clic : pose une tourelle givrante',guard:'Clic : appelle deux moutons gardiens',repair:'Clic : répare ton mouton ultime',
-  hammer2:'',springs:'Clic : super sauts 25 s',cloak:'Clic : invisible 7 s',haste:'Clic : vitesse +50 % 8 s',wallgad:'Clic : mur de 3 blocs',storm:'Clic : foudre sur la zone visée',cluster:'Clic : bombe à fragmentation',vortex:'Clic : trou noir qui aspire'};
+  hammer2:'',springs:'Clic : super sauts 25 s',cloak:'Clic : toi et ton équipe invisibles 7 s',haste:'Clic : vitesse +50 % 8 s',wallgad:'Clic : mur de 3 blocs',storm:'Clic : foudre sur la zone visée',cluster:'Clic : bombe à fragmentation',vortex:'Clic : trou noir qui aspire'};
 Object.assign(TIPS,TIPS2);
 Object.assign(TIPS,{pick:'Maintiens le clic pour casser blocs, ponts et le coffre ennemi (tes propres blocs te sont rendus)',baa:'Clic : souffle de brume qui repousse les ennemis et dévie les tirs',
   glove:'Clic : coup de crochet qui projette très loin',hammer:'Clic : onde de choc qui projette et casse les blocs',bow:'Clic : tirer un carreau (recharge entre chaque tir)',
@@ -79,7 +79,7 @@ Object.assign(TIPS,{pick:'Maintiens le clic pour casser blocs, ponts et le coffr
   jet:'Clic : le perroquet te porte 4 s',dash:'Clic : élan',trampo:'Clic : pose un hamac rebondissant',tp:'Clic : lance la boussole, tu t\'y téléportes',bridge:'Clic : 8 planches de passerelle',
   bomb:'Clic : lance un baril de poudre',repel:'Clic : vague qui repousse tout le monde',mine:'Clic : pose une mine marine',banana:'Clic : pose une peau de banane',chicken:'Clic : lance un crabe kamikaze',
   heal:'Clic : +12 PV',shield:'Clic : érige un rempart autour de ton île (porte vers le centre) avec tes blocs',turret:'Clic : pose un canon de pont automatique',turret2:'Clic : pose un canon givrant',guard:'Clic : appelle deux matelots gardiens',
-  repair:'Clic : répare ton coffre au trésor',springs:'Clic : super sauts 25 s',cloak:'Clic : invisible 7 s',haste:'Clic : vitesse +50 % 8 s',wallgad:'Clic : palissade de 3 planches',
+  repair:'Clic : répare ton coffre au trésor',springs:'Clic : super sauts 25 s',cloak:'Clic : toi et ton équipe invisibles 7 s',haste:'Clic : vitesse +50 % 8 s',wallgad:'Clic : palissade de 3 planches',
   storm:'Clic : l\'orage frappe la zone visée',cluster:'Clic : baril qui explose en 6 mini-barils',vortex:'Clic : maelström qui aspire',flag:'Clic : pavillon noir : soigne tes alliés, ralentit les ennemis',
   anchor:'Clic : jette une ancre qui assomme',buoy:'Passif : te repêche si tu tombes à la mer',kraken:'Clic : un tentacule frappe la zone',barrage:'Clic : 6 boulets sur la zone visée',net:'Clic : pose un filet piégé'});
 function hotbarRect(n){ const s=Math.min(52,Math.max(24,(VW-30)/Math.max(1,n)-6)),g=6; return {s,g,x:(VW-n*(s+g)+g)/2,y:VH-s-14}; }
@@ -176,10 +176,8 @@ function drawAim(){
     case 'dash':{
       for(let k=1;k<=4;k++){ const px=e.x+Math.cos(ang)*k*T,py=e.y+Math.sin(ang)*k*T, s=w2s(px,py,8), s2=w2s(px+Math.cos(ang)*10,py+Math.sin(ang)*10,8); ctx.globalAlpha=.9-k*.17; ctx.strokeStyle='#e0f2fe'; ctx.lineWidth=3.5; const dxs=s2[0]-s[0],dys=s2[1]-s[1],n=Math.hypot(dxs,dys)||1,nx=-dys/n*8,ny=dxs/n*8; ctx.beginPath(); ctx.moveTo(s[0]-dxs/n*6+nx,s[1]-dys/n*6+ny); ctx.lineTo(s[0]+dxs/n*6,s[1]+dys/n*6); ctx.lineTo(s[0]-dxs/n*6-nx,s[1]-dys/n*6-ny); ctx.stroke(); }
       ctx.globalAlpha=1; break;}
-    case 'bridge':{
-      const horiz=Math.abs(Math.cos(ang))>Math.abs(Math.sin(ang)), sx=horiz?Math.sign(Math.cos(ang)):0, sy=horiz?0:Math.sign(Math.sin(ang));
-      let tx=Math.floor(e.x/T),ty=Math.floor(e.y/T);
-      for(let k=0;k<8;k++){ tx+=sx;ty+=sy; if(!inb(tx,ty)||wl(tx,ty)>0) break; if(fl(tx,ty)===0) gQuad(tx,ty,'#fde047',.28,0); }
+    case 'bridge':case 'bridge2':{
+      for(const [tx,ty] of bridgeLine(e,Math.cos(ang),Math.sin(ang),8)) if(fl(tx,ty)===0) gQuad(tx,ty,id==='bridge'?'#fde047':'#cbd5e1',.28,0);
       break;}
     case 'trampo':case 'banana':case 'turret':case 'turret2':{
       const tx=Math.floor(wx/T),ty=Math.floor(wy/T), ok=fl(tx,ty)>0&&wl(tx,ty)===0&&Math.hypot((tx+.5)*T-e.x,(ty+.5)*T-e.y)<=3.7*T;

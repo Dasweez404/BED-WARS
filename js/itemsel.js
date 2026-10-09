@@ -4,7 +4,7 @@
 const ITEMSEL_LOCK=['wool','core','wall','pick','sword'];
 const ISEL={cat:'Tous',q:'',cache:null};
 /* objets retirés par défaut (doublons) : triple arbalète, lance-écume, lance-filet, canon à pop-corn, canon à ressort, masse de forgeron (≈ hache de guerre) */
-const DEF_OFF=['crossbow3','bubble','woolgun','popcorn','pogo','hammer'];
+const DEF_OFF=[]; // (les doublons sont maintenant retirés pour de bon, voir GONE_IDS)
 function ensureDefaultOff(){ if(!game.opts||(game.opts.offV|0)>=1) return; game.opts.off=game.opts.off||{}; for(const id of DEF_OFF) game.opts.off[id]=1; game.opts.offV=1; if(typeof saveOpts==='function') saveOpts(); }
 { const _n=newGame; newGame=function(){ ensureDefaultOff(); _n(); }; }
 function itemselMeta(it){

@@ -73,8 +73,8 @@ function useGadget2(e,id,wx,wy,ax,ay){
     case 'stonewall':{ const horiz=Math.abs(ax)>Math.abs(ay); const [px,py]=aimPoint(e,wx,wy,3.7*T), tx=Math.floor(px/T), ty=Math.floor(py/T); let n=0;
       for(let k=-2;k<=2;k++){ const x2=tx+(horiz?0:k),y2=ty+(horiz?k:0),i=inb(x2,y2)?idx(x2,y2):-1; if(i<0||floorT[i]===0||wallT[i]||spawnerAt(x2,y2)||protectedTile(x2,y2,e.team)||wallBlockedByEnt((x2+.5)*T,(y2+.5)*T)) continue; wallT[i]=STONE; hpW[i]=BHP[STONE]; ownW[i]=e.team; pop[i]=1; n++; chunks((x2+.5)*T,(y2+.5)*T,BCOL[4][0],4); }
       return n>0; }
-    case 'bridge2':{ let n=0; const horiz=Math.abs(ax)>Math.abs(ay), sx=horiz?Math.sign(ax):0, sy=horiz?0:Math.sign(ay); let tx=Math.floor(e.x/T),ty=Math.floor(e.y/T);
-      for(let k=0;k<8;k++){ tx+=sx;ty+=sy; if(!inb(tx,ty)||wl(tx,ty)>0) break; const i=idx(tx,ty); if(floorT[i]===0){ floorT[i]=4; hpF[i]=BHP[4]; ownF[i]=e.team; pop[i]=1+k*.08; n++; } }
+    case 'bridge2':{ let n=0; const L=bridgeLine(e,ax,ay,8);
+      for(let k=0;k<L.length;k++){ const [tx,ty]=L[k], i=idx(tx,ty); if(floorT[i]===0){ floorT[i]=4; hpF[i]=BHP[4]; ownF[i]=e.team; pop[i]=1+k*.08; n++; } }
       if(!n) return false; burst(e.x,e.y,'#a7afb8',10,140,.4,3); return true; }
     case 'battery':{ const [px,py]=aimPoint(e,wx,wy,3.7*T), tx=Math.floor(px/T), ty=Math.floor(py/T), horiz=Math.abs(ax)>Math.abs(ay); let n=0;
       for(const k of [-1,1]){ const x2=tx+(horiz?0:k),y2=ty+(horiz?k:0); if(fl(x2,y2)===0||wl(x2,y2)>0) continue; traps.push({kind:'turret',x:(x2+.5)*T,y:(y2+.5)*T,t:1e6,hp:14,age:0,team:e.team,owner:e,cd:.6,ang:0}); ring((x2+.5)*T,(y2+.5)*T,T,'#94a3b8',.3); n++; }
@@ -112,7 +112,8 @@ let ROSTER=null;
 const POOL_CATS=['Armes','Gadgets','Défense','Outils','Reliques'];
 const POOL_EXTRA=['glove','hammer','baa','heal'];
 const poolIds=()=>SHOP.filter(s=>(POOL_CATS.includes(s.cat)||POOL_EXTRA.includes(s.id))&&s.id!=='core'&&s.id!=='wall'&&s.id!=='pick'&&!itemOff(s.id)).map(s=>s.id);
-const itemOff=id=>!!(game.opts&&game.opts.off&&game.opts.off[id]); // objets désactivés dans l'onglet « Objets »
+const GONE_IDS=['crossbow3','bubble','woolgun','popcorn','pogo','hammer','springs','smokebomb','raft']; // retirés définitivement
+const itemOff=id=>GONE_IDS.includes(id)||!!(game.opts&&game.opts.off&&game.opts.off[id]); // objets désactivés dans l'onglet « Objets »
 const inRoster=id=>!itemOff(id)&&(!ROSTER||!poolIds_set.has(id)||ROSTER.has(id));
 let poolIds_set=new Set();
 function makeRoster(){

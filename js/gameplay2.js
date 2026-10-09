@@ -22,7 +22,7 @@ for(const id of GONE){ const i=SHOP.findIndex(s=>s.id===id); if(i>=0) SHOP.splic
 }
 /* ---------- 2. sorts de départ ---------- */
 Object.assign(game.opts,{sig:1});
-const SIGS=['heal','cloak','springs','vortex','net','decoy','tp','haste'], SIG_CD=30;
+const SIGS=['heal','cloak','vortex','net','decoy','tp','haste'], SIG_CD=30;
 const sigsOn=()=>game.opts.sig===undefined?true:!!(game.opts.sig|0);
 let SIGUI=null;
 function sigGrant(e,ids){ e.sig=ids.slice(0,2); e.sigT={}; for(const id of e.sig){ e.am[id]=Math.max(1,e.am[id]||0); e.sigT[id]=0; } if(e===player&&typeof syncBar==='function') syncBar(e); }
