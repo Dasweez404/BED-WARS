@@ -47,15 +47,9 @@ const RPV=BPIP.addView({id:'rpl',css:'left:10px;top:300px;',border:'#fb7185',
     const tx=mx+(vx-mx)*lk, tz=mz+(vz-mz)*lk; cam.position.set(tx+Math.cos(a)*R,1.6+R*.34,tz+Math.sin(a)*R); cam.lookAt(tx,.65,tz); },
   post:(cx,cv)=>{ const G=RPL.cur&&RPL.cur._GK; for(const g of Object.values(RPL.gp)){ g.g.visible=false; g.tr.forEach(t=>t.visible=false); } if(RPL.fx){ RPL.fx.ring.visible=false; RPL.fx.line.visible=false; RPL.fx.sp.forEach(m=>m.visible=false); }
     const c=RPL.cur; if(!c) return; const W=cv.width, h=W/2, kc=TEAMS[c.kt].light, vc=TEAMS[c.vt].light; cv.style.borderColor=TEAMS[c.kt].col;
-    cx.save(); cx.textAlign='center';
-    const vg=cx.createRadialGradient(h,h,W*.3,h,h,W*.72); vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(0,0,0,.62)'); cx.fillStyle=vg; cx.fillRect(0,0,W,W);
-    cx.fillStyle='rgba(0,0,0,.55)'; cx.fillRect(0,0,W,42); cx.fillRect(0,W-48,W,48);
-    const pulse=.55+.45*Math.sin(c.t*7); cx.fillStyle='rgba(255,70,70,'+pulse+')'; cx.beginPath(); cx.arc(h-52,26,7,0,6.283); cx.fill();
-    cx.font='bold 21px system-ui,sans-serif'; cx.fillStyle='#fff'; cx.fillText('REJEU',h+4,33);
-    cx.font='bold 16px system-ui,sans-serif'; const kn=c.kn.slice(0,9), vn=c.vn.slice(0,9), w1=cx.measureText(kn).width, w2=cx.measureText(vn).width, ic=28, tot=w1+w2+ic+16, x0=h-tot/2, y=W-20;
-    cx.textAlign='left'; cx.fillStyle=kc; cx.fillText(kn,x0,y); cx.font='20px system-ui,sans-serif'; cx.fillText(c.ico,x0+w1+6,y+2); cx.font='bold 16px system-ui,sans-serif'; cx.fillStyle=c.mine&&c.vn===player.name?'#fca5a5':vc; cx.fillText(vn,x0+w1+ic+12,y);
-    cx.textAlign='center'; cx.lineWidth=7; cx.lineCap='round'; cx.strokeStyle='rgba(0,0,0,.45)'; cx.beginPath(); cx.arc(h,h,h-6,0,6.283); cx.stroke(); cx.strokeStyle=kc; cx.beginPath(); cx.arc(h,h,h-6,-Math.PI/2,-Math.PI/2+6.283*Math.min(1,c.t/RPL.dur)); cx.stroke();
-    if(c._end){ const q=Math.min(1,c._ee/.25), s=1+(1-q)*.8+Math.sin(c._ee*14)*.03; cx.save(); cx.translate(h,h-20); cx.scale(s,s); cx.rotate(-.1); cx.font='900 54px system-ui,sans-serif'; cx.lineWidth=7; cx.strokeStyle='#4a0d0d'; cx.strokeText('K.O.',0,0); cx.fillStyle='#ff5a5a'; cx.globalAlpha=Math.min(1,q*1.5); cx.fillText('K.O.',0,0); cx.restore(); }
+    cx.save(); // plus aucun texte : seulement un léger vignettage et l'anneau de progression
+    const vg=cx.createRadialGradient(h,h,W*.3,h,h,W*.72); vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(0,0,0,.5)'); cx.fillStyle=vg; cx.fillRect(0,0,W,W);
+    cx.lineWidth=7; cx.lineCap='round'; cx.strokeStyle='rgba(0,0,0,.45)'; cx.beginPath(); cx.arc(h,h,h-6,0,6.283); cx.stroke(); cx.strokeStyle=kc; cx.beginPath(); cx.arc(h,h,h-6,-Math.PI/2,-Math.PI/2+6.283*Math.min(1,c.t/RPL.dur)); cx.stroke();
     cx.restore(); }
 });
 RPV.cam.fov=36; RPV.cam.updateProjectionMatrix();
