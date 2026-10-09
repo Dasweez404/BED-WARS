@@ -83,6 +83,11 @@
   #shop .tab{padding:6px 14px;border-radius:10px;background:#4a2f1b;border:2px solid #7a5230;cursor:pointer;font-size:15px;font-weight:600}
   #shop .tab:hover{background:#5d3b22}
   #shop .tab.on{background:#e2b14f;color:#3a2000;border-color:#ffe08a}
+  #shop .wcols{display:grid;grid-template-columns:2fr 3fr;gap:12px;align-items:start}
+  #shop .wcol h3{margin:2px 0 8px;font-size:15px;color:#fde68a;font-family:Fredoka,sans-serif}
+  #shop .wgrid{display:grid;gap:7px}#shop .wgrid.w1{grid-template-columns:1fr 1fr}#shop .wgrid.w2{grid-template-columns:1fr 1fr 1fr}
+  #shop .wcols .item{padding:6px 8px;min-height:0}#shop .wcols .item .d{font-size:10.5px;line-height:1.25;max-height:3.8em;overflow:hidden}#shop .wcols .item .ic{transform:scale(.85);transform-origin:left top}#shop .wcols .item .n{font-size:13px}
+  @media(max-width:900px){#shop .wgrid.w2{grid-template-columns:1fr 1fr}}@media(max-width:700px){#shop .wcols{grid-template-columns:1fr}#shop .wgrid.w1,#shop .wgrid.w2{grid-template-columns:1fr}}
   #shop .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:9px}
   #shop .item{background:linear-gradient(160deg,#6b4527,#3d2614);border:2px solid #8a5f36;border-left:5px solid #8a5f36;border-radius:12px;padding:9px 11px;cursor:pointer;transition:transform .08s;display:grid;grid-template-columns:36px 1fr;column-gap:9px;align-items:center}
   #shop .item .ic{font-size:28px;grid-row:1/4;text-align:center;filter:drop-shadow(0 2px 3px #0008)}
@@ -152,64 +157,64 @@
     <div class="sticky"><div id="tutNote" style="display:none;font-size:13px;color:#fde68a;margin-bottom:6px">👋 Première partie ? Le tutoriel t'apprend tout en deux minutes.</div><button class="big" id="playBtn">À l'abordage !</button> <button class="big" id="tutBtn" style="font-size:22px;padding:10px 22px;margin-left:8px;background:#7dd3fc;box-shadow:0 6px 0 #2a7ea6,0 12px 24px #0008">📘 Tutoriel</button></div>
   </div>
 </div>
-<script>window.BUILD='1791538921';</script>
+<script>window.BUILD='1791539133';</script>
 <script>
 document.addEventListener('click',function(ev){var b=ev.target.closest&&ev.target.closest('.mtab');if(!b)return;var open=b.classList.contains('on');
 document.querySelectorAll('.mtab').forEach(function(x){x.classList.toggle('on',!open&&x===b)});
 document.querySelectorAll('.tpan').forEach(function(p){p.classList.toggle('hidden',open||p.id!=='tab-'+b.dataset.tab)});});
 </script>
-<script src="js/three.min.js?v=1791538921"></script>
-<script src="js/peerjs.min.js?v=1791538921"></script>
-<script src="js/sim.js?v=1791538921"></script>
-<script src="js/extras.js?v=1791538921"></script>
-<script src="js/extras2.js?v=1791538921"></script>
-<script src="js/render3d.js?v=1791538921"></script>
-<script src="js/models.js?v=1791538921"></script>
-<script src="js/extras3.js?v=1791538921"></script>
-<script src="js/extras4.js?v=1791538921"></script>
-<script src="js/extras5.js?v=1791538921"></script>
-<script src="js/extras6.js?v=1791538921"></script>
-<script src="js/render3d2.js?v=1791538921"></script>
-<script src="js/sprites.js?v=1791538921"></script>
-<script src="js/hud.js?v=1791538921"></script>
-<script src="js/juice.js?v=1791538921"></script>
-<script src="js/net.js?v=1791538921"></script>
-<script src="js/extras7.js?v=1791538921"></script>
-<script src="js/ambiance.js?v=1791538921"></script>
-<script src="js/music.js?v=1791538921"></script>
-<script src="js/social.js?v=1791538921"></script>
-<script src="js/modes.js?v=1791538921"></script>
-<script src="js/stats.js?v=1791538921"></script>
-<script src="js/sea.js?v=1791538921"></script>
-<script src="js/bots2.js?v=1791538921"></script>
-<script src="js/arsenal.js?v=1791538921"></script>
-<script src="js/gadgets2.js?v=1791538921"></script>
-<script src="js/bosses2.js?v=1791538921"></script>
-<script src="js/maps2.js?v=1791538921"></script>
-<script src="js/contracts.js?v=1791538921"></script>
-<script src="js/juice2.js?v=1791538921"></script>
-<script src="js/bosspip.js?v=1791538921"></script>
-<script src="js/endgame.js?v=1791538921"></script>
-<script src="js/arsenal2.js?v=1791538921"></script>
-<script src="js/structures.js?v=1791538921"></script>
-<script src="js/detail3d.js?v=1791538921"></script>
-<script src="js/detail3d2.js?v=1791538921"></script>
-<script src="js/icons.js?v=1791538921"></script>
-<script src="js/kawaii.js?v=1791538921"></script>
-<script src="js/combat2.js?v=1791538921"></script>
-<script src="js/gameplay2.js?v=1791538921"></script>
-<script src="js/balance.js?v=1791538921"></script>
-<script src="js/feat9.js?v=1791538921"></script>
-<script src="js/pads2.js?v=1791538921"></script>
-<script src="js/replay.js?v=1791538921"></script>
-<script src="js/ragdoll.js?v=1791538921"></script>
-<script src="js/bar2.js?v=1791538921"></script>
-<script src="js/itemsel.js?v=1791538921"></script>
-<script src="js/rework10.js?v=1791538921"></script>
-<script src="js/fps.js?v=1791538921"></script>
-<script src="js/heldcard.js?v=1791538921"></script>
-<script src="js/touch.js?v=1791538921"></script>
-<script src="js/tutorial.js?v=1791538921"></script>
-<script src="js/main.js?v=1791538921"></script>
+<script src="js/three.min.js?v=1791539133"></script>
+<script src="js/peerjs.min.js?v=1791539133"></script>
+<script src="js/sim.js?v=1791539133"></script>
+<script src="js/extras.js?v=1791539133"></script>
+<script src="js/extras2.js?v=1791539133"></script>
+<script src="js/render3d.js?v=1791539133"></script>
+<script src="js/models.js?v=1791539133"></script>
+<script src="js/extras3.js?v=1791539133"></script>
+<script src="js/extras4.js?v=1791539133"></script>
+<script src="js/extras5.js?v=1791539133"></script>
+<script src="js/extras6.js?v=1791539133"></script>
+<script src="js/render3d2.js?v=1791539133"></script>
+<script src="js/sprites.js?v=1791539133"></script>
+<script src="js/hud.js?v=1791539133"></script>
+<script src="js/juice.js?v=1791539133"></script>
+<script src="js/net.js?v=1791539133"></script>
+<script src="js/extras7.js?v=1791539133"></script>
+<script src="js/ambiance.js?v=1791539133"></script>
+<script src="js/music.js?v=1791539133"></script>
+<script src="js/social.js?v=1791539133"></script>
+<script src="js/modes.js?v=1791539133"></script>
+<script src="js/stats.js?v=1791539133"></script>
+<script src="js/sea.js?v=1791539133"></script>
+<script src="js/bots2.js?v=1791539133"></script>
+<script src="js/arsenal.js?v=1791539133"></script>
+<script src="js/gadgets2.js?v=1791539133"></script>
+<script src="js/bosses2.js?v=1791539133"></script>
+<script src="js/maps2.js?v=1791539133"></script>
+<script src="js/contracts.js?v=1791539133"></script>
+<script src="js/juice2.js?v=1791539133"></script>
+<script src="js/bosspip.js?v=1791539133"></script>
+<script src="js/endgame.js?v=1791539133"></script>
+<script src="js/arsenal2.js?v=1791539133"></script>
+<script src="js/structures.js?v=1791539133"></script>
+<script src="js/detail3d.js?v=1791539133"></script>
+<script src="js/detail3d2.js?v=1791539133"></script>
+<script src="js/icons.js?v=1791539133"></script>
+<script src="js/kawaii.js?v=1791539133"></script>
+<script src="js/combat2.js?v=1791539133"></script>
+<script src="js/gameplay2.js?v=1791539133"></script>
+<script src="js/balance.js?v=1791539133"></script>
+<script src="js/feat9.js?v=1791539133"></script>
+<script src="js/pads2.js?v=1791539133"></script>
+<script src="js/replay.js?v=1791539133"></script>
+<script src="js/ragdoll.js?v=1791539133"></script>
+<script src="js/bar2.js?v=1791539133"></script>
+<script src="js/itemsel.js?v=1791539133"></script>
+<script src="js/rework10.js?v=1791539133"></script>
+<script src="js/fps.js?v=1791539133"></script>
+<script src="js/heldcard.js?v=1791539133"></script>
+<script src="js/touch.js?v=1791539133"></script>
+<script src="js/tutorial.js?v=1791539133"></script>
+<script src="js/main.js?v=1791539133"></script>
 </body>
 </html>

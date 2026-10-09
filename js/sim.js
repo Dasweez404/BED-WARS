@@ -895,11 +895,16 @@ function renderShop(){
   const e=player, sc=shopEl.scrollTop;
   let h=`<div class="top"><h2>Boutique${typeof ROSTER!=='undefined'&&ROSTER?` <small style="font-size:13px;color:#d9c49a;font-family:Fredoka,sans-serif">roster aléatoire : ${ROSTER.size} objets</small>`:''}</h2><div class="res">${Object.keys(RESCOL).map(k=>`<span style="color:${RESCOL[k]}"><img class="ri" src="${ICON[k]}"> ${e.res[k]}</span>`).join('')}</div><span class="x" data-close="1">✕</span></div>`;
   h+='<div class="tabs">'+TABS.map(t=>`<div class="tab ${t===shopTab?'on':''}" data-tab="${t}">${t==='Base'?'Améliorations (diamants)':t}</div>`).join('')+'</div><div class="grid">';
-  for(const it of SHOP.filter(s=>s.cat===shopTab&&inRoster(s.id))){
+  const itemHtml=it=>{
     const inf=it.info(e), can=inf.ok!==false&&canAfford(e,inf.cost);
     const c0=Object.keys(inf.cost)[0], bcol=c0?RESCOL[c0]:'#33407a';
-    h+=`<div class="item ${can?'':'no'}" data-buy="${it.id}" style="border-left-color:${bcol}"><div class="ic">${shopIco(it.id)}</div><div class="n">${inf.name}${inf.tag?` <small style="color:#9fb0e0">[${inf.tag}]</small>`:''}</div><div class="d">${inf.desc}</div><div class="c">${costHtml(inf.cost)}</div></div>`;
-  }
+    return `<div class="item ${can?'':'no'}" data-buy="${it.id}" style="border-left-color:${bcol}"><div class="ic">${shopIco(it.id)}</div><div class="n">${inf.name}${inf.tag?` <small style="color:#9fb0e0">[${inf.tag}]</small>`:''}</div><div class="d">${inf.desc}</div><div class="c">${costHtml(inf.cost)}</div></div>`;
+  };
+  const list=SHOP.filter(s=>s.cat===shopTab&&inRoster(s.id));
+  if(shopTab==='Armes'){ // deux colonnes : corps à corps | à distance (pas de défilement inutile)
+    const melee=list.filter(s=>!GUNS[s.id]), ranged=list.filter(s=>GUNS[s.id]);
+    h+=`</div><div class="wcols"><div class="wcol"><h3>⚔️ Corps à corps</h3><div class="wgrid w1">${melee.map(itemHtml).join('')}</div></div><div class="wcol"><h3>🎯 À distance</h3><div class="wgrid w2">${ranged.map(itemHtml).join('')}</div></div>`;
+  } else for(const it of list) h+=itemHtml(it);
   shopEl.innerHTML=h+'</div>'; shopEl.scrollTop=sc;
 }
 function toggleShop(force){
