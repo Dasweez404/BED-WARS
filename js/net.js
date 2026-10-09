@@ -145,7 +145,7 @@ function netLeave(keepLobbyUI){
 }
 
 /* ---------- sérialisation (compacte : on n'envoie que ce qui n'est pas nul / pas changé) ---------- */
-const R2=v=>{ if(typeof v==='number') return Math.round(v*100)/100; if(Array.isArray(v)) return v.map(R2); if(v&&typeof v==='object'&&!(v instanceof Set)){ const o={}; for(const k in v){ const x=v[k]; if(typeof x==='function') continue; o[k]=R2(x); } return o; } return v; };
+const R2=(v,dp)=>{ dp=dp|0; if(typeof v==='number') return Math.round(v*100)/100; if(dp>6) return null; if(Array.isArray(v)) return v.map(x=>R2(x,dp+1)); if(v&&typeof v==='object'&&!(v instanceof Set)){ if(v.res&&v.alive!==undefined&&v.team!==undefined) return null; const o={}; for(const k in v){ const x=v[k]; if(typeof x==='function') continue; o[k]=R2(x,dp+1); } return o; } return v; }; // références vers d'autres pirates (revanche, prime…) ignorées : sinon boucle infinie
 const ENT_SKIP=new Set(['riding','ai','lastBy','burnBy','hook','inp','x','y','z','ang','held','ix','iy','_tx','_ty','_tz','_follow','_ff']);
 const ENT_STATIC=['team','slot','name','cls','look','isBot','remote','up','pers'];
 const ENT_NUM=['resp','inv','flash','swing','swingMax','cloak','bubble','frozen','slow','root','curse','aegis','plate','rage','burn','slip','squash','muzzle','stepPh','springT','jetT','voidT','haste','kills','deaths','ix','iy','bsel','sword','jet','grap','shield','sdx','sdy','tiny','giant','glide','stickT','carry','pilot','mark','markT','mirror'];
