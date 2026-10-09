@@ -14,8 +14,8 @@ const TUT_STEPS=[
   {t:'Construire',x:'Prends les blocs (1) et clique : sur la mer ça fait un pont, sur le sol un mur. Pose 6 blocs !',xt:'Sélectionne les blocs, puis pousse le joystick droit vers la mer : maintiens pour poser des blocs. Pose 6 blocs !',hl:'hotbar',enter:()=>{ player.blocks[2]=Math.max(player.blocks[2],20); },ok:()=>TUT.c.placed>=6},
   {t:'Miner',x:'Équipe la pioche (2) et maintiens le clic sur un bloc pour le casser. Un bloc miné te revient dans l\'inventaire.',xt:'Équipe la pioche, puis maintiens le joystick droit en visant un bloc.',hl:'hotbar',ok:()=>TUT.c.mined>=3},
   {t:'Combattre',x:'Un mannequin s\'est invité ! Équipe l\'épée (3) et frappe-le avec le clic gauche, trois fois.',xt:'Équipe l\'épée, puis pousse le joystick droit vers le mannequin : frappe-le trois fois.',hl:'hotbar',tg:()=>TUT.dummy&&TUT.dummy.alive?[TUT.dummy.x,TUT.dummy.y,'Mannequin']:null,enter:()=>tutDummy(),ok:()=>TUT.c.hits>=3},
-  {t:'Parer',x:'Un ennemi qui te frappe ? Appuie sur F juste avant le coup : tu le pares et l\'attaquant est déséquilibré. Recharge 1,8 s : essaie !',xt:'Touche le petit bouton 🛡 à gauche de ta barre de vie pour parer.',ok:()=>TUT.c.parried},
-  {t:'Changer d\'arme',x:'Toutes les armes de mêlée partagent l\'emplacement de l\'épée, toutes les armes à feu celui du pistolet. Un clic droit alterne entre elles : essaie (une rapière vient de t\'être offerte).',xt:'(Sur mobile, touche l\'emplacement de l\'épée pour alterner.)',hl:'hotbar',enter:()=>{ player.own.rapier=true; },ok:()=>tutTouch()||TUT.c.cycled>=1},
+  {t:'Parer',x:'Épée en main (3), un clic DROIT juste avant un coup le pare : l\'attaquant est déséquilibré. Recharge 1,8 s. Essaie !',xt:'Touche le petit bouton 🛡 à gauche de ta barre de vie pour parer.',hl:'hotbar',enter:()=>{ setSel('sword'); },ok:()=>TUT.c.parried},
+  {t:'Changer d\'arme',x:'Toutes les armes de mêlée partagent l\'emplacement de l\'épée, toutes celles à feu celui du pistolet. Appuie sur TAB pour passer à l\'arme suivante du même emplacement (une rapière vient de t\'être offerte).',xt:'(Sur mobile, touche l\'emplacement de l\'épée pour alterner.)',hl:'hotbar',enter:()=>{ player.own.rapier=true; },ok:()=>tutTouch()||TUT.c.cycled>=1},
   {t:'Se soigner',x:'Tu es blessé ! Sélectionne la Ration de bord (barre d\'objets) et MAINTIENS le clic : tu regagnes 20 % de vie par seconde, sans rien gaspiller si tu lâches.',xt:'Sélectionne la ration et maintiens le joystick droit.',hl:'hotbar',enter:()=>{ player.am.heal=(player.am.heal||0)+1; player.hp=Math.min(player.hp,maxhp(player)*.4); },ok:()=>TUT.c.healT>=2},
   {t:'Prévenir son équipe',x:'V envoie un ping à l\'endroit visé (maintiens-le pour choisir parmi plusieurs), X ouvre la roue d\'emojis. Essaie l\'un des deux !',xt:'Utilise 📍 (puis touche la carte) ou 😀 en bas à gauche.',ok:()=>PINGS.some(p=>p.team===0&&p.name===player.name)||EMOTES.some(m=>m.e===player)},
   {t:'L\'objectif',x:'Ton coffre est ta vie : tant qu\'il est intact, tu réapparais. Détruis les coffres ennemis et élimine leurs équipages pour gagner. Attention : après quelques minutes, une tempête puis une zone rouge réduisent la carte — dehors, ta vie baisse et rien ne soigne. Trois éliminations d\'affilée mettent une prime sur ta tête ! Appuie sur Entrée pour continuer.',xt:'Ton coffre est ta vie : tant qu\'il est intact, tu réapparais. Détruis les coffres ennemis et élimine leurs équipages pour gagner. Touche « Suite ».',tg:()=>[(TD[2].bx+.5)*T,(TD[2].by+.5)*T,'Coffre ennemi'],ack:true,ok:()=>TUT.c.ack},
@@ -98,3 +98,20 @@ function tutMenuUi(){ const b=document.getElementById('tutBtn'); if(!b) return; 
 { const _dp=doParry; doParry=function(e){ const r=_dp(e); if(game.tut&&e===player&&r) TUT.c.parried=true; return r; };
   const _cg=window.cycleGroup; if(_cg) window.cycleGroup=function(e,id){ const r=_cg(e,id); if(game.tut&&e===player&&r) TUT.c.cycled=(TUT.c.cycled||0)+1; return r; };
   const _u=update; update=function(dt){ if(game.tut&&TUT.on&&selId==='heal'&&mouse.down&&player.hp<maxhp(player)-.1) TUT.c.healT=(TUT.c.healT||0)+dt; _u(dt); }; }
+
+/* ---------- garde-fous : impossible de bloquer le tutoriel ---------- */
+{ const _u=update, _h2=hurt;
+  hurt=function(e,a,by,kx,ky){ if(game.tut&&e===TUT.dummy){ kx=ky=0; } if(game.tut&&e===player){ a=Math.min(a,.5); } return _h2(e,a,by,kx,ky); };
+  update=function(dt){ _u(dt);
+    if(!game.tut||!TUT.on||!player||!player.alive||game.state!=='play') return; const st=TUT_STEPS[TUT.i]; if(!st) return; const c=TUT.c, T0=TD[0];
+    // mannequin : toujours présent, vivant, sur l'île, pas trop loin
+    if(st.t==='Combattre'||st.t==='Parer'){ const d=TUT.dummy; const off=!d||!d.alive||d.z<-5||!floorSupport(d.x,d.y)||Math.hypot(d.x-player.x,d.y-player.y)>12*T; if(off&&st.t==='Combattre') tutDummy(); if(d){ d.vx=d.vy=0; d.hp=Math.max(d.hp,5); } }
+    // blocs : toujours de quoi poser / casser
+    if((st.t==='Construire'||st.t==='Miner')&&totalBlocks(player)<8) player.blocks[2]+=12;
+    if(st.t==='Acheter'&&player.res.bronze<25&&player.res.silver<6){ player.res.bronze+=30; player.res.silver+=8; }
+    if(st.t==='La boutique'&&player.res.bronze<10) player.res.bronze+=40;
+    // ration : toujours une disponible tant que l'étape n'est pas finie, et toujours blessé
+    if(st.t==='Se soigner'&&(c.healT||0)<2){ if((player.am.heal||0)<=0&&(player.healLeft||0)<.05) player.am.heal=1; if(player.hp>maxhp(player)*.5&&(c.healT||0)<.1) player.hp=maxhp(player)*.4; }
+    // mine : s'il n'y a plus de bloc à casser près du joueur, on en pose trois
+    if(st.t==='Miner'&&!c.mineSeeded){ c.mineSeeded=true; const a=player.ang||0; for(let k=2;k<=4;k++){ const x=Math.floor((player.x+Math.cos(a)*k*T)/T), y=Math.floor((player.y+Math.sin(a)*k*T)/T); if(inb(x,y)&&floorT[idx(x,y)]>0&&!wallT[idx(x,y)]&&!spawnerAt(x,y)){ const i=idx(x,y); wallT[i]=WOOL; hpW[i]=BHP[WOOL]; ownW[i]=0; pop[i]=1; } } }
+  }; }

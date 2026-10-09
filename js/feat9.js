@@ -45,8 +45,7 @@ BOT_BUY.splice(8,0,
 /* ---- parade (F) ---- */
 function doParry(e){ if(!e.alive||e.parryCd>0||e.frozen>0||e.bubble>0||e.riding||game.state!=='play') return false;
   e.parry=.34; e.parryCd=1.8; ring(e.x,e.y,T*1.05,'#fde68a',.3,true); sfx('swing',e.x,e.y); return true; }
-addEventListener('keydown',ev=>{ if(ev.repeat||game.state!=='play'||game.paused||shopOpen||!player||!player.alive||ev.key.toLowerCase()!=='f') return;
-  if(game.spec) return; if(NETCLIENT){ netSend({t:'act',a:'parry'}); return; } doParry(player); });
+function actParry(){ if(game.state!=='play'||game.paused||shopOpen||!player||!player.alive||game.spec) return; if(NETCLIENT){ netSend({t:'act',a:'parry'}); return; } doParry(player); } // clic droit avec une arme de mêlée
 addEventListener('pointerdown',ev=>{ if(ev.pointerType!=='touch'||game.state!=='play'||!player||!player.alive||!ctx) return; const x=ev.clientX-(VW/2-190), y=ev.clientY-(VH-90); if(x*x+y*y<28*28){ if(NETCLIENT) netSend({t:'act',a:'parry'}); else doParry(player); } });
 { const _nh=netHostData; netHostData=function(team,m){ if(m&&m.t==='act'&&m.a==='parry'){ const e=ents.find(o=>o.remote&&o.team===team); if(e&&e.alive&&NET.started) doParry(e); return; } _nh(team,m); }; }
 /* bots : ils parent quand un adversaire est au contact */
@@ -81,7 +80,7 @@ addEventListener('pointerdown',ev=>{ if(ev.pointerType!=='touch'||game.state!=='
     if(e.arD>0){ const w=300, x=VW/2-w/2, p=e.arD/e.arM, A=ARMORS[e.arT]||ARMORS[1]; ctx.fillStyle='#0008'; ctx.fillRect(x,by-9,w,6); ctx.fillStyle=p<.3?'#f87171':A.col; ctx.fillRect(x,by-9,w*p,6); ctx.font='13px system-ui'; ctx.textAlign='right'; ctx.fillText(A.ico,x-5,by-3); }
     const cx0=VW/2-190, cy0=by+12, rdy=e.parryCd<=0; ctx.beginPath(); ctx.arc(cx0,cy0,16,0,6.283); ctx.fillStyle=e.parry>0?'#fde68a':'#0b1b2dcc'; ctx.fill(); ctx.lineWidth=2.5; ctx.strokeStyle=rdy?'#fde68a':'#64748b'; ctx.stroke();
     if(!rdy){ ctx.beginPath(); ctx.moveTo(cx0,cy0); ctx.arc(cx0,cy0,16,-Math.PI/2,-Math.PI/2+6.283*Math.min(1,e.parryCd/1.8)); ctx.closePath(); ctx.fillStyle='#0009'; ctx.fill(); }
-    ctx.font='bold 14px system-ui'; ctx.textAlign='center'; ctx.fillStyle=rdy?'#fde68a':'#94a3b8'; ctx.fillText(tc?'🛡':'F',cx0,cy0+5);
+    ctx.font='bold 14px system-ui'; ctx.textAlign='center'; ctx.fillStyle=rdy?'#fde68a':'#94a3b8'; ctx.fillText('🛡',cx0,cy0+5); ctx.font='bold 9px system-ui'; ctx.fillText(tc?'':'clic droit',cx0,cy0+27);
     ctx.textAlign='left'; ctx.restore(); }; }
 /* ---- info de résistance des blocs (boutique uniquement) ---- */
 for(const id of ['wool','wood','stone','obs','coral','iceblk']){ const it=SHOPMAP[id]; if(!it) continue;

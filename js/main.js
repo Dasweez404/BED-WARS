@@ -16,7 +16,7 @@ addEventListener('keydown',ev=>{
   let d=0;
   if(/^Digit[0-9]$/.test(ev.code)) d=+ev.code.slice(5)||10; else if(/^Numpad[0-9]$/.test(ev.code)) d=+ev.code.slice(6)||10; else if(DIGIT[k]) d=DIGIT[k]; else if(k==='à') d=10;
   if(d){ const l=hotList(player); if(l[d-1]){ if(selId==='block'&&l[d-1].id==='block') actCycle(); setSel(l[d-1].id); } }
-  else if(k==='Tab'){ ev.preventDefault(); if(player.alive) actSwap(); }
+  else if(k==='Tab'){ ev.preventDefault(); if(player.alive){ if(typeof bargCount==='function'&&bargCount(player,selId)>=2&&cycleGroup(player,selId)) return; actSwap(); } } // Tab : arme suivante du même emplacement (sinon : échange avec la réserve)
   else if(k==='e'){ if(!actBoat()) toggleShop(); }
   else if(k==='r'){ if(player.alive) actReload(); }
   else if(k==='c') actCycle();
@@ -41,7 +41,7 @@ function bindMouse(c){
     if(ev.button===1){ ev.preventDefault(); return; }
     if(game.state==='over'){showMenu();return;}
     if(game.state!=='play'||game.paused) return;
-    if(ev.button===2){ const l=hotList(player), hb=hotbarRect(l.length); if(mouse.y>=hb.y-6&&mouse.y<=hb.y+hb.s&&mouse.x>=hb.x&&mouse.x<hb.x+l.length*(hb.s+hb.g)){ const i=Math.floor((mouse.x-hb.x)/(hb.s+hb.g)); if(l[i]&&typeof cycleGroup==='function'&&cycleGroup(player,l[i].id)) return; } if(typeof cycleGroup==='function'&&cycleGroup(player,selId)) return; actCycle(); return; }
+    if(ev.button===2){ const l=hotList(player), hb=hotbarRect(l.length); if(mouse.y>=hb.y-6&&mouse.y<=hb.y+hb.s&&mouse.x>=hb.x&&mouse.x<hb.x+l.length*(hb.s+hb.g)){ const i=Math.floor((mouse.x-hb.x)/(hb.s+hb.g)); if(l[i]&&typeof bargOf==='function'&&bargOf(l[i].id)==='gun'&&typeof cycleGroup==='function'&&cycleGroup(player,l[i].id)) return; } if(typeof bargOf==='function'&&bargOf(selId)==='melee'&&typeof actParry==='function'){ actParry(); return; } if(typeof bargOf==='function'&&bargOf(selId)==='gun'&&typeof cycleGroup==='function'&&cycleGroup(player,selId)) return; actCycle(); return; }
     const l=hotList(player), hb=hotbarRect(l.length);
     if(mouse.y>=hb.y-6&&mouse.y<=hb.y+hb.s&&mouse.x>=hb.x&&mouse.x<hb.x+l.length*(hb.s+hb.g)){
       const i=Math.floor((mouse.x-hb.x)/(hb.s+hb.g)); if(l[i]){ if(selId==='block'&&l[i].id==='block') actCycle(); setSel(l[i].id);} return;
