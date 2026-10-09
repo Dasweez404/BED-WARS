@@ -680,6 +680,7 @@ function useGadget(e,id,wx,wy){
       bombs.push({x:e.x,y:e.y,tx:e.x+dx/d*m,ty:e.y+dy/d*m,fuse:.95,team:e.team,owner:e,kind:'bomb',R:1.35*T,dm:6,bd:.7,shell:true,h:12}); break;}
     case 'buoy': floatTxt(e.x,e.y-40,'Passif : te repêche en mer','#fb923c',14); return false;
     case 'heal':
+      if(!e.isBot) return false; // joueurs : maintiens le clic (régénération progressive, voir rework10.js)
       if(e.hp>=maxhp(e)-.5) return false;
       e.hp=Math.min(maxhp(e),e.hp+12); floatTxt(e.x,e.y-34,'+12 ♥','#4ade80',16);
       for(let i=0;i<8;i++) parts.push({x:e.x+rnd(-10,10),y:e.y,z:rnd(0,10),vz:rnd(60,120),vx:0,vy:0,life:.8,max:.8,col:'#4ade80',size:4});

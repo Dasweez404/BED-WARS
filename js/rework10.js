@@ -12,7 +12,7 @@
   if(typeof PERS!=='undefined') for(const k in PERS){ const p=PERS[k]; if(Array.isArray(p.likes)) p.likes=p.likes.filter(i=>!gone(i)); }
 }
 /* ---- parapluie planeur : passif tant qu'on est en vie, sans recharge ---- */
-{ const _o=owned; owned=function(e,id){ if(id==='glide') return false; return _o(e,id); }; // plus d'emplacement dans la barre
+{ const _o=owned; owned=function(e,id){ if(id==='glide') return false; if(id==='heal'&&(e.healLeft||0)>.02) return true; return _o(e,id); }; // plus d'emplacement dans la barre
   PERM_DEF.glide=PERM.glide={cd:0,keep:true,cost:{bronze:30,silver:8}};
   const it=SHOPMAP.glide; if(it){ it.cat='Outils';
     it.info=e=>e.own.glide?{name:'Parapluie planeur',desc:'Équipé : actif tout seul dès que tu tombes.',cost:{},ok:false,tag:'PASSIF'}:{name:'Parapluie planeur (passif)',desc:'Toujours actif : dès que tu tombes, tu planes doucement et tu ne prends plus de dégâts de chute. Aucune recharge, rien à activer, gardé à ta mort.',cost:{bronze:30,silver:8}};
@@ -157,4 +157,21 @@ const rhNeed=w=>Math.max(.12,(BHP[w.wall||w.floor]||10)*.03); // ≈ moitié du 
   const idx0=new Map(SHOP.map((s,i)=>[s,i])), rank=c=>order.indexOf(c);
   const sorted=[...SHOP].sort((a,b)=>{ const ra=rank(a.cat),rb=rank(b.cat); if(ra!==rb) return ra-rb; if(a.cat==='Base') return idx0.get(a)-idx0.get(b); return worth(a)-worth(b)||idx0.get(a)-idx0.get(b); });
   SHOP.length=0; SHOP.push(...sorted);
+}
+
+/* =====================  RATION DE BORD : RÉGÉNÉRATION PROGRESSIVE, CLIC MAINTENU  =====================
+   Une ration = 100 % de ta vie en 5 s (20 % par seconde). Relâcher n'en gaspille rien : le reste de la ration est gardé. */
+{ const _u=update, RATE=.2;
+  update=function(dt){
+    for(const e of ents){ if(!e.alive||e.isBot||e.frozen>0||game.paused||game.state!=='play') continue; const sel=e===player?selId:(e.inp&&e.inp.sel), down=e===player?mouse.down:(e.inp&&e.inp.down);
+      if(sel!=='heal'||!down){ e.hlT=0; continue; } const mx=maxhp(e); if(e.hp>=mx-.01) continue;
+      if((e.healLeft||0)<=.001){ if((e.am.heal||0)>0){ e.am.heal--; e.healLeft=1; } else continue; }
+      const amt=Math.min(e.healLeft,RATE*dt,(mx-e.hp)/mx); e.healLeft-=amt; e.hp+=amt*mx; e.swing=Math.max(e.swing,.1); e.swingMax=.25; e.hlT=(e.hlT||0)-dt; e.hlA=(e.hlA||0)+amt*mx;
+      if(e.hlT<=0){ e.hlT=.35; burst(e.x,e.y-e.z-10,'#86efac',3,60,.6,3); if(e.hlA>=1){ floatTxt(e.x,e.y-36-e.z,'+'+Math.round(e.hlA)+' ♥','#4ade80',14); e.hlA=0; } } }
+    _u(dt); };
+  const it=SHOPMAP.heal; if(it){ const old=it.info; it.info=function(e){ const r=old.call(this,e); return Object.assign({},r,{desc:'Maintiens le clic : tu régénères 20 % de ta vie par seconde (une ration = tout en 5 s). Relâcher ne gaspille rien : le reste de la ration est gardé.'}); }; }
+  TIPS2.heal='Maintiens le clic : +20 % de vie par seconde (une ration = 5 s)'; if(typeof TIPS!=='undefined') TIPS.heal='Maintiens le clic : +20 % de vie par seconde';
+  const _dh=drawHud; drawHud=function(){ _dh(); if(game.state!=='play'||!ctx||!player||!player.alive||selId!=='heal') return; ctx.save(); ctx.setTransform(DPR,0,0,DPR,0,0); const s=w2s(player.x,player.y,66);
+    if(s[2]){ const w=54, p=Math.max(0,Math.min(1,player.healLeft||0)); ctx.fillStyle='#0009'; ctx.fillRect(s[0]-w/2,s[1]-4,w,7); ctx.fillStyle='#4ade80'; ctx.fillRect(s[0]-w/2,s[1]-4,w*p,7); ctx.font='bold 11px system-ui'; ctx.textAlign='center'; ctx.fillStyle='#bbf7d0'; ctx.fillText('🍖 maintiens le clic · '+(player.am.heal||0)+' ration'+((player.am.heal||0)>1?'s':''),s[0],s[1]-9); ctx.textAlign='left'; }
+    ctx.restore(); };
 }
