@@ -3,6 +3,10 @@
    Cartes avec icône, description complète et coût de chaque objet ; recherche, filtre par catégorie, activation d'un clic. */
 const ITEMSEL_LOCK=['wool','core','wall','pick','sword'];
 const ISEL={cat:'Tous',q:'',cache:null};
+/* objets retirés par défaut (doublons) : triple arbalète, lance-écume, lance-filet, canon à pop-corn, canon à ressort, masse de forgeron (≈ hache de guerre) */
+const DEF_OFF=['crossbow3','bubble','woolgun','popcorn','pogo','hammer'];
+function ensureDefaultOff(){ if(!game.opts||(game.opts.offV|0)>=1) return; game.opts.off=game.opts.off||{}; for(const id of DEF_OFF) game.opts.off[id]=1; game.opts.offV=1; if(typeof saveOpts==='function') saveOpts(); }
+{ const _n=newGame; newGame=function(){ ensureDefaultOff(); _n(); }; }
 function itemselMeta(it){
   if(!ISEL.cache) ISEL.cache={}; if(ISEL.cache[it.id]) return ISEL.cache[it.id];
   const m=ITEMMAP[it.id]||(typeof RELICS!=='undefined'&&RELICS[it.id])||null; let inf=null; try{ inf=it.info(makeEnt(0,false,'x')); }catch(e){}
@@ -13,7 +17,7 @@ function itemselMeta(it){
   return ISEL.cache[it.id]={name,ico,desc:String(desc).replace(/</g,'&lt;'),cost,perm};
 }
 function renderItemSel(){
-  const box=document.getElementById('itemsel'); if(!box||typeof SHOP==='undefined') return; game.opts.off=game.opts.off||{};
+  ensureDefaultOff(); const box=document.getElementById('itemsel'); if(!box||typeof SHOP==='undefined') return; game.opts.off=game.opts.off||{};
   const off=game.opts.off, all=SHOP.filter(s=>!ITEMSEL_LOCK.includes(s.id)), cats=['Tous',...new Set(all.map(s=>s.cat))], nOff=all.filter(s=>off[s.id]).length;
   const q=ISEL.q.trim().toLowerCase(), list=all.filter(s=>(ISEL.cat==='Tous'||s.cat===ISEL.cat)&&(!q||(itemselMeta(s).name+' '+itemselMeta(s).desc).toLowerCase().includes(q)));
   const cnt=c=>{ const l=c==='Tous'?all:all.filter(s=>s.cat===c); return l.filter(s=>!off[s.id]).length+'/'+l.length; };
