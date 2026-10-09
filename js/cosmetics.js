@@ -1,7 +1,7 @@
 'use strict';
 /* =====================  COSMÉTIQUES : 18 nouvelles coiffes et masques  =====================
    Mêmes proportions chibi cubiques, deux petits points pour les yeux. Rendus en 3D (cubes fusionnés) et en 2D (sprites). */
-const NEW_HATS=['Masque totem','Cagoule perroquet','Tête de crocodile','Casque viking','Couronne','Toque de chef','Cornes de diable','Bonnet de Noël','Scaphandre','Oreilles d\'ours','Tête de requin','Citrouille','Sombrero','Tête de poulpe','Oreilles de chat','Oreilles de lapin','Heaume de chevalier','Casque de mineur'];
+const NEW_HATS=['Masque totem','Cagoule perroquet','Tête de crocodile','Scaphandre','Tête de requin','Tête de poulpe','Tête de singe','Chapeau de feuilles','Fleur de tiaré','Tête de tonneau','Casque de conquistador','Chapeau de paille','Noix de coco','Ananas','Couronne de coquillages','Tête de crabe','Cheveux d\'algues','Tête de méduse']; // thème : mer, tropiques, piraterie
 const HAT0=HATS.length; HATS.push(...NEW_HATS);
 /* ---------- 3D : parties de cubes, repère = sommet de la tête (le visage est à x=+.41, y≈-.37) ---------- */
 const HAT3D={};
@@ -59,9 +59,31 @@ const HAT3D={};
   HAT3D[17]=()=>[ // casque de mineur
     h(0,.04,0,.92,.24,.92,'#facc15'),h(.28,-.02,0,.56,.06,.92,'#eab308'),h(0,.2,0,.1,.12,.5,'#eab308'),h(.5,.1,0,.14,.14,.14,'#fff7b0'),h(.58,.1,0,.03,.1,.1,'#fde68a')];
 }
+{ const keep=[0,1,2,8,10,13], old=Object.assign({},HAT3D); for(const k in HAT3D) delete HAT3D[k]; keep.forEach((o,i)=>{ HAT3D[i]=old[o]; }); }
 { const _hp=hatParts;
   hatParts=function(kind,hatc,trim,light,hair){ const f=HAT3D[kind-HAT0]; return f?f(hatc,light):_hp(kind,hatc,trim,light,hair); }; }
 
+
+{ const h=(x,y,z,sx,sy,sz,color,rot)=>({geo:GEO.box,pos:[x,y,z],scale:[sx,sy,sz],color,rot});
+  HAT3D[6]=()=>[h(0,.0,0,.88,.12,.88,'#7c4a21'),h(-.05,.1,0,.6,.14,.6,'#6b3f1c'),h(-.05,-.2,-.5,.2,.2,.14,'#7c4a21'),h(-.05,-.2,.5,.2,.2,.14,'#7c4a21'),h(-.02,-.2,-.56,.1,.1,.04,'#f2a8a8'),h(-.02,-.2,.56,.1,.1,.04,'#f2a8a8'),
+    h(.46,-.55,0,.12,.3,.52,'#e8c39e'),h(.54,-.48,0,.04,.07,.12,'#2b1b12'),h(.46,-.22,0,.07,.07,.8,'#6b3f1c')];
+  HAT3D[7]=()=>[h(0,-.02,0,.86,.1,.86,'#4a7c2f'),h(.5,.08,0,.9,.04,.22,'#5aa03a',[0,0,.45]),h(-.5,.08,0,.9,.04,.22,'#4a8a2f',[0,0,-.45]),h(0,.08,.5,.22,.04,.9,'#5aa03a',[-.45,0,0]),h(0,.08,-.5,.22,.04,.9,'#4a8a2f',[.45,0,0]),
+    h(.3,.2,.3,.7,.04,.2,'#6dbb45',[0,.8,.3]),h(-.3,.2,-.3,.7,.04,.2,'#6dbb45',[0,.8,-.3]),h(0,.24,0,.14,.3,.14,'#3f7a28')];
+  HAT3D[8]=()=>[h(0,-.02,0,.86,.08,.86,'#6b4a2a'),h(.1,-.14,.5,.26,.05,.26,'#ffffff',[.4,0,0]),h(.1,-.14,.5,.05,.26,.26,'#ffffff',[.4,0,0]),h(.1,-.14,.5,.2,.2,.05,'#fff7e0',[.4,0,0]),h(.1,-.12,.56,.07,.07,.07,'#fbbf24'),
+    h(.0,-.24,.52,.3,.04,.12,'#3f8f3a',[0,.4,-.5]),h(-.14,-.1,.5,.3,.04,.12,'#3f8f3a',[0,-.4,.4]),h(.2,-.02,.44,.12,.06,.12,'#ffffff')];
+  HAT3D[9]=()=>[h(0,-.12,0,1.0,.9,1.0,'#8a5a2b'),h(0,-.34,0,1.05,.07,1.05,'#6b7280'),h(0,.1,0,1.05,.07,1.05,'#6b7280'),h(0,.34,0,.94,.05,.94,'#6b4423'),h(.51,-.1,0,.02,.8,.04,'#6b4423'),h(.51,-.1,.3,.02,.8,.04,'#6b4423'),h(.51,-.1,-.3,.02,.8,.04,'#6b4423'),
+    h(.52,-.3,-.2,.03,.1,.1,'#15121a'),h(.52,-.3,.2,.03,.1,.1,'#15121a'),h(.52,-.55,0,.03,.07,.3,'#15121a')];
+  HAT3D[10]=()=>[h(0,.04,0,.9,.22,.9,'#a8b0ba'),h(0,.22,0,.14,.18,.9,'#c0c7d0'),h(.52,.0,0,.32,.06,.5,'#9aa3ad',[0,0,.35]),h(-.52,.0,0,.32,.06,.5,'#9aa3ad',[0,0,-.35]),h(0,-.04,0,.94,.06,.94,'#7b8590'),h(.3,.08,.46,.06,.06,.04,'#fbbf24'),h(.3,.08,-.46,.06,.06,.04,'#fbbf24'),h(-.12,.1,.46,.06,.06,.04,'#fbbf24'),h(-.12,.1,-.46,.06,.06,.04,'#fbbf24')];
+  HAT3D[11]=()=>[h(0,-.02,0,1.45,.05,1.45,'#ead58f'),h(0,.15,0,.62,.28,.62,'#e2c46e'),h(0,.03,0,.66,.07,.66,'#dc2626'),h(.0,.3,0,.5,.04,.5,'#d4b45a')];
+  HAT3D[12]=()=>[h(0,.12,0,.9,.42,.9,'#6b4423'),h(0,.1,0,.84,.46,.84,'#7a4f27'),h(.2,.34,-.12,.08,.04,.08,'#2b1b12'),h(.2,.34,.12,.08,.04,.08,'#2b1b12'),h(.28,.34,0,.08,.04,.08,'#2b1b12'),h(-.1,.46,.2,.05,.4,.05,'#ef4444',[.2,0,.2]),h(-.12,.62,.28,.05,.1,.05,'#ffffff')];
+  HAT3D[13]=()=>[h(0,.12,0,.72,.44,.72,'#f6c744'),...[-.2,.0,.2].flatMap(x=>[-.2,0,.2].map((z,i)=>h(x+.0,.12+(i-1)*.14,z,.2,.03,.2,'#d89e1c'))),h(0,.5,0,.1,.36,.1,'#3f8f3a'),h(.12,.46,0,.1,.3,.08,'#4aa044',[0,0,-.4]),h(-.12,.46,0,.1,.3,.08,'#4aa044',[0,0,.4]),h(0,.46,.12,.08,.3,.1,'#3f8f3a',[.4,0,0]),h(0,.46,-.12,.08,.3,.1,'#4aa044',[-.4,0,0])];
+  HAT3D[14]=()=>[h(0,.0,0,.88,.1,.88,'#e8c39e'),...[[.44,0],[-.44,0],[0,.44],[0,-.44],[.31,.31],[.31,-.31],[-.31,.31],[-.31,-.31]].map(([x,z],i)=>h(x,.08,z,.14,.14,.14,i%2?'#f9a8d4':'#ffffff')),h(.46,.14,0,.1,.1,.1,'#ffffff'),h(0,.14,.46,.1,.1,.1,'#fde68a'),h(.1,.1,-.46,.16,.16,.04,'#fb923c',[0,0,.7])];
+  HAT3D[15]=()=>[h(0,.1,0,.7,.2,.56,'#ef4444'),h(0,.22,0,.5,.08,.4,'#f87171'),h(.34,.18,-.38,.22,.2,.16,'#dc2626'),h(.5,.26,-.4,.12,.1,.1,'#ef4444'),h(.34,.18,.38,.22,.2,.16,'#dc2626'),h(.5,.26,.4,.12,.1,.1,'#ef4444'),h(.16,.3,-.12,.05,.18,.05,'#f8fafc'),h(.16,.3,.12,.05,.18,.05,'#f8fafc'),h(.16,.4,-.12,.07,.07,.07,'#15121a'),h(.16,.4,.12,.07,.07,.07,'#15121a'),h(0,.0,.0,.86,.08,.86,'#b91c1c')];
+  HAT3D[16]=()=>[h(0,.0,0,.88,.1,.88,'#2f7d4a'),h(0,.2,.2,.1,.36,.1,'#3fa263',[.2,0,0]),h(.1,.22,-.2,.1,.42,.1,'#2f7d4a',[-.2,0,.1]),h(-.2,.18,0,.1,.3,.1,'#3fa263'),
+    ...[[-.46,-.3],[-.46,.3],[-.46,0],[0,-.46],[0,.46]].map(([x,z],i)=>h(x,-.35,z,x?.1:.1,.7+(i%2)*.15,x?.1:.1,i%2?'#2f7d4a':'#3fa263'))];
+  HAT3D[17]=()=>[h(0,.14,0,.92,.4,.92,'#e879f9'),h(0,.3,0,.7,.14,.7,'#f0abfc'),h(.2,.3,.2,.14,.06,.14,'#ffffff'),h(-.1,.32,-.2,.12,.06,.12,'#ffffff'),
+    ...[[.38,.38],[-.38,.38],[.38,-.38],[-.38,-.38],[0,.5],[0,-.5],[.5,0]].map(([x,z],i)=>h(x,-.32,z,.08,.7+(i%3)*.12,.08,i%2?'#f0abfc':'#d946ef'))];
+}
 /* ---------- 2D : sprites (repère 96×128 ; tête centrée en (48,hy), hy = 44 + bob) ---------- */
 const HAT2D={};
 { const ell=(c,x,y,rx,ry,fill,w,rot)=>{ c.beginPath(); c.ellipse(x,y,rx,ry,rot||0,0,6.3); fillStroke(c,fill,w||2.5); };
@@ -115,13 +137,37 @@ const HAT2D={};
   HAT2D[17]=(c,hy,top)=>{ c.beginPath(); c.ellipse(48,top+16,32,19,0,Math.PI,6.3); c.lineTo(80,top+18); c.lineTo(16,top+18); c.closePath(); fillStroke(c,'#facc15',3); rect(c,12,top+13,72,7,'#eab308',3,2.5); rect(c,42,top-10,12,24,'#eab308',3,2);
     c.beginPath(); c.arc(48,top-2,8,0,6.3); fillStroke(c,'#fff7b0',2.5); };
 }
+{ const keep=[0,1,2,8,10,13], old=Object.assign({},HAT2D); for(const k in HAT2D) delete HAT2D[k]; keep.forEach((o,i)=>{ HAT2D[i]=old[o]; }); }
+{ const ell=(c,x,y,rx,ry,fill,w,rot)=>{ c.beginPath(); c.ellipse(x,y,rx,ry,rot||0,0,6.3); fillStroke(c,fill,w||2.5); };
+  const poly=(c,pts,fill,w)=>{ c.beginPath(); c.moveTo(pts[0][0],pts[0][1]); for(let i=1;i<pts.length;i++) c.lineTo(pts[i][0],pts[i][1]); c.closePath(); fillStroke(c,fill,w||2.5); };
+  const rect=(c,x,y,w,h,fill,r,lw)=>{ c.beginPath(); rrp(c,x,y,w,h,r===undefined?4:r); fillStroke(c,fill,lw||2.5); };
+  HAT2D[3]=(c,hy,top)=>{ // scaphandre : casque en cuivre autour du visage (le visage reste visible)
+    c.beginPath(); c.ellipse(48,top+22,38,20,0,Math.PI,6.3); c.lineTo(86,hy-16); c.lineTo(10,hy-16); c.closePath(); fillStroke(c,'#b45309',3);
+    rect(c,8,hy-18,18,52,'#b45309',6,3); rect(c,70,hy-18,18,52,'#b45309',6,3); rect(c,10,hy+26,76,12,'#d97706',5,3);
+    c.beginPath(); rrp(c,24,hy-18,48,48,10); c.lineWidth=6; c.strokeStyle='#d97706'; c.stroke(); c.lineWidth=2; c.strokeStyle=OUT; c.stroke();
+    for(const [x,y] of [[17,hy-8],[79,hy-8],[17,hy+14],[79,hy+14]]){ c.beginPath(); c.arc(x,y,3,0,6.3); fillStroke(c,'#fbbf24',1.5); } rect(c,42,top-4,12,10,'#fbbf24',3,2); };
+  HAT2D[6]=(c,hy,top)=>{ c.beginPath(); c.ellipse(48,top+16,33,19,0,Math.PI,6.3); c.lineTo(80,top+18); c.lineTo(16,top+18); c.closePath(); fillStroke(c,'#7c4a21',3); ell(c,14,hy+2,8,9,'#7c4a21',2.5); ell(c,82,hy+2,8,9,'#7c4a21',2.5); ell(c,14,hy+2,4,5,'#f2a8a8',1); ell(c,82,hy+2,4,5,'#f2a8a8',1);
+    ell(c,48,hy+14,17,11,'#e8c39e',2.5); c.fillStyle='#2b1b12'; c.fillRect(42,hy+10,3,3); c.fillRect(52,hy+10,3,3); c.strokeStyle='#6b3f1c'; c.lineWidth=3; c.beginPath(); c.moveTo(26,hy-6); c.lineTo(70,hy-6); c.stroke(); };
+  HAT2D[7]=(c,hy,top)=>{ ell(c,48,top+16,34,9,'#4a7c2f',3); poly(c,[[14,top+14],[-2,top+6],[8,top+22]],'#5aa03a',2.5); poly(c,[[82,top+14],[98,top+6],[88,top+22]],'#5aa03a',2.5); poly(c,[[30,top+10],[22,top-14],[42,top+4]],'#6dbb45',2.5); poly(c,[[66,top+10],[74,top-14],[54,top+4]],'#6dbb45',2.5); poly(c,[[42,top+6],[48,top-18],[56,top+6]],'#3f7a28',2.5); };
+  HAT2D[8]=(c,hy,top)=>{ ell(c,26,hy-12,6,4,'#3f8f3a',1.5,.6); ell(c,18,hy-6,6,4,'#3f8f3a',1.5,-.4); for(let i=0;i<5;i++){ const a=i*1.2566; ell(c,24+Math.cos(a)*6,hy-10+Math.sin(a)*6,5,5,'#ffffff',1.6); } c.beginPath(); c.arc(24,hy-10,3,0,6.3); fillStroke(c,'#fbbf24',1.2); };
+  HAT2D[9]=(c,hy,top)=>{ rect(c,14,hy-38,68,76,'#8a5a2b',8,3); c.strokeStyle='#6b4423'; c.lineWidth=2; for(const x of [32,48,64]){ c.beginPath(); c.moveTo(x,hy-36); c.lineTo(x,hy+36); c.stroke(); } rect(c,12,hy-24,72,7,'#6b7280',2,2.5); rect(c,12,hy+18,72,7,'#6b7280',2,2.5); rect(c,18,hy-40,60,7,'#6b4423',3,2.5); c.fillStyle='#15121a'; for(const x of [36,60]){ c.beginPath(); c.arc(x,hy+3,4.2,0,6.3); c.fill(); } c.fillRect(40,hy+13,16,3); };
+  HAT2D[10]=(c,hy,top)=>{ c.beginPath(); c.ellipse(48,top+16,33,19,0,Math.PI,6.3); c.lineTo(81,top+18); c.lineTo(15,top+18); c.closePath(); fillStroke(c,'#a8b0ba',3); poly(c,[[44,top-2],[48,top-16],[52,top-2]],'#c0c7d0',2); poly(c,[[10,top+20],[24,top+10],[24,top+22]],'#9aa3ad',2.5); poly(c,[[86,top+20],[72,top+10],[72,top+22]],'#9aa3ad',2.5); for(const x of [28,48,68]){ c.beginPath(); c.arc(x,top+14,2.5,0,6.3); fillStroke(c,'#fbbf24',1); } };
+  HAT2D[11]=(c,hy,top)=>{ ell(c,48,top+14,50,9,'#ead58f',3); poly(c,[[28,top+14],[32,top-8],[64,top-8],[68,top+14]],'#e2c46e',3); rect(c,28,top+4,40,7,'#dc2626',2,2.5); };
+  HAT2D[12]=(c,hy,top)=>{ ell(c,48,top+10,34,22,'#7a4f27',3); for(const [x,y] of [[40,top+2],[56,top+2],[48,top+10]]){ c.beginPath(); c.arc(x,y,3,0,6.3); fillStroke(c,'#2b1b12',1); } c.strokeStyle='#ef4444'; c.lineWidth=4; c.beginPath(); c.moveTo(62,top); c.lineTo(76,top-20); c.stroke(); c.strokeStyle=OUT; c.lineWidth=1; c.stroke(); };
+  HAT2D[13]=(c,hy,top)=>{ ell(c,48,top+8,26,24,'#f6c744',3); c.strokeStyle='#d89e1c'; c.lineWidth=2; for(let i=-2;i<=2;i++){ c.beginPath(); c.moveTo(48+i*10-12,top-12); c.lineTo(48+i*10+12,top+28); c.moveTo(48+i*10+12,top-12); c.lineTo(48+i*10-12,top+28); c.stroke(); }
+    poly(c,[[48,top-12],[38,top-30],[48,top-22],[58,top-30]],'#3f8f3a',2.5); poly(c,[[48,top-12],[28,top-20],[44,top-8]],'#4aa044',2.5); poly(c,[[48,top-12],[68,top-20],[52,top-8]],'#4aa044',2.5); };
+  HAT2D[14]=(c,hy,top)=>{ rect(c,14,top+10,68,10,'#e8c39e',4,2.5); for(let i=0;i<7;i++){ const x=20+i*9.5; ell(c,x,top+8,5,6,i%2?'#f9a8d4':'#ffffff',1.8); } ell(c,76,top+6,6,6,'#fb923c',1.5); c.beginPath(); c.arc(48,top+2,4,0,6.3); fillStroke(c,'#ffffff',1.5); };
+  HAT2D[15]=(c,hy,top)=>{ ell(c,48,top+12,28,13,'#ef4444',3); ell(c,22,top-4,10,9,'#dc2626',2.5); ell(c,74,top-4,10,9,'#dc2626',2.5); poly(c,[[14,top-6],[8,top-16],[20,top-12]],'#ef4444',2); poly(c,[[82,top-6],[88,top-16],[76,top-12]],'#ef4444',2); rect(c,38,top-6,4,12,'#f8fafc',2,1.5); rect(c,56,top-6,4,12,'#f8fafc',2,1.5); c.fillStyle='#15121a'; c.beginPath(); c.arc(40,top-8,2.6,0,6.3); c.arc(58,top-8,2.6,0,6.3); c.fill(); };
+  HAT2D[16]=(c,hy,top)=>{ c.beginPath(); c.ellipse(48,top+16,31,16,0,Math.PI,6.3); c.lineTo(78,top+18); c.lineTo(18,top+18); c.closePath(); fillStroke(c,'#2f7d4a',3); for(const x of [14,22,74,82]){ c.beginPath(); rrp(c,x-4,top+12,8,40,4); fillStroke(c,x%16?'#3fa263':'#2f7d4a',2.2); } poly(c,[[38,top+4],[40,top-12],[46,top+2]],'#3fa263',2); poly(c,[[54,top+4],[58,top-16],[62,top+4]],'#2f7d4a',2); };
+  HAT2D[17]=(c,hy,top)=>{ c.beginPath(); c.ellipse(48,top+14,34,24,0,Math.PI,6.3); c.lineTo(82,top+16); c.lineTo(14,top+16); c.closePath(); fillStroke(c,'#e879f9',3); ell(c,36,top-2,5,3,'#ffffff',1); ell(c,58,top-4,4,3,'#ffffff',1); for(const x of [16,28,40,56,68,80]){ c.strokeStyle=OUT; c.lineWidth=5.5; c.lineCap='round'; c.beginPath(); c.moveTo(x,top+14); c.quadraticCurveTo(x+4,top+30,x-2,top+46); c.stroke(); c.strokeStyle=x%24?'#f0abfc':'#d946ef'; c.lineWidth=3; c.stroke(); } };
+}
 { const _d=drawPirateFrame;
   drawPirateFrame=function(c,ox,pose,td,look,neutral){
     const l=lookOf(look), k=l.hat-HAT0, nw=k>=0&&HAT2D[k];
     _d(c,ox,pose,td,nw?Object.assign({},l,{hat:3}):look,neutral);
     const hy=44+pose.bob, top=hy-30;
     if(nw){ c.save(); c.translate(ox,0); HAT2D[k](c,hy,top);
-      if([0,1,2,8,16].includes(k)){ c.fillStyle='#15121a'; for(const x of (l.patch?[60]:[36,60])){ c.beginPath(); c.arc(x,hy+3,4.2,0,6.3); c.fill(); } } // les deux petits points restent visibles
+      if([0,1,2,3,9,10].includes(k)){ c.fillStyle='#15121a'; for(const x of (l.patch?[60]:[36,60])){ c.beginPath(); c.arc(x,hy+3,4.2,0,6.3); c.fill(); } } // les deux petits points restent visibles
       c.restore(); }
     // finition 2D : lumière douce en haut à gauche, ombre en bas (uniquement sur ce qui est dessiné)
     c.save(); c.beginPath(); c.rect(ox,0,FR_W,FR_H); c.clip(); c.globalCompositeOperation='source-atop';
