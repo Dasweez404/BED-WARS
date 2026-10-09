@@ -2,7 +2,7 @@
 /* =====================  TEXTURES 2 : blocs plus détaillés, sol sableux / herbeux, icônes de blocs texturées  =====================
    Pixel art procédural 32×32 : biseaux lumineux, bruit, motifs sculptés. « Bloc de temple » (ex-grès taillé) et « Bloc de corail » (ex-grès rouge). */
 BNAME[4]='Bloc de temple'; BNAME[7]='Bloc de corail';
-BCOL[4]=['#d8b565','#9a7732']; BCOL[7]=['#f27f86','#b9485a'];
+BCOL[4]=['#a3a8b0','#6f747d']; BCOL[7]=['#f27f86','#b9485a'];
 for(const k of ['stone','coral']){ const it=ITEMMAP[k]; if(it) it.n=k==='stone'?'Bloc de temple':'Bloc de corail'; }
 for(const k in BTEX) delete BTEX[k];
 function t2canvas(N){ const c=document.createElement('canvas'); c.width=c.height=N; return c; }
@@ -22,15 +22,11 @@ blockTex=function(t){
     for(let k=0;k<4;k++){ const y=3+k*8+RI(3); for(let x=0;x<N;x++) if(R()<.55) px(x,y+Math.round(Math.sin(x*.35+k)*1.4),'#cdb375'); }
     for(let k=0;k<46;k++) px(RI(N),RI(N),R()<.5?'#d3bd80':'#f7edc8'); for(let k=0;k<5;k++) px(RI(N),RI(N),'#b89b58',2,1);
     t2bevel(g,N,'rgba(255,250,220,.4)','rgba(110,80,30,.32)'); }
-  else if(t===4){ // bloc de temple : dalles dorées gravées, méandre, joyau turquoise
-    g.fillStyle='#d9b768'; g.fillRect(0,0,N,N); for(let k=0;k<50;k++) px(RI(N),RI(N),R()<.5?'#c9a655':'#e6ca84');
-    px(0,0,'#8f6d2c',N,1); px(0,N-1,'#8f6d2c',N,1); px(0,0,'#8f6d2c',1,N); px(N-1,0,'#8f6d2c',1,N);
-    const key='#9d7b36', lite='#f1dc9c';
-    for(let i=2;i<N-2;i+=1){ if(i<N-2){ px(i,3,key); px(i,N-4,key);} px(3,i,key); px(N-4,i,key); }
-    for(const [x,y] of [[6,6],[N-9,6],[6,N-9],[N-9,N-9]]){ px(x,y,key,3,1); px(x,y,key,1,3); px(x+2,y+2,key,3,1); px(x+2,y+2,key,1,3); }
-    g.fillStyle='#3b8f8c'; g.fillRect(13,13,6,6); g.fillStyle='#6fe0d0'; g.fillRect(14,14,4,4); g.fillStyle='#e9fffb'; g.fillRect(14,14,2,2); g.strokeStyle=key; g.lineWidth=1; g.strokeRect(12.5,12.5,7,7);
-    px(15,9,key,2,2); px(15,21,key,2,2); px(9,15,key,2,2); px(21,15,key,2,2); px(16,10,lite); px(16,22,lite);
-    t2bevel(g,N,'rgba(255,245,200,.5)','rgba(80,55,15,.4)'); }
+  else if(t===4){ // bloc de temple : pierre grise taillée, joints nets, 4 dalles
+    g.fillStyle='#9ea3ab'; g.fillRect(0,0,N,N);
+    const sl=[[0,0,16,16,'#a6abb3'],[16,0,16,16,'#9aa0a8'],[0,16,16,16,'#9aa0a8'],[16,16,16,16,'#a6abb3']];
+    for(const [x,y,w,h,c] of sl){ g.fillStyle=c; g.fillRect(x+1,y+1,w-2,h-2); g.fillStyle='rgba(255,255,255,.28)'; g.fillRect(x+1,y+1,w-2,1); g.fillRect(x+1,y+1,1,h-2); g.fillStyle='rgba(40,45,55,.3)'; g.fillRect(x+1,y+h-2,w-2,1); g.fillRect(x+w-2,y+1,1,h-2); }
+    g.fillStyle='#6b7079'; g.fillRect(0,15,N,2); g.fillRect(15,0,2,N); g.fillRect(0,0,N,1); g.fillRect(0,N-1,N,1); g.fillRect(0,0,1,N); g.fillRect(N-1,0,1,N); }
   else if(t===7){ // bloc de corail : polypes, branches et petits trous
     g.fillStyle='#ee707c'; g.fillRect(0,0,N,N); for(let k=0;k<70;k++) px(RI(N),RI(N),R()<.5?'#e25e6e':'#f58a92');
     for(let k=0;k<9;k++){ const x=RI(N), y=RI(N), r=2+RI(3); for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){ const d=dx*dx+dy*dy; if(d<=r*r) px(x+dx,(y+dy+N)%N,d>(r-1)*(r-1)?'#c64a5d':(dx+dy<0?'#ffb0b4':'#f8969c')); } }
@@ -56,7 +52,7 @@ function groundTex2(){ if(T2GROUND) return T2GROUND; const N=32, c=t2canvas(N), 
   for(let k=0;k<22;k++){ g.fillStyle='rgba(120,120,120,.55)'; g.fillRect(RI(N),RI(N),1,1+RI(2)); } for(let k=0;k<10;k++){ g.fillStyle='rgba(255,255,255,1)'; g.fillRect(RI(N),RI(N),2,1); }
   g.fillStyle='rgba(0,0,0,.08)'; g.fillRect(0,N-1,N,1); g.fillRect(N-1,0,1,N); g.fillStyle='rgba(255,255,255,.35)'; g.fillRect(0,0,N,1); g.fillRect(0,0,1,N);
   return T2GROUND=t2tex(c); }
-{ const _b=buildWorldMeshes; buildWorldMeshes=function(){ _b(); if(iGround&&iGround.material){ iGround.material.map=groundTex2(); iGround.material.needsUpdate=true; } }; }
+
 /* ---- icônes de blocs : vraie texture projetée sur un cube isométrique ---- */
 { const _ic=icoCube;
   window.icoCubeTex=function(c,bs){ const tex=blockTex(bs), img=tex&&tex.image; if(!img) return false; const N=img.width;

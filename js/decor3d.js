@@ -32,6 +32,10 @@ function decModels(){
     a(B,'#7c7366',[0,.9,1.8],[.8,1.8,.5],[.75,0,0]); for(let k=0;k<6;k++) a(B,k%2?'#a89d8b':'#8b8070',[0,.15+k*.3,2.1-k*.28],[.8,.3,.28]);
     a(B,'#4a4238',[0,2.35,0],[.7,.5,.7]); a(B,'#2b2118',[0,2.35,.36],[.3,.35,.04]); a(S0,'#fbbf24',[0,2.9,0],[.22,.22,.22]); for(const [x,z] of [[-.3,-.3],[.3,-.3],[-.3,.3],[.3,.3]]){ a(Cy,'#6b6256',[x,2.8,z],[.04,.5,.04]); } a(Co,'#fb923c',[0,3.2,0],[.14,.4,.14]);
     for(const x of [-1.2,1.2]){ a(B,'#4a4238',[x,.5,2.2],[.3,1,.3]); a(S0,'#16a34a',[x,1.1,2.2],[.2,.2,.2]); } a(B,'#16a34a',[0,1.15,1.6],[.05,.05,.05]); });
+  Mo.plaza=mk(a=>{ const st=['#8b9099','#9aa0a8','#a8adb5']; for(let k=0;k<3;k++){ const w=9-k*2.2; a(B,st[k],[0,.04+k*.07,0],[w,.08+k*.04,w]); a(B,'#6b7079',[0,.09+k*.07,0],[w+.05,.02,w+.05]); }
+    a(Cy,'#fbbf24',[0,.3,0],[1.1,.04,1.1]); a(Cy,'#f59e0b',[0,.33,0],[.8,.03,.8]); a(Cy,'#fde68a',[0,.36,0],[.4,.03,.4]);
+    for(let k=0;k<8;k++){ const t=k*Math.PI/4; a(Co,'#fbbf24',[Math.cos(t)*1.4,.34,Math.sin(t)*1.4],[.1,.35,.1],[Math.sin(t)*1.3,0,-Math.cos(t)*1.3]); }
+    for(const [x,z] of [[-3.6,-3.6],[3.6,-3.6],[-3.6,3.6],[3.6,3.6]]){ a(B,'#7c8189',[x,.5,z],[.6,1,.6]); a(B,'#9aa0a8',[x,1.05,z],[.76,.12,.76]); a(B,'#2b2f3a',[x,1.2,z],[.42,.18,.42]); a(Co,'#fb923c',[x,1.45,z],[.2,.45,.2]); a(Co,'#fde047',[x,1.4,z],[.1,.3,.1]); } });
   Mo.house=mk(a=>{ a(B,'#e8dcc0',[0,.5,0],[1.4,1,1.2]); a(B,'#6b4423',[0,1.05,0],[1.5,.08,1.3]); a(B,'#7c2d12',[0,1.45,0],[1.5,.5,.9],[0,0,0]); a(Co,'#7c2d12',[0,1.45,0],[.95,.8,.95],[0,Math.PI/4,0]);
     a(B,'#3b2412',[-.3,.35,.61],[.3,.7,.04]); a(B,'#fde68a',[.35,.6,.61],[.28,.28,.04]); a(B,'#6b4423',[.35,.6,.63],[.34,.04,.03]); a(B,'#fde68a',[1.0*0,.6,-.61],[.28,.28,.04]); a(B,'#4a4238',[.5,1.65,-.2],[.2,.5,.2]); a(B,'#dc2626',[0,.9,.64],[1.5,.06,.04]); });
   Mo.lamp=mk(a=>{ a(Cy,'#2b2f3a',[0,.55,0],[.04,1.1,.04]); a(B,'#2b2f3a',[0,1.12,0],[.2,.04,.2]); a(B,'#ffc861',[0,1.24,0],[.14,.18,.14]); a(Co,'#2b2f3a',[0,1.42,0],[.14,.1,.14]); });
@@ -67,6 +71,7 @@ function decBuild(){
       if(r<.012) put('wreck',x,y,{s:1.1,rz:(R()-.5)*.25}); else if(r<.02) put('bow',x,y,{rz:(R()-.5)*.4}); else if(r<.03) put('ribs',x,y); else if(e&&r<.06) put('anchor',x,y,{s:.9}); else if(r<.09) put('shell',x,y); }
     for(let y=14;y<86;y+=3)for(let x=14;x<86;x+=3){ const p=[x+Math.floor(R()*3),y+Math.floor(R()*3)]; if(!water(p[0],p[1])) continue; if(R()<.06){ put(R()<.5?'wreck':'bow',p[0],p[1],{y:-.7,rz:.5*(R()-.5),rx:.2*(R()-.5),s:1.15}); } else if(R()<.04) put('buoy',p[0],p[1],{y:-.15}); }
   } else if(id==='citadel'){
+    put('plaza',CX,CY,{});
     for(const sx of [-1,1]) for(const sy of [-1,1]){ const x=CX+sx*7, y=CY+sy*7; put('pyramid',x,y,{ry:Math.atan2(sx,sy)*0+(sx>0?(sy>0?Math.PI*1.0:Math.PI*1.5):(sy>0?Math.PI*.5:0)),s:1}); }
     for(const [x,y] of tiles){ if(!free(x,y)) continue; const r=R(); if(near(x,y,11)&&!near(x,y,5)){ if(r<.02) put('house',x,y,{s:1.1}); else if(r<.045) put('lamp',x,y); else if(r<.06) put('cannon',x,y); } else if(Math.abs(x-CX)<14&&Math.abs(y-CY)<14&&r<.025) put('lamp',x,y); }
   } else if(id==='glacier'||id==='floes'){
@@ -81,3 +86,6 @@ function decBuild(){
   for(const k of Object.keys(L)){ const m=instOf(Mo[k],VCMAT(),L[k],true); DEC3.meshes.push(m); }
 }
 { const _on=onNewGame; onNewGame=function(){ _on(); try{ decBuild(); }catch(e){ console.error(e); } }; }
+
+/* Citadelle : pas de galion au centre, une place de temple à la place */
+{ const _bs=buildShip; buildShip=function(){ _bs(); if((game.opts.map)==='citadel'&&shipGroup){ scene.remove(shipGroup); shipGroup=null; } }; }
