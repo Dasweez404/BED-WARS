@@ -28,6 +28,7 @@ const MUS=(()=>{
     // écho (réverbération du pauvre)
     S.send=AC.createGain(); S.send.gain.value=1; const dl=AC.createDelay(1); dl.delayTime.value=.31; const fb=AC.createGain(); fb.gain.value=.3; const df=AC.createBiquadFilter(); df.type='lowpass'; df.frequency.value=2200;
     S.send.connect(dl); dl.connect(df); df.connect(fb); fb.connect(dl); df.connect(S.bus);
+    { const cv=AC.createConvolver(); cv.buffer=a2impulse(2.4,2.3); const cg=AC.createGain(); cg.gain.value=.7; S.send.connect(cv); cv.connect(cg); cg.connect(S.bus); }
     for(const n of LAY){ const g=AC.createGain(); g.gain.value=0; g.connect(S.bus); S.L[n]=g; }
     // ambiance : vagues, pluie, vent
     const mk=(type,f,q)=>{ const src=AC.createBufferSource(); src.buffer=noiseBuf; src.loop=true; const fl=AC.createBiquadFilter(); fl.type=type; fl.frequency.value=f; if(q) fl.Q.value=q; const g=AC.createGain(); g.gain.value=0; src.connect(fl); fl.connect(g); g.connect(AC.destination); src.start(); return {g,fl}; };
@@ -36,7 +37,7 @@ const MUS=(()=>{
   }
   /* ---------- instruments ---------- */
   function vox(type,freq,t0,dur,vol,layer,o){
-    o=o||{}; const os=AC.createOscillator(), g=AC.createGain(); os.type=type; os.frequency.setValueAtTime(freq,t0); if(o.slide) os.frequency.exponentialRampToValueAtTime(Math.max(25,freq*o.slide),t0+dur);
+    o=o||{}; const os=AC.createOscillator(), g=AC.createGain(); if(typeof a2type==='function') a2type(os,type); else os.type=type; os.frequency.setValueAtTime(freq,t0); if(o.slide) os.frequency.exponentialRampToValueAtTime(Math.max(25,freq*o.slide),t0+dur);
     if(o.det) os.detune.value=o.det; let out=g; if(o.lp){ const f=AC.createBiquadFilter(); f.type='lowpass'; f.frequency.value=o.lp; os.connect(f); f.connect(g); } else os.connect(g);
     const a=o.atk||.012; g.gain.setValueAtTime(.0001,t0); g.gain.linearRampToValueAtTime(vol,t0+a); if(o.sus){ g.gain.setValueAtTime(vol,t0+dur*.6); } g.gain.exponentialRampToValueAtTime(.0001,t0+dur);
     g.connect(layer===null?S.bus:S.L[layer]); if(o.echo){ const e=AC.createGain(); e.gain.value=o.echo; g.connect(e); e.connect(S.send); } os.start(t0); os.stop(t0+dur+.05);

@@ -137,6 +137,7 @@ function sfx(n,x,y){
   const now=performance.now(); if(sfxT[n]&&now-sfxT[n]<40) return; sfxT[n]=now;
   let v=1; if(x!==undefined&&player){ v=clamp(1-Math.hypot(x-player.x,y-player.y)/T/20,0,1); if(v<.03) return; }
   const r=Math.random();
+  if(typeof sfxPlay2==='function'&&sfxPlay2(n,v)) return;
   switch(n){
     case 'place':tone(300+r*60,.07,'square',.07*v,1.6);break;
     case 'tick':tone(180+r*40,.05,'triangle',.06*v,.6);break;
