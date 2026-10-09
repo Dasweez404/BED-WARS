@@ -10,7 +10,8 @@
     const d0=Math.hypot(M.bases[0][0]-50,M.bases[0][1]-50), f=34/d0;
     M.bases=M.bases.map((b,i)=>[BASES[i][0],BASES[i][1],b[2]||BASES[i][2]]);
     M.dia=DIA.map(p=>[p[0],p[1]]);
-    if(id==='classic'||id==='close'||id==='tides'||id==='citadel'||id==='jungle'||id==='tempest') M.relay=RELAY.map(p=>[p[0],p[1]]);
+    if(id==='close') continue;
+    if(id==='classic'||id==='tides'||id==='citadel'||id==='jungle'||id==='tempest') M.relay=RELAY.map(p=>[p[0],p[1]]);
     else if(id==='scatter'){ M.relay=M.relay.map(p=>sc(p,1.25)); }
     else M.relay=(M.relay||[]).map(p=>sc(p,Math.min(f,1.3)));
   }
@@ -18,5 +19,6 @@
   if(MAPS.citadel) MAPS.citadel.relay=[];
   if(MAPS.glacier) MAPS.glacier.relay=RELAY.map(p=>[p[0],p[1]]);
   MAPS.classic.n='Archipel'; MAPS.classic.d='La carte classique : 4 îles aux points cardinaux, de petits îlots relais et le galion au centre.';
+  MAPS.vast={n:'Haute mer',d:'La carte gigantesque : des îles aux quatre extrémités du monde, de longues traversées et des îlots relais. Catapulte et artillerie indispensables !',bases:[[50,88,[0,-1]],[12,50,[1,0]],[50,12,[0,1]],[88,50,[-1,0]]],dia:[[22,22],[78,22],[22,78],[78,78]],relay:[[50,68],[32,50],[50,32],[68,50],[36,36],[64,36],[36,64],[64,64]]};
   delete MAPS.wide;
 })();

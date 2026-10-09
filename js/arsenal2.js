@@ -43,7 +43,7 @@ function abilityCat(e,wx,wy){
   if(e===player&&NETCLIENT){ netSend({t:'act',a:'cat',x:Math.round(aim.x),y:Math.round(aim.y)}); return true; }
   if((e.pcd.catapult||0)>0){ if(e===player) floatTxt(e.x,e.y-36,'🪨 Recharge : '+Math.ceil(e.pcd.catapult)+' s','#cbd5e1',13); return false; }
   if((e.blocks[4]||0)<1){ floatTxt(e.x,e.y-34,'Il faut de la pierre','#fca5a5',14); return false; }
-  const x=wx===undefined?aim.x:wx, y=wy===undefined?aim.y:wy, [tx,ty]=aimPoint(e,x,y,18*T); e.blocks[4]--; e.pcd.catapult=6; bombs.push({x:e.x,y:e.y,tx,ty,fuse:1.15,team:e.team,owner:e,kind:'bomb',R:1.6*T,dm:12,bd:3,h:20}); e.swing=.2; e.swingMax=.2; sfx('shot',e.x,e.y); floatTxt(e.x,e.y-38,'🪨 CATAPULTE !','#d6d3d1',14); return true; }
+  const x=wx===undefined?aim.x:wx, y=wy===undefined?aim.y:wy, [tx,ty]=aimPoint(e,x,y,76*T); e.blocks[4]--; e.pcd.catapult=6; bombs.push({x:e.x,y:e.y,tx,ty,fuse:1.15+Math.min(1.6,Math.hypot(tx-e.x,ty-e.y)/(40*T)),team:e.team,owner:e,kind:'bomb',R:1.6*T,dm:12,bd:3,h:20}); e.swing=.2; e.swingMax=.2; sfx('shot',e.x,e.y); floatTxt(e.x,e.y-38,'🪨 CATAPULTE !','#d6d3d1',14); return true; }
 { const _nh=netHostData; netHostData=function(team,m){ if(m&&m.t==='act'&&(m.a==='art'||m.a==='cat')){ const e=ents.find(o=>o.remote&&o.team===team); if(e&&e.alive&&NET.started){ if(m.a==='art') abilityArt(e,+m.x||e.x,+m.y||e.y); else abilityCat(e,+m.x||e.x,+m.y||e.y); } return; } _nh(team,m); }; }
 { const _u=useGadget2;
   useGadget2=function(e,id,wx,wy,ax,ay){
@@ -57,7 +57,7 @@ function abilityCat(e,wx,wy){
   controlEnt=function(e,dt,inp){
     if(e===player&&ART.on){
       if(!e.alive||e.frozen>0||(ART.t+=dt)>12){ ART.on=false; } else {
-        e.ix=e.iy=0; const k=720*dt; ART.px=clamp(ART.px+(inp.ix||0)*k,-1700,1700); ART.py=clamp(ART.py+(inp.iy||0)*k,-1700,1700);
+        e.ix=e.iy=0; const k=720*dt; ART.px=clamp(ART.px+(inp.ix||0)*k,-2400,2400); ART.py=clamp(ART.py+(inp.iy||0)*k,-2400,2400);
         if(inp.clicked){ const tc=typeof TOUCH!=='undefined'&&TOUCH.on, tx=tc?e.x+ART.px:inp.wx, ty=tc?e.y+ART.py:inp.wy; if(!((e.pcd.artillery||0)>0)){ artFire(e,tx,ty); e.cd.gad=.5; ART.on=false; } }
         return; } }
     _ce(e,dt,inp); };
