@@ -986,13 +986,17 @@ function updateEnt(e,dt){
   } else e.voidT=Math.max(0,e.voidT-dt*2);
   if(fl(fx,fy)>0&&e.z<=gh+1) e.waterJumps=0;
 }
+const ELIM_CAP={bronze:20,silver:8,gold:2,diamond:1}; // plafond de stock d'une base éliminée
 function updateSpawners(dt){
   for(const sp of spawners){
     for(const r in sp.types){
       const ty=sp.types[r], iv=ty.int();
       if(iv===Infinity) continue;
-      ty.t+=dt*(game.opts.res||1)*((game.opts.rate&&game.opts.rate[r])||1)*(sp.kind!=='base'&&EV.rush?3:1);
-      while(ty.t>=iv){ty.t-=iv; ty.stock++;}
+      const dead=sp.kind==='base'&&teamElim(sp.team); // base éliminée : production réduite de moitié et stock plafonné
+      ty.t+=dt*(game.opts.res||1)*((game.opts.rate&&game.opts.rate[r])||1)*(sp.kind!=='base'&&EV.rush?3:1)*(dead?.5:1);
+      const capE=dead?(ELIM_CAP[r]||1):Infinity;
+      if(dead&&ty.stock>capE) ty.stock=capE;
+      while(ty.t>=iv){ty.t-=iv; if(ty.stock<capE) ty.stock++; else { ty.t=0; break; }}
     }
     const R=(sp.kind==='base'?6:2.3)*T, cx=(sp.x+.5)*T, cy=(sp.y+.5)*T;
     for(const e of ents){
