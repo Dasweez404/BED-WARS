@@ -42,3 +42,15 @@ function netRestart(){
   const b=document.createElement('button'); b.className='pbtn'; b.id='pRestart'; b.textContent='🔁 Relancer la partie (en ligne)'; b.style.display='none'; b.onclick=()=>netRestart(); box.insertBefore(b,q);
   setInterval(()=>{ b.style.display=(typeof NET!=='undefined'&&NET.role==='host'&&NET.started&&typeof NETON!=='undefined'&&NETON)?'':'none'; },300);
 })();
+
+/* copier le code du salon (mot de passe de la partie) dans le presse-papiers */
+function mpCopyCode(btn){
+  const code=(typeof NET!=='undefined'&&NET.code)||''; if(!code) return; const done=()=>{ const t=btn.dataset.t||btn.textContent; btn.dataset.t=t; btn.textContent='✔ Code copié : '+code; setTimeout(()=>{ btn.textContent=t; },1800); };
+  const fallback=()=>{ try{ const ta=document.createElement('textarea'); ta.value=code; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); done(); }catch(e){ btn.textContent='Code : '+code; } };
+  try{ if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(code).then(done,fallback); else fallback(); }catch(e){ fallback(); }
+}
+(function(){
+  const start=document.getElementById('mpStart'), q=document.getElementById('pQuit'), box=document.querySelector('#pause .pbox');
+  if(start){ const b=document.createElement('button'); b.className='obtn'; b.id='mpCodeCopy'; b.textContent='📋 Copier le code du salon'; b.style.display='none'; b.onclick=()=>mpCopyCode(b); start.parentNode.insertBefore(b,start); setInterval(()=>{ b.style.display=(NET.role==='host'&&NET.code&&!NET.started)?'':'none'; },400); }
+  if(box&&q){ const b=document.createElement('button'); b.className='pbtn'; b.id='pCodeCopy'; b.textContent='📋 Copier le code du salon'; b.style.display='none'; b.onclick=()=>mpCopyCode(b); box.insertBefore(b,q); setInterval(()=>{ b.style.display=(NET.role==='host'&&NET.code&&NET.started)?'':'none'; },400); }
+})();
