@@ -1,7 +1,7 @@
 'use strict';
 /* =====================  INTERFACE (canvas 2D par-dessus la 3D)  ===================== */
-const FONT='"Fredoka","Lilita One",system-ui,sans-serif';
-const PFONT='"Pirata One","Lilita One","Fredoka",serif';
+const FONT='"Barlow","Segoe UI",system-ui,sans-serif';
+const PFONT='"Pirata One",Georgia,serif';
 let uic=null, ctx=null, DPR=1;
 const miniCv=document.createElement('canvas'); miniCv.width=W; miniCv.height=H;
 const miniCtx=miniCv.getContext('2d'); const miniImg=miniCtx.createImageData(W,H);

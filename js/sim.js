@@ -893,7 +893,7 @@ function shopIco(id){
 function renderShop(){
   if(!shopOpen) return;
   const e=player, sc=shopEl.scrollTop;
-  let h=`<div class="top"><h2>Boutique${typeof ROSTER!=='undefined'&&ROSTER?` <small style="font-size:13px;color:#d9c49a;font-family:Fredoka,sans-serif">roster aléatoire : ${ROSTER.size} objets</small>`:''}</h2><div class="res">${Object.keys(RESCOL).map(k=>`<span style="color:${RESCOL[k]}"><img class="ri" src="${ICON[k]}"> ${e.res[k]}</span>`).join('')}</div><span class="x" data-close="1">✕</span></div>`;
+  let h=`<div class="top"><h2>Boutique${typeof ROSTER!=='undefined'&&ROSTER?` <small style="font-size:13px;color:#d9c49a;font-family:Barlow,sans-serif">roster aléatoire : ${ROSTER.size} objets</small>`:''}</h2><div class="res">${Object.keys(RESCOL).map(k=>`<span style="color:${RESCOL[k]}"><img class="ri" src="${ICON[k]}"> ${e.res[k]}</span>`).join('')}</div><span class="x" data-close="1">✕</span></div>`;
   h+='<div class="tabs">'+TABS.map(t=>`<div class="tab ${t===shopTab?'on':''}" data-tab="${t}">${t==='Base'?'Améliorations (diamants)':t}</div>`).join('')+'</div><div class="grid">';
   const itemHtml=it=>{
     const inf=it.info(e), can=inf.ok!==false&&canAfford(e,inf.cost);
