@@ -30,8 +30,8 @@ addEventListener('pointerlockchange',()=>{ if(document.pointerLockElement==null&
     const cp=Math.cos(FPS.pitch); camera3.lookAt(e.x*U+Math.cos(FPS.yaw)*cp,e.z*U+FPS.eye+Math.sin(FPS.pitch),e.y*U+Math.sin(FPS.yaw)*cp);
     cam3.x=e.x; cam3.y=e.y; sun.position.set(e.x*U-14,30,e.y*U+12); sun.target.position.set(e.x*U,0,e.y*U); };
   const _a=updateAim;
-  updateAim=function(){ if(!fpsActive()){ _a(); return; }
-    mouse.x=VW/2; mouse.y=VH/2; aim.ok=false; _a(); const e=player;
+  updateAim=function(){ if(!fpsActive()){ _a(); if(player&&player.pv) player.pv=0; if(typeof NET!=='undefined'&&NET.inp) NET.inp.pv=0; return; }
+    mouse.x=VW/2; mouse.y=VH/2; aim.ok=false; _a(); const e=player; e.pv=FPS.pitch; if(typeof NET!=='undefined'&&NET.inp) NET.inp.pv=FPS.pitch;
     if(!aim.ok||Math.hypot(aim.x-e.x,aim.y-e.y)>26*T){ aim.x=e.x+Math.cos(FPS.yaw)*14*T; aim.y=e.y+Math.sin(FPS.yaw)*14*T; aim.ok=true; } };
   const _p=animatePirate;
   animatePirate=function(e,m,dt){ _p(e,m,dt); if(e===player&&fpsActive()) m.visible=false; };

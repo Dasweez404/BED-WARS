@@ -523,7 +523,7 @@ function fireGun(e,id){
   sfx(id==='gun'?'shot':id==='rocket'?'whoosh':id==='bow'?'bow':id==='woolgun'?'woof':id,e.x,e.y);
   for(let i=0;i<g.pel;i++){
     const a=e.ang+(g.pel>1?rnd(-spr,spr):(Math.random()*2-1)*spr*.7+Math.sin(s.n*1.7)*s.b*.45);
-    projs.push({x:e.x+Math.cos(e.ang)*14,y:e.y+Math.sin(e.ang)*14,z:12,vx:Math.cos(a)*g.sp,vy:Math.sin(a)*g.sp,team:e.team,owner:e,life:g.life*(g.kind==='flame'?1:rangeK(e)),dmg:g.dmg*cv(e,'gun'),kb:g.kb,kind:g.kind||'bullet',col:g.col,pierce:g.pierce,hit:g.pierce?[]:null,short:g.short,lift:g.lift});
+    projs.push({x:e.x+Math.cos(e.ang)*14,y:e.y+Math.sin(e.ang)*14,z:e.pv?(e.z||0)+26:12,vz:e.pv?Math.tan(clamp(e.pv+.12,-1.2,1.2))*g.sp:undefined,vx:Math.cos(a)*g.sp,vy:Math.sin(a)*g.sp,team:e.team,owner:e,life:g.life*(g.kind==='flame'?1:rangeK(e)),dmg:g.dmg*cv(e,'gun'),kb:g.kb,kind:g.kind||'bullet',col:g.col,pierce:g.pierce,hit:g.pierce?[]:null,short:g.short,lift:g.lift});
   }
   e.vx-=Math.cos(e.ang)*g.rec; e.vy-=Math.sin(e.ang)*g.rec;
   if(id!=='flame'&&id!=='bow'){ burst(e.x+Math.cos(e.ang)*16,e.y+Math.sin(e.ang)*16,g.col,4,120,.15,3); if(e===player) shake=Math.max(shake,id==='shotgun'||id==='sniper'||id==='rocket'?6:2); }
@@ -1037,8 +1037,8 @@ function updateProj(dt){
     p.life-=dt; if(p.life<=0){ if(p.kind==='rocket') explode({x:p.x,y:p.y,team:p.team,owner:p.owner,kind:'bomb',R:2.2*T,dm:9,bd:.8}); continue; }
     const n=Math.ceil(Math.hypot(p.vx,p.vy)*dt/8);
     for(let i=0;i<n&&p.life>0;i++){
-      p.x+=p.vx*dt/n; p.y+=p.vy*dt/n;
-      if(wl(Math.floor(p.x/T),Math.floor(p.y/T))>0&&!(p.owner&&p.owner.tower)){ // les tirs depuis la tour de guet passent par-dessus les murs
+      p.x+=p.vx*dt/n; p.y+=p.vy*dt/n; if(p.vz!==undefined){ p.z+=p.vz*dt/n; if(p.z<0&&p.dmg>=0){ burst(p.x,p.y,'#ddd',3,60,.2,2); p.life=0; break; } }
+      if(wl(Math.floor(p.x/T),Math.floor(p.y/T))>0&&!(p.owner&&p.owner.tower)&&(p.vz===undefined||p.z<wallTop(Math.floor(p.x/T),Math.floor(p.y/T)))){ // les tirs depuis la tour de guet passent par-dessus les murs
         burst(p.x,p.y,'#ddd',3,60,.2,2);
         { // les armes à feu et flèches abîment les blocs murs (pas le coffre, pas les ponts) selon leurs dégâts
           const wx=Math.floor(p.x/T), wy=Math.floor(p.y/T), wi=idx(wx,wy);
@@ -1055,7 +1055,7 @@ function updateProj(dt){
       for(const o of ents){
         if(!o.alive||o.team===p.team) continue;
         if(p.hit&&p.hit.includes(o)) continue;
-        if(Math.hypot(o.x-p.x,o.y-p.y)<12){
+        if(Math.hypot(o.x-p.x,o.y-p.y)<12&&(p.vz===undefined||(p.z>=(o.z||0)-6&&p.z<=(o.z||0)+36))){
           if(p.kind==='rocket'){ explode({x:p.x,y:p.y,team:p.team,owner:p.owner,kind:'bomb',R:2.2*T,dm:9,bd:.8}); p.life=0; break; }
           const sp_=Math.hypot(p.vx,p.vy)||1;
           hurt(o,p.dmg,p.owner,p.vx/sp_*p.kb,p.vy/sp_*p.kb); if(p.lift) o.vz=Math.max(o.vz,p.lift);

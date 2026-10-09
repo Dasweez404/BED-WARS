@@ -7,10 +7,10 @@ ENT_NUM.push('arD','arM','arR','arT','bounty','streak','parry','parryCd');
 /* ---- armures : usure + résistance selon le prix ---- */
 const ARMORS=[
   null,
-  {id:'arm_leather',n:'Gilet de cuir',ico:'🦺',col:'#b9855a',res:.15,dur:26,cost:{bronze:40},hex:0x9a6b3a},
-  {id:'arm_iron',n:'Cuirasse de fer',ico:'🛡️',col:'#cbd5e1',res:.28,dur:55,cost:{bronze:30,silver:10},hex:0xb8c2cc},
-  {id:'arm_gold',n:'Armure dorée',ico:'👑',col:'#fbbf24',res:.38,dur:90,cost:{gold:3},hex:0xfbbf24},
-  {id:'arm_diamond',n:'Armure de diamant',ico:'💎',col:'#67e8f9',res:.5,dur:150,cost:{diamond:2},hex:0x67e8f9}
+  {id:'arm_leather',n:'Gilet de cuir',ico:'🦺',col:'#b9855a',res:.2,dur:34,cost:{bronze:40},hex:0x9a6b3a},
+  {id:'arm_iron',n:'Cuirasse de fer',ico:'🛡️',col:'#cbd5e1',res:.34,dur:70,cost:{bronze:30,silver:10},hex:0xb8c2cc},
+  {id:'arm_gold',n:'Armure dorée',ico:'👑',col:'#fbbf24',res:.45,dur:115,cost:{gold:3},hex:0xfbbf24},
+  {id:'arm_diamond',n:'Armure de diamant',ico:'💎',col:'#67e8f9',res:.58,dur:190,cost:{diamond:2},hex:0x67e8f9}
 ];
 for(let i=1;i<ARMORS.length;i++){ const A=ARMORS[i];
   const it={id:A.id,n:A.n,ico:A.ico,col:A.col}; ITEMS.push(it); ITEMMAP[A.id]=it;

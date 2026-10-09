@@ -77,7 +77,7 @@ function netHostData(team,m){
   const s=NET.slots[team]; if(!s||!m) return; if(m.t==='hello'||m.t==='buy') netLog('← invité '+team+': '+m.t); else if(m.t==='in'&&!s.gotIn){ s.gotIn=1; netLog('← premières commandes de l\'invité '+team); }
   if(m.t==='hello'){ s.name=String(m.name||'Pirate').slice(0,14); s.cls=m.cls; s.look=m.look; netLobbyBroadcast(); return; }
   const e=ents.find(o=>o.remote&&o.team===team); if(!e||!NET.started) return;
-  if(m.t==='in'){ const q=e.inp; q.ix=+m.ix||0; q.iy=+m.iy||0; q.wx=+m.wx||0; q.wy=+m.wy||0; q.down=!!m.down; q.sel=String(m.sel||'sword'); if(m.clk>0) q.clicked=true; if(m.px!==undefined){ q.px=+m.px; q.py=+m.py; } }
+  if(m.t==='in'){ const q=e.inp; q.ix=+m.ix||0; q.iy=+m.iy||0; q.wx=+m.wx||0; q.wy=+m.wy||0; q.down=!!m.down; q.sel=String(m.sel||'sword'); e.pv=+m.pv||0; if(m.clk>0) q.clicked=true; if(m.px!==undefined){ q.px=+m.px; q.py=+m.py; } }
   else if(m.t==='act'){
     if(!e.alive) return;
     if(m.a==='jump') jump(e);
@@ -277,7 +277,7 @@ function netClientFrame(dt){
     else { e.x+=(e._tx-e.x)*k; e.y+=(e._ty-e.y)*k; }
     if(e._tz!==undefined) e.z+=(e._tz-e.z)*Math.min(1,dt*20); }
   for(const L of [projs,bombs,traps,guards,chickens,sharks,drops,pearls,boats,cannons]) for(const o of L){ if(o._tx!==undefined){ o.x+=(o._tx-o.x)*k; o.y+=(o._ty-o.y)*k; } }
-  NET.sendT-=dt; if(NET.sendT<=0){ NET.sendT=1/30; netSend({t:'in',ix:inp.ix,iy:inp.iy,wx:Math.round(inp.wx),wy:Math.round(inp.wy),down:inp.down,sel:inp.sel,clk:inp.clk,px:Math.round(me.x*10)/10,py:Math.round(me.y*10)/10}); inp.clk=0; }
+  NET.sendT-=dt; if(NET.sendT<=0){ NET.sendT=1/30; netSend({t:'in',ix:inp.ix,iy:inp.iy,wx:Math.round(inp.wx),wy:Math.round(inp.wy),down:inp.down,sel:inp.sel,clk:inp.clk,pv:inp.pv?Math.round(inp.pv*100)/100:0,px:Math.round(me.x*10)/10,py:Math.round(me.y*10)/10}); inp.clk=0; }
 }
 /* hôte : la position d'un invité est pilotée par lui (validée), sauf en cas de force extérieure */
 function netFollow(e,dt,q){
