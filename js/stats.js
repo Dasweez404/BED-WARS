@@ -42,6 +42,7 @@ drawOverButtons=function(){
   if(game.replay) return; HUDB.length=0; if(game.state!=='over'||ovfWait()||!OVF.at) return;
   const small=VH<460, h=small?34:42, y=Math.min(VH-h-8,(BIL.y||VH*.7)+4), list=[['↩ Menu (Entrée)',()=>showMenu(),'#fde68a'],['▶ Revoir les 10 dernières s',startReplay,'#c4b5fd']];
   if(game.specOffer) list.unshift(['👁 Regarder la fin (Espace)',startSpectate,'#7dd3fc']);
+  if(typeof NET!=='undefined'&&NET.role==='host'&&NET.started) list.unshift(['🔁 Relancer la partie',()=>netRestart(),'#86efac']);
   const w=Math.min(250,(VW-40)/list.length-8), tot=list.length*w+(list.length-1)*8; let x=VW/2-tot/2;
   for(const [txt,fn,col] of list){ HUDB.push({x,y,w,h,fn}); panel(x,y,w,h,12,col); ctx.font='bold '+(small?'12':'14')+'px '+FONT; ctx.textAlign='center'; ctx.fillStyle='#fff'; ctx.fillText(txt,x+w/2,y+h/2+5); x+=w+8; }
 };

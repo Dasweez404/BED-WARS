@@ -132,7 +132,7 @@ function netGuestData(m){
     NET.started=true; NETON=true; NETCLIENT=true; NET.myTeam=m.team; { const st=game.opts.style; game.opts=m.opts; game.opts.style=st; } game.diff=m.diff; NETSLOTS=m.slots;
     NET.snapped=false; newGame(); if(m.roster) ROSTER=new Set(m.roster); else ROSTER=null;
     player=ents.find(e=>e.team===m.team&&e.slot===0); NET.base=null; NET.inT=0; NET.hostX=player.x; NET.hostY=player.y; NET.lastHp=player.hp;
-    game.state='play'; screenTransition(()=>document.getElementById('start').classList.add('hidden'));
+    game.state='play'; if(typeof setPause==='function') setPause(false); if(typeof toggleShop==='function') toggleShop(false); screenTransition(()=>document.getElementById('start').classList.add('hidden'));
   }
   else if(m.t==='s'&&NETCLIENT) netApplySnap(m);
 }

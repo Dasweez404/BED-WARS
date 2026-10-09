@@ -30,3 +30,15 @@ function mpAbsent(){ if(typeof NETON==='undefined'||!NETON||game.opts.fillbots!=
   paint();
   setInterval(()=>{ btn.style.display=(NET.role==='host'&&!NET.started)?'':'none'; paint(); },400);
 })();
+
+/* relancer la partie en ligne (hôte) : mêmes joueurs, nouvelle partie tout de suite */
+function netRestart(){
+  if(NET.role!=='host'||!NET.started) return;
+  if(typeof setPause==='function') setPause(false); if(typeof toggleShop==='function') toggleShop(false);
+  NET.started=false; netHostStart();
+}
+(function(){
+  const box=document.querySelector('#pause .pbox'), q=document.getElementById('pQuit'); if(!box||!q) return;
+  const b=document.createElement('button'); b.className='pbtn'; b.id='pRestart'; b.textContent='🔁 Relancer la partie (en ligne)'; b.style.display='none'; b.onclick=()=>netRestart(); box.insertBefore(b,q);
+  setInterval(()=>{ b.style.display=(typeof NET!=='undefined'&&NET.role==='host'&&NET.started&&typeof NETON!=='undefined'&&NETON)?'':'none'; },300);
+})();
