@@ -2,7 +2,7 @@
 /* =====================  PERSONNALITÉS DES BOTS (option du menu « Bots »)  =====================
    Chaque capitaine a un caractère : objets préférés, façon de choisir ses cibles, réactions. */
 const PERS={
-  ruse:{ico:'🦊',n:'Rusé',cls:'mystique',d:'Furtif : espionne, vole, vise le coffre le plus faible et fuit quand il va mal.',likes:['cloak','tp','stickybomb','pickpocket','decoy','swap','dash','haste','net','mine','springs']},
+  ruse:{ico:'🦊',n:'Rusé',cls:'matelot',d:'Furtif : espionne, vole, vise le coffre le plus faible et fuit quand il va mal.',likes:['cloak','tp','stickybomb','pickpocket','decoy','swap','dash','haste','net','mine','springs']},
   batisseur:{ico:'🧱',n:'Bâtisseur',cls:'charpentier',d:'Fortifie sa base, achète des défenses et ne sort qu\'en force.',likes:['turret','turret2','guard','wallgad','repair','net','mine','flag','anchor','aegis','bridge']},
   kamikaze:{ico:'💥',n:'Kamikaze',cls:'brute',d:'Fonce tôt, adore les explosifs et devient fou furieux quand il est blessé.',likes:['rocket','cluster','stickybomb','flame','shotgun','haste','dash','gun','smg']},
   chasseur:{ico:'🎯',n:'Chasseur de primes',cls:'corsaire',d:'Traque le pirate qui a le plus d\'éliminations (souvent toi !).',likes:['sniper','flarebow','javelin','grap','jet','boomerang','haste','trident']},
@@ -16,7 +16,7 @@ let persCount=0;
       const id=PERS_IDS[(persCount+(game.t<1?0:0))%PERS_IDS.length]; persCount++; const P=PERS[id];
       e.pers=id; e.ai.pers=id; if(CLASSES[P.cls]) e.cls=P.cls; for(const l of P.likes) if(BOT_OPTIONAL.includes(l)) e.ai.likes.add(l);
       if(!e.name.startsWith(P.ico)) e.name=P.ico+' '+e.name;
-      if(id==='kamikaze') e.ai.leaveAt*=.45; else if(id==='batisseur') e.ai.leaveAt=e.ai.leaveAt*2.2+10; else if(id==='marchand') e.ai.leaveAt*=1.1;
+      if(id==='kamikaze') e.ai.leaveAt*=.45; else if(id==='batisseur') e.ai.leaveAt=e.ai.leaveAt*1.5+4; else if(id==='marchand') e.ai.leaveAt*=1.1;
     }
     _ac(e);
   };
@@ -33,7 +33,7 @@ const pers=b=>b.ai&&b.ai.pers;
       let best=null,bh=1e9; for(const t of TD){ if(t.id===b.team||!t.coreAlive) continue; const ci=idx(t.bx,t.by), h=wallT[ci]===CORE?hpW[ci]:99; if(h<bh){ bh=h; best=t; } }
       if(best){ ai.mode='raid'; ai.target=best.id; if((b.am.cloak||0)>0&&b.cd.gad<=0&&Math.random()<.6) useGadget(b,'cloak',b.x,b.y); return; }
     }
-    if(p==='chasseur'&&Math.random()<.6&&ents.some(o=>o.alive&&o.team!==b.team)){ ai.mode='hunt'; ai.bounty=true; return; }
+    if(p==='chasseur'&&Math.random()<.4&&ents.some(o=>o.alive&&o.team!==b.team)){ ai.mode='hunt'; ai.bounty=true; return; }
     if(p==='marchand'&&Math.random()<.7){
       const l=spawners.filter(s=>s.kind==='dia'||(s.kind==='gold'&&game.t>50)).map(s=>({s,d:Math.hypot(s.x-me,s.y-my)+Math.random()*6})).sort((a,c)=>a.d-c.d);
       if(l.length){ const s=l[0].s; ai.mode='res'; ai.goal=[s.x,s.y]; ai.wait=s.kind==='dia'?14:11; ai.bounty=false; return; }
