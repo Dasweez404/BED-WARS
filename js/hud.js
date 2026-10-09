@@ -290,7 +290,7 @@ function drawHud(){
   // équipes
   ctx.save(); if(ts<1) ctx.scale(ts,ts);
   TD.forEach((t,i)=>{
-    const y=10+i*38, ci=idx(t.bx,t.by), chp=wallT[ci]===CORE?hpW[ci]:0;
+    if(t.absent) return; const y=10+TD.slice(0,i).filter(x=>!x.absent).length*38, ci=idx(t.bx,t.by), chp=wallT[ci]===CORE?hpW[ci]:0;
     if(t.hpPrev===undefined) t.hpPrev=chp;
     const hideOwn=i===player.team&&!(player.up&&player.up.watch>0)&&t.coreAlive; // sans la Cloche de vigie : aucune alerte sur ton propre coffre
     if(chp<t.hpPrev-.1&&!hideOwn){ t.alert=1.4; if(i===player.team&&hud.alertT<=0){ announce('TON COFFRE EST ATTAQUÉ !','#fca5a5'); sfx('alarm'); hud.alertT=7; } }
