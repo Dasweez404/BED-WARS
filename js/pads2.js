@@ -72,14 +72,14 @@ function pdBuild(sp){
 function pdPill(x,y,items){
   ctx.font='bold 13px system-ui'; const w=items.reduce((s,it)=>s+ctx.measureText(String(it.n)).width+26,10); let px=x-w/2; const h=22, py=y-h/2;
   ctx.fillStyle='#0b1b2dd9'; ctx.beginPath(); if(ctx.roundRect) ctx.roundRect(px,py,w,h,11); else ctx.rect(px,py,w,h); ctx.fill(); ctx.lineWidth=1.5; ctx.strokeStyle='#ffffff55'; ctx.stroke(); px+=8;
-  for(const it of items){ ctx.beginPath(); ctx.arc(px+6,y,6,0,6.283); ctx.fillStyle=it.c; ctx.fill(); ctx.strokeStyle='#0008'; ctx.lineWidth=1; ctx.stroke(); ctx.fillStyle='#fff'; ctx.textAlign='left'; ctx.fillText(String(it.n),px+15,y+4.5); px+=ctx.measureText(String(it.n)).width+26; }
+  for(const it of items){ ctx.globalAlpha=it.z?.4:1; ctx.beginPath(); ctx.arc(px+6,y,6,0,6.283); ctx.fillStyle=it.c; ctx.fill(); ctx.strokeStyle='#0008'; ctx.lineWidth=1; ctx.stroke(); ctx.fillStyle='#fff'; ctx.textAlign='left'; ctx.fillText(String(it.n),px+15,y+4.5); px+=ctx.measureText(String(it.n)).width+26; ctx.globalAlpha=1; }
 }
 { const _dh=drawHud;
   drawHud=function(){ _dh(); if(game.state!=='play'||!ctx||!player||typeof w2s!=='function'||(typeof BOSS!=='undefined'&&false)) return;
     ctx.save(); ctx.setTransform(DPR,0,0,DPR,0,0);
     for(const sp of spawners){ const mine=sp.kind==='base'&&(sp.team===player.team||teamElim(sp.team)); if(sp.kind==='base'&&!mine) continue;
-      const cx=(sp.x+.5)*T, cy=(sp.y+.5)*T; if(sp.kind!=='base'&&Math.hypot(cx-player.x,cy-player.y)>16*T) continue;
-      const items=[]; for(const r of ['bronze','silver','gold','diamond']){ const ty=sp.types[r]; if(ty&&ty.stock>0) items.push({n:ty.stock,c:RESCOL[r]}); }
+      const cx=(sp.x+.5)*T, cy=(sp.y+.5)*T; if(sp.kind!=='base'&&Math.hypot(cx-player.x,cy-player.y)>24*T) continue;
+      const items=[]; for(const r of ['bronze','silver','gold','diamond']){ const ty=sp.types[r]; if(ty&&ty.int()!==Infinity) items.push({n:ty.stock,c:RESCOL[r],z:ty.stock<=0}); }
       if(!items.length) continue; const s=w2s(cx,cy,(sp.kind==='base'?1.55:sp.kind==='dia'?1.45:1.35)*T); if(!s[2]||s[0]<-60||s[0]>VW+60||s[1]<-20||s[1]>VH+20) continue;
       pdPill(s[0],s[1],items); }
     ctx.textAlign='left'; ctx.restore(); }; }
