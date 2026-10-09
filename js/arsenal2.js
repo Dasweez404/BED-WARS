@@ -18,7 +18,7 @@ SHOP.push(
   upItem('catapult','Catapulte à blocs',1,[3],['Construit une catapulte autour de ta base (elle détruit les blocs sur son emplacement). Monte dessus (touche E), vise et clique : un bloc de pierre (consommé) part jusqu\'à 18 cases, dégâts énormes sur les murs. Recharge 6 s.']),
   upItem('scope','Observatoire',1,[3],['Construit un observatoire autour de ta base : monte dessus (touche E) pour regarder partout sur la carte, déplacer la vue (ZQSD) et zoomer (molette).']),
   upItem('lighthouse','Tour de guet',1,[3],['Une tour en bois de 5,5 blocs sur ton île : debout dessus, E te téléporte tout en haut (E de nouveau pour redescendre). De là-haut tu vois bien plus loin, tes armes portent bien plus loin et tes tirs passent par-dessus les murs.']),
-  upItem('shipyard','Chantier naval',2,[4,6],['Toutes les 60 s, un matelot gardien réapparaît à ta base (1 gardien maximum).','Toutes les 45 s, jusqu\'à 2 gardiens.'])
+  upItem('shipyard','Chantier naval',2,[4,6],['Toutes les 110 s, un matelot gardien réapparaît à ta base (1 gardien maximum).','Toutes les 80 s, jusqu\'à 2 gardiens.'])
 );
 SHOP.forEach(s=>SHOPMAP[s.id]=s);
 H_THROW.push('barrel'); H_BUFF.push('mirror');
@@ -57,7 +57,7 @@ function abilityCat(e,wx,wy){
   controlEnt=function(e,dt,inp){
     if(e===player&&ART.on){
       if(!e.alive||e.frozen>0||(ART.t+=dt)>12){ ART.on=false; } else {
-        e.ix=e.iy=0; const k=720*dt; ART.px=clamp(ART.px+(inp.ix||0)*k,-2400,2400); ART.py=clamp(ART.py+(inp.iy||0)*k,-2400,2400);
+        e.ix=e.iy=0; const k=1300*dt; ART.px=clamp(ART.px+(inp.ix||0)*k,-3000,3000); ART.py=clamp(ART.py+(inp.iy||0)*k,-3000,3000);
         if(inp.clicked){ const tc=typeof TOUCH!=='undefined'&&TOUCH.on, tx=tc?e.x+ART.px:inp.wx, ty=tc?e.y+ART.py:inp.wy; if(!((e.pcd.artillery||0)>0)){ artFire(e,tx,ty); e.cd.gad=.5; ART.on=false; } }
         return; } }
     _ce(e,dt,inp); };
@@ -84,8 +84,8 @@ function abilityCat(e,wx,wy){
         for(const o of ents){ if(!o.alive||o.team===t.id||o.cloak>0||Math.hypot(o.x-cx,o.y-cy)>10*T) continue; set.push(o); const l=LHSEEN.get(o); if(!l||game.t-l>14){ LHSEEN.set(o,game.t); t.intr=3; if(t.id===player.team){ floatTxt(o.x,o.y-50,'🔔 INTRUS !','#fca5a5',14); announce('🔔 UN ENNEMI ENTRE DANS TA BASE !','#fca5a5'); sfx('alarm'); } } } if(t.intr>0) t.intr-=dt; }
       LHM[t.id]=set; }
     // chantier naval
-    for(const t of TD){ const lv=t.ent.up.shipyard|0; if(!lv||!t.members.some(m=>m.alive)||!t.coreAlive) continue; SY[t.id]-=dt; if(SY[t.id]<=0){ SY[t.id]=[60,45][lv-1]; const max=[1,2][lv-1];
-        if(guards.filter(g=>g.team===t.id).length<max){ const px=(t.padTile[0]+.5)*T, py=(t.padTile[1]+.5)*T; guards.push({x:px,y:py,team:t.id,owner:t.ent,hp:7,t:1e6,cd:.5,vx:0,vy:0,ph:rnd(0,6),ang:0}); ring(px,py,T*1.3,'#a3e635',.5,true); burst(px,py,'#bef264',10,120,.5,3); if(t.id===player.team) floatTxt(px,py-40,'⚓ Chantier naval : un gardien !','#bef264',14); } } }
+    for(const t of TD){ const lv=t.ent.up.shipyard|0; if(!lv||!t.members.some(m=>m.alive)||!t.coreAlive) continue; SY[t.id]-=dt; if(SY[t.id]<=0){ SY[t.id]=[110,80][lv-1]; const max=[1,2][lv-1];
+        if(guards.filter(g=>g.team===t.id).length<max){ const px=(t.padTile[0]+.5)*T, py=(t.padTile[1]+.5)*T; guards.push({x:px,y:py,team:t.id,owner:t.ent,hp:4,t:1e6,cd:.5,vx:0,vy:0,ph:rnd(0,6),ang:0}); ring(px,py,T*1.3,'#a3e635',.5,true); burst(px,py,'#bef264',10,120,.5,3); if(t.id===player.team) floatTxt(px,py-40,'⚓ Chantier naval : un gardien !','#bef264',14); } } }
   };
 }
 /* ---------- affichage : tonneaux (3D), réticule d'artillerie, repères du phare ---------- */

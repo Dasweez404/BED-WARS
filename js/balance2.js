@@ -21,3 +21,16 @@
   };
 })();
 if(typeof throwBomb==='function'){ const _tb=throwBomb; throwBomb=function(e,kind,wx,wy){ const n=bombs.length; const r=_tb(e,kind,wx,wy); for(let i=n;i<bombs.length;i++){ const b=bombs[i]; if(b.dm) b.dm*=.85; if(b.R) b.R*=.96; } return r; }; }
+
+/* ===== Gardiens : retours visuels/sonores quand on les touche ===== */
+if(typeof updateGuards==='function'){ const _ug=updateGuards;
+  updateGuards=function(dt){
+    for(const g of guards){ if(g._hp===undefined) g._hp=g.hp; }
+    _ug(dt);
+    for(const g of guards) g.flash=Math.max(0,(g.flash||0)-dt);
+    for(const g of guards){ if(g._hp===undefined){ g._hp=g.hp; continue; } const d=g._hp-g.hp; g._hp=g.hp;
+      if(d>.05){ g.flash=.18; floatTxt(g.x+rnd(-6,6),g.y-34,'-'+(Math.round(d*10)/10),'#fde68a',15); burst(g.x,g.y-8,'#ffffff',8,150,.3,3); burst(g.x,g.y-8,'#fca5a5',5,110,.3,3); ring(g.x,g.y,T*.7,'#fecaca',.25,true); sfx('hit',g.x,g.y); g.hitT=.25;
+        if(g.hp<=0){ floatTxt(g.x,g.y-46,'💥','#fff',18); burst(g.x,g.y,'#bef264',16,200,.5,4); } } } };
+}
+
+if(typeof updateGuardM==='function'){ const _um=updateGuardM; updateGuardM=function(g,m){ _um(g,m); const k=g.flash>0?1+g.flash*1.6:1; m.scale.setScalar(k); m.position.y=g.flash>0?g.flash*.8:0; m.rotation.z=g.flash>0?Math.sin(g.flash*40)*.25:0; }; }

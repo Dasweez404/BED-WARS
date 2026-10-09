@@ -410,7 +410,7 @@ function updateCamera(dt){
 }
 function updateAim(){
   if(game.state!=='play'){ aim.ok=false; return; }
-  ndc.set(mouse.x/VW*2-1,-(mouse.y/VH*2-1)); rayc.setFromCamera(ndc,camera3);
+  camera3.updateMatrixWorld(true); ndc.set(mouse.x/VW*2-1,-(mouse.y/VH*2-1)); rayc.setFromCamera(ndc,camera3);
   planeY.constant=-WHu; let hit=false;
   if(rayc.ray.intersectPlane(planeY,hitP)){ const tx=Math.floor(hitP.x),ty=Math.floor(hitP.z); if(wl(tx,ty)>0){ aim.x=hitP.x*T; aim.y=hitP.z*T; aim.ok=true; hit=true; } }
   if(!hit){ planeY.constant=0; if(rayc.ray.intersectPlane(planeY,hitP)){ aim.x=hitP.x*T; aim.y=hitP.z*T; aim.ok=true; } }
