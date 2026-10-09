@@ -11,8 +11,8 @@
   const PRICE={ // nombre = équivalent argent (mélangé bronze/argent) ; objet = prix exact
     turret:14,turret2:16,guard:12,decoy:12,mine:4,flag:12,anchortrap:10,mistbell:9,battery:20,stonewall:10,hull:11,
     net:{bronze:12},banana:{bronze:10},bananarow:{bronze:20},barrel:9,heal:{bronze:30},sling:{bronze:50},coco:{bronze:36},
-    sniper:{gold:2},rocket:{gold:3},gatling:{gold:3},meteor:{gold:3},spy:{gold:3},r_parrot:{gold:4},storm:{gold:4},
-    blood:{gold:3},frost:{gold:2},flame:{gold:2},raid:{gold:2},r_fang:{gold:3},
+    sniper:{gold:2},rocket:{gold:3},gatling:{gold:3},meteor:{gold:3},spy:{gold:3},r_parrot:{gold:7},storm:{gold:4},
+    blood:{gold:3},frost:{gold:2},flame:{gold:2},raid:{gold:2},r_fang:{gold:6},
     shield:14,wallgad:6,
     gun:8,bow:7,pogo:8,rubberchicken:9,boomerang:10,ice:10,flarebow:12
   };

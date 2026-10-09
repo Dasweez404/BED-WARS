@@ -112,7 +112,7 @@ let ROSTER=null;
 const POOL_CATS=['Armes','Gadgets','Défense','Outils','Reliques'];
 const POOL_EXTRA=['glove','hammer','baa','heal'];
 const poolIds=()=>SHOP.filter(s=>(POOL_CATS.includes(s.cat)||POOL_EXTRA.includes(s.id))&&s.id!=='core'&&s.id!=='wall'&&s.id!=='pick'&&!itemOff(s.id)).map(s=>s.id);
-const GONE_IDS=['crossbow3','bubble','woolgun','popcorn','pogo','hammer','springs','smokebomb','raft','quake','kraken','barrage','siren','frostnova','meteor','hurricane','rod','crabs','raid','sneeze']; // retirés définitivement
+const GONE_IDS=['crossbow3','bubble','woolgun','popcorn','pogo','hammer','springs','smokebomb','raft','quake','kraken','barrage','siren','frostnova','meteor','hurricane','rod','crabs','raid','sneeze','mistbell','stonewall','bananarow','battery','decoy']; // retirés définitivement
 const itemOff=id=>GONE_IDS.includes(id)||!!(game.opts&&game.opts.off&&game.opts.off[id]); // objets désactivés dans l'onglet « Objets »
 const inRoster=id=>!itemOff(id)&&(!ROSTER||!poolIds_set.has(id)||ROSTER.has(id));
 let poolIds_set=new Set();

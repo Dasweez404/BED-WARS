@@ -33,7 +33,7 @@ const ITEMS=[
   {id:'storm',n:'Orage',ico:'🌩️',col:'#fde047'},{id:'barrage',n:'Salve de canons',ico:'🎇',col:'#f87171'},{id:'cluster',n:'Baril à grappes',ico:'🎆',col:'#16a34a'},{id:'bomb',n:'Baril de poudre',ico:'🛢️',col:'#92400e'},{id:'repel',n:'Vague scélérate',ico:'🌊',col:'#38bdf8'},
   {id:'vortex',n:'Maelström',ico:'🌀',col:'#7c3aed'},{id:'kraken',n:'Tentacule du kraken',ico:'🐙',col:'#34d399'},{id:'anchor',n:'Ancre',ico:'⚓',col:'#9ca3af'},{id:'chicken',n:'Crabe kamikaze',ico:'🦀',col:'#ef4444'},{id:'heal',n:'Ration de bord',ico:'🍖',col:'#ef4444'},
   {id:'turret',n:'Canon de pont',ico:'🗼',col:'#94a3b8'},{id:'turret2',n:'Canon givrant',ico:'🧊',col:'#7dd3fc'},{id:'wallgad',n:'Palissade',ico:'🚧',col:'#b98a52'},
-  {id:'mine',n:'Mine marine',ico:'🧿',col:'#9ca3af'},{id:'banana',n:'Peau de banane',ico:'🍌',col:'#fde047'},{id:'net',n:'Filet piégé',ico:'🥅',col:'#d6dde6'},{id:'guard',n:'Matelots gardiens',ico:'💀',col:'#fff'},
+  {id:'mine',n:'Mine marine',ico:'🧿',col:'#9ca3af'},{id:'banana',n:'Peau de banane',ico:'🍌',col:'#fde047'},{id:'net',n:'Filet piégé',ico:'🥅',col:'#d6dde6'},{id:'guard',n:'Matelots mercenaires',ico:'🧟',col:'#a3e635'},
   {id:'repair',n:'Réparation du coffre',ico:'🔧',col:'#86efac'},{id:'flag',n:'Pavillon noir',ico:'🏴',col:'#111827'},{id:'buoy',n:'Bouée de sauvetage',ico:'🛟',col:'#fb923c'},{id:'shield',n:'Bouclier de brume',ico:'🛡️',col:'#60a5fa'},
   {id:'trident',n:'Trident de Poséidon',ico:'🔱',col:'#38bdf8'},{id:'gatling',n:'Poivrière rotative',ico:'🌶️',col:'#f87171'},{id:'javelin',n:'Javelot de chasse',ico:'🗡',col:'#e5e7eb'},{id:'flarebow',n:'Arc incendiaire',ico:'🏹',col:'#fb923c'},
   {id:'swap',n:'Singe farceur',ico:'🐒',col:'#f472b6'},{id:'frostnova',n:'Souffle du spectre',ico:'👻',col:'#7dd3fc'},{id:'decoy',n:'Matelot mercenaire',ico:'🧟',col:'#a3e635'},
@@ -600,7 +600,7 @@ function useGadget(e,id,wx,wy){
     case 'chicken':{
       chickens.push({x:e.x,y:e.y,vx:ax*220,vy:ay*220,team:e.team,owner:e,t:7,ph:0,arm:.5}); break;}
     case 'guard':{
-      for(let k=0;k<2;k++) guards.push({x:e.x+rnd(-18,18),y:e.y+rnd(-18,18),team:e.team,owner:e,hp:10,t:1e6,cd:.5,vx:0,vy:0,ph:rnd(0,6),ang:e.ang});
+      for(let k=0;k<2;k++) guards.push({x:e.x+rnd(-18,18),y:e.y+rnd(-18,18),team:e.team,owner:e,hp:18,t:1e6,cd:.5,vx:0,vy:0,ph:rnd(0,6),ang:e.ang});
       ring(e.x,e.y,T*1.6,'#fff',.4,true); burst(e.x,e.y,'#fff',14,160,.5,4); break;}
     case 'repair':{
       const td=TD[e.team],ci=idx(td.bx,td.by); if(!td.coreAlive||hpW[ci]>=BHP[CORE]-.5) return false;
@@ -631,13 +631,7 @@ function useGadget(e,id,wx,wy){
     case 'springs': e.springT=25; floatTxt(e.x,e.y-34,'SUPER SAUT !','#4ade80',15); burst(e.x,e.y,'#4ade80',12,140,.5,3); break;
     case 'cloak': for(const m of ents){ if(!m.alive||m.team!==e.team) continue; m.cloak=Math.max(m.cloak,7); m.haste=Math.max(m.haste,2.5); floatTxt(m.x,m.y-34,'INVISIBLE','#e5e7eb',15); burst(m.x,m.y,'#e5e7eb',14,140,.5,3); smoke(m.x,m.y,8,10,1.2); } break;
     case 'haste': e.haste=8; floatTxt(e.x,e.y-34,'VITESSE !','#38bdf8',15); burst(e.x,e.y,'#38bdf8',14,160,.5,3); break;
-    case 'wallgad':{
-      const tx=Math.floor(wx/T),ty=Math.floor(wy/T); if(Math.hypot((tx+.5)*T-e.x,(ty+.5)*T-e.y)>3.7*T) return false;
-      const horiz=Math.abs(ax)>Math.abs(ay); let n=0;
-      for(let k=-1;k<=1;k++){ const x2=tx+(horiz?0:k),y2=ty+(horiz?k:0),i=inb(x2,y2)?idx(x2,y2):-1;
-        if(i<0||floorT[i]===0||wallT[i]||spawnerAt(x2,y2)||protectedTile(x2,y2,e.team)||wallBlockedByEnt((x2+.5)*T,(y2+.5)*T)) continue;
-        wallT[i]=WOOD; hpW[i]=BHP[WOOD]; ownW[i]=e.team; pop[i]=1; n++; chunks((x2+.5)*T,(y2+.5)*T,BCOL[3][0],4); }
-      if(!n) return false; break;}
+    case 'wallgad':{ if(!placeHerse(e,wx,wy,ax,ay)) return false; break;}
     case 'storm':{
       const dx=wx-e.x,dy=wy-e.y,d=Math.hypot(dx,dy)||1,m=Math.min(d,10*T),tx=e.x+dx/d*m,ty=e.y+dy/d*m;
       bombs.push({x:tx,y:ty,tx,ty,fuse:1,team:e.team,owner:e,kind:'bomb',R:1.7*T,dm:9,bd:.8,bolt:true,h:0}); break;}
@@ -680,7 +674,7 @@ function useGadget(e,id,wx,wy){
       blastTiles(e.x,e.y,3.2*T,8,e,e.team);
       for(const o of ents){ if(!o.alive||o.team===e.team||Math.hypot(o.x-e.x,o.y-e.y)>3.4*T) continue; hurt(o,3,e,(o.x-e.x)*2.2,(o.y-e.y)*2.2); o.vz=380; }
       break;}
-    case 'aegis': e.aegis=3.5; floatTxt(e.x,e.y-36,'INVULNÉRABLE','#fde047',15); ring(e.x,e.y,T*1.6,'#fde047',.5,true); burst(e.x,e.y,'#fde047',16,170,.6,3); break;
+    case 'aegis': if(!nearBase(e)){ floatTxt(e.x,e.y-36,'Utilisable seulement dans ta base','#fde68a',14); return false; } e.aegis=5; floatTxt(e.x,e.y-36,'INVULNÉRABLE','#fde047',15); ring(e.x,e.y,T*1.6,'#fde047',.5,true); burst(e.x,e.y,'#fde047',16,170,.6,3); break;
     case 'coco':{
       const dx=wx-e.x,dy=wy-e.y,d=Math.hypot(dx,dy)||1,m=Math.min(d,8*T);
       bombs.push({x:e.x,y:e.y,tx:e.x+dx/d*m,ty:e.y+dy/d*m,fuse:.95,team:e.team,owner:e,kind:'bomb',R:1.35*T,dm:6,bd:.7,shell:true,h:12}); break;}
@@ -828,7 +822,7 @@ const SHOP=[
   mk('repel','Gadgets',e=>({name:'Vague scélérate ×1',desc:'Projette tout le monde loin (dans le vide !).',cost:{silver:5}}),e=>e.repel+=1),
   gadItem('turret','Canon de pont','Tire seul sur les ennemis proches jusqu\'à ce qu\'il soit détruit.',{silver:14},1,'Défense'),
   gadItem('turret2','Canon givrant','Gèle brièvement les ennemis proches jusqu\'à ce qu\'il soit détruit.',{silver:16},1,'Défense'),
-  gadItem('guard','Matelots gardiens','Deux matelots gardiens défendent ta base pendant 45 s.',{silver:12},1,'Défense'),
+  gadItem('guard','Matelots mercenaires','Deux matelots mercenaires (18 PV chacun) se battent pour toi pendant 45 s.',{silver:14},1,'Défense'),
   gadItem('repair','Réparation du coffre','Répare ton coffre en 4,5 s (reste près de lui, sans te faire toucher) : jusqu\'à +35 % de sa vie.',{silver:8},1,'Défense'),
   gadItem('vortex','Maelström','Aspire les ennemis vers son centre pendant 3,5 s.',{gold:2},1),
   gadItem('springs','Bottes de mousse','Sauts très hauts 25 s, et l\'atterrissage fait mal.',{silver:8},1),
@@ -855,7 +849,7 @@ const SHOP=[
   gadItem('decoy','Matelot mercenaire','Un costaud (32 PV) se bat pour toi pendant 30 s.',{silver:12},1,'Défense'),
   gadItem('siren','Chant des sirènes','Attire et ralentit les ennemis dans un grand rayon.',{silver:14},1),
   gadItem('quake','Séisme','Secoue le sol : blocs brisés, ennemis projetés en l\'air.',{gold:2},1),
-  gadItem('aegis','Médaillon doré','Invulnérable pendant 3,5 s.',{gold:3},1,'Défense'),
+  gadItem('aegis','Médaillon doré','Invulnérable pendant 5 s, mais uniquement dans ta base : parfait pour défendre ton coffre.',{gold:3},1,'Défense'),
   gadItem('coco','Noix de coco explosive','Lancer en cloche, petite explosion.',{bronze:30},3),
   mk('shield','Défense',e=>({name:'Bouclier de brume ×1',desc:'Dôme 12 s : bloque ennemis, flèches et bombes.',cost:{gold:2}}),e=>e.shield+=1),
   upItem('fb','Forge de bronze',3,[3,5,8],['Bronze toutes les 0,7 s','Bronze toutes les 0,5 s','Bronze toutes les 0,35 s']),

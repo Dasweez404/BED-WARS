@@ -61,3 +61,74 @@ const BLESS_T=6, LAUGH_R=2*T, GAS=[];
       if((b.am.laughgas||0)>0&&fd>2*T&&fd<8*T&&r<dt*.5) return useGadget(b,'laughgas',foe.x,foe.y); }
     return _bg(b,foe,fd,nearCore,r,dt); };
 }
+
+/* =====================  HERSE (ex-palissade)  =====================
+   Trois cases de pointes posées au sol : les ennemis qui marchent dessus sont ralentis et prennent des dégâts. Durée 45 s. */
+const HERSES=[], HERSE_T=45;
+function placeHerse(e,wx,wy,ax,ay){
+  const tx=Math.floor(wx/T), ty=Math.floor(wy/T); if(Math.hypot((tx+.5)*T-e.x,(ty+.5)*T-e.y)>3.7*T){ floatTxt(e.x,e.y-34,'Trop loin : vise à moins de 3 cases','#fde68a',14); return false; }
+  const horiz=Math.abs(ax)>Math.abs(ay); let n=0;
+  for(let k=-1;k<=1;k++){ const x2=tx+(horiz?0:k), y2=ty+(horiz?k:0); if(!inb(x2,y2)) continue; const i=idx(x2,y2);
+    if(floorT[i]===0||wallT[i]||spawnerAt(x2,y2)||protectedTile(x2,y2,e.team)) continue;
+    const old=HERSES.find(h=>h.tx===x2&&h.ty===y2); if(old){ old.t=HERSE_T; old.hp=12; old.team=e.team; old.owner=e; n++; continue; }
+    HERSES.push({tx:x2,ty:y2,x:(x2+.5)*T,y:(y2+.5)*T,team:e.team,owner:e,t:HERSE_T,hp:12}); chunks((x2+.5)*T,(y2+.5)*T,'#9ca3af',4); pop[i]=1; n++; }
+  if(!n){ floatTxt(e.x,e.y-34,'Pose-la sur le sol de l\'île','#fde68a',14); return false; } sfx('buy'); return true;
+}
+{ const it=SHOPMAP.wallgad; if(it){ if(ITEMMAP.wallgad){ ITEMMAP.wallgad.n='Herse'; ITEMMAP.wallgad.ico='⛓️'; }
+    const old=it.info; it.info=function(e){ const r=old.call(this,e); return Object.assign({},r,{name:String(r.name||'').replace(/^Palissade/,'Herse'),desc:'Pose 3 cases de pointes au sol pendant 45 s : les ennemis qui marchent dessus sont ralentis et prennent des dégâts.'}); }; }
+  TIPS2.wallgad='Trois cases de pointes : les ennemis dessus sont ralentis et blessés';
+  const _nw=newGame; newGame=function(){ _nw(); HERSES.length=0; }; }
+{ const _u=update;
+  update=function(dt){
+    for(let i=HERSES.length-1;i>=0;i--){ const h=HERSES[i]; h.t-=dt; if(h.t<=0||h.hp<=0||floorT[idx(h.tx,h.ty)]===0){ burst(h.x,h.y,'#9ca3af',6,100,.4,3); HERSES.splice(i,1); continue; }
+      for(const o of ents){ if(!o.alive||o.team===h.team||o.z>16||Math.abs(o.x-h.x)>T*.55||Math.abs(o.y-h.y)>T*.55) continue;
+        o.slow=Math.max(o.slow,.6); o.hsT=(o.hsT||0)-dt; if(o.hsT<=0){ o.hsT=.4; hurt(o,1.3,h.owner,0,0); burst(o.x,o.y-4,'#f87171',3,70,.3,2); } } }
+    _u(dt); };
+  const _ex=explode;
+  explode=function(b){ _ex(b); const R=(b.R||2.7*T)+T*.4; for(let i=HERSES.length-1;i>=0;i--){ const h=HERSES[i]; if(b.team!==undefined&&h.team===b.team) continue; if(Math.hypot(h.x-b.x,h.y-b.y)<R){ burst(h.x,h.y,'#9ca3af',8,120,.5,3); HERSES.splice(i,1); } } };
+  const _nc=netCommon; netCommon=function(){ const c=_nc(); if(HERSES.length) c.hs=HERSES.map(h=>[h.tx,h.ty,h.team,Math.round(h.t)]); return c; };
+  const _na=netApplySnap; netApplySnap=function(m){ _na(m); const old=new Map(HERSES.map(h=>[h.tx+','+h.ty,h])); HERSES.length=0; for(const a of (m.hs||[])){ const h=old.get(a[0]+','+a[1])||{tx:a[0],ty:a[1],x:(a[0]+.5)*T,y:(a[1]+.5)*T,hp:12}; h.team=a[2]; h.t=a[3]; HERSES.push(h); } };
+}
+const HM={map:new Map(),mat:null};
+{ const _r=render3d;
+  render3d=function(dt){
+    if(renderer&&scene&&game.state!=='menu'){ const live=new Set();
+      for(const h of HERSES){ const k=h.tx+','+h.ty; live.add(k); let g=HM.map.get(k);
+        if(!g){ const mt=new THREE.MeshStandardMaterial({color:0xc4ccd6,metalness:.7,roughness:.35,flatShading:true}), wd=new THREE.MeshStandardMaterial({color:0x5b4326,flatShading:true});
+          g=new THREE.Group(); for(const z of [-.32,.32]){ const bm=new THREE.Mesh(GEO.box,wd); bm.scale.set(.92,.07,.08); bm.position.set(0,.05,z); g.add(bm); }
+          for(let a=0;a<3;a++)for(let b=0;b<3;b++){ const sp=new THREE.Mesh(GEO.cone,mt); sp.scale.set(.07,.4,.07); sp.position.set(-.3+a*.3,.25,-.3+b*.3); g.add(sp); }
+          g.position.set((h.tx+.5),0.02,(h.ty+.5)); scene.add(g); HM.map.set(k,g); }
+        g.scale.y=Math.min(1,h.t/1.5); }
+      for(const [k,g] of HM.map) if(!live.has(k)){ scene.remove(g); HM.map.delete(k); } }
+    _r(dt); };
+}
+
+/* =====================  MARTEAU DE RÉPARATION : OBJET PERMANENT, CLIC MAINTENU  =====================
+   Reconstruit un par un les blocs détruits de ton équipe (45 s), deux fois plus vite qu'on ne les détruit. */
+{ PERM_DEF.repairhammer=PERM.repairhammer={cd:0,keep:true,cost:{bronze:35,silver:8}};
+  const it=SHOPMAP.repairhammer; if(it){ it.cat='Défense';
+    it.info=e=>e.own.repairhammer?{name:'Marteau de réparation',desc:'Équipé : maintiens le clic pour reconstruire.',cost:{},ok:false,tag:'PERMANENT'}:{name:'Marteau de réparation (permanent)',desc:'Maintiens le clic : tu rebâtis un à un les blocs détruits de ton équipe (45 s) dans 6 cases, deux fois plus vite qu\'on les détruit. Rien n\'est consommé.',cost:{bronze:35,silver:8}};
+    it.buy=e=>{ e.own.repairhammer=true; if(e.isBot) e.am.repairhammer=99; }; }
+  TIPS2.repairhammer='Maintiens le clic : reconstruit les blocs détruits de ton équipe (permanent)';
+}
+const RH_R=6*T;
+function rhPick(e){ const now=game.t; let best=null,bd=1e9; for(let k=0;k<wreck.length;k++){ const w=wreck[k]; if(now-w.t>45||w.own!==e.team) continue; const x=w.i%W, y=(w.i/W)|0; const d=Math.hypot((x+.5)*T-e.x,(y+.5)*T-e.y); if(d>RH_R||d>=bd) continue;
+    if(w.wall?(wallT[w.i]!==0||wallBlockedByEnt((x+.5)*T,(y+.5)*T)):(floorT[w.i]!==0)) continue; bd=d; best=k; } return best; }
+function rhBuild(w){ const x=w.i%W, y=(w.i/W)|0;
+  if(w.wall){ wallT[w.i]=w.wall; hpW[w.i]=BHP[w.wall]; ownW[w.i]=w.own; } else { floorT[w.i]=w.floor; hpF[w.i]=BHP[w.floor]||10; ownF[w.i]=w.own; }
+  pop[w.i]=1; burst((x+.5)*T,(y+.5)*T,'#fde68a',4,90,.4,3); sfx('tick',(x+.5)*T,(y+.5)*T); }
+const rhNeed=w=>Math.max(.12,(BHP[w.wall||w.floor]||10)*.03); // ≈ moitié du temps qu'il faut pour détruire le bloc
+{ const _u=update;
+  update=function(dt){
+    for(const e of ents){ if(!e.alive||!e.own||!e.own.repairhammer||e.isBot) continue; const sel=e===player?selId:(e.inp&&e.inp.sel), down=e===player?mouse.down:(e.inp&&e.inp.down);
+      if(sel!=='repairhammer'||!down||e.frozen>0||game.paused){ e.rhP=0; e.rhK=-1; continue; }
+      const k=rhPick(e); if(k===null){ e.rhP=0; e.rhMsg=(e.rhMsg||0)-dt; if(e.rhMsg<=0){ e.rhMsg=1.2; floatTxt(e.x,e.y-34,'Rien à réparer','#fde68a',13); } continue; }
+      const w=wreck[k]; if(e.rhKey!==w.i){ e.rhKey=w.i; e.rhP=0; } e.rhP+=dt; e.swing=Math.max(e.swing,.1); e.swingMax=.25; e.rhNeed=rhNeed(w);
+      if(e.rhP>=e.rhNeed){ rhBuild(w); wreck.splice(k,1); e.rhP=0; e.rhKey=-1; } }
+    _u(dt); };
+  const _ug=useGadget2; useGadget2=function(e,id,wx,wy,ax,ay){ if(id==='repairhammer') return false; return _ug(e,id,wx,wy,ax,ay); };
+  const _bg=botGadgets2; botGadgets2=function(b,foe,fd,nearCore,r,dt){ if(b.own&&b.own.repairhammer&&nearCore&&wreck.length&&r<dt*1.5){ const k=rhPick(b); if(k!==null){ rhBuild(wreck[k]); wreck.splice(k,1); return true; } } return _bg(b,foe,fd,nearCore,r,dt); };
+  const _dh=drawHud; drawHud=function(){ _dh(); if(game.state!=='play'||!ctx||!player||!player.alive||selId!=='repairhammer'||!player.own.repairhammer) return;
+    ctx.save(); ctx.setTransform(DPR,0,0,DPR,0,0); const s=w2s(player.x,player.y,66); if(s[2]){ const w=54, p=player.rhNeed?Math.min(1,(player.rhP||0)/player.rhNeed):0; ctx.fillStyle='#0009'; ctx.fillRect(s[0]-w/2,s[1]-4,w,7); ctx.fillStyle='#fbbf24'; ctx.fillRect(s[0]-w/2,s[1]-4,w*p,7); ctx.font='bold 11px system-ui'; ctx.textAlign='center'; ctx.fillStyle='#fde68a'; ctx.fillText('🔨 maintiens le clic',s[0],s[1]-9); ctx.textAlign='left'; }
+    ctx.restore(); };
+}
