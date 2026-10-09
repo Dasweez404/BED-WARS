@@ -24,3 +24,6 @@ ENT_NUM.push('tower');
   const _ce=controlEnt; controlEnt=function(e,dt,inp){ if(e.tower) inp=Object.assign({},inp,{ix:0,iy:0}); _ce(e,dt,inp); };
   const _j=jump; jump=function(e,p){ if(e.tower) return; return _j(e,p); };
 }
+
+/* ---- Rempart d'île : description ---- */
+{ const it=SHOPMAP.shield; if(it){ const old=it.info; it.info=function(e){ const r=old.call(this,e); return Object.assign({},r,{desc:'Érige un mur fermé autour de ton île, sans porte. Plus tu as de blocs dans l\'inventaire, plus il a d\'étages (jusqu\'à '+MAXH()+'). Un escalier intérieur, du côté de la sortie, te permet de sauter dessus.'}); }; } }

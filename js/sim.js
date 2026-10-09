@@ -555,7 +555,7 @@ function throwBomb(e,kind,wx,wy){
 }
 function useShield(e){ // « Rempart d'île » : érige un mur autour de l'île avec les meilleurs blocs disponibles
   if(e.shield<=0||e.cd.gad>0) return;
-  if(e.isBot&&totalBlocks(e)<36) return;
+  if(e.isBot&&totalBlocks(e)<60) return;
   if(!buildRampart(e)) return;
   e.shield--; e.cd.gad=.8;
 }
