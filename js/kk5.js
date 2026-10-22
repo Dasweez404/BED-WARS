@@ -26,10 +26,10 @@ KK.lite=function(n){ if(KK.groundGeo[n]) return KK.groundGeo[n]; const g=KK.bk[n
   const o=new THREE.BufferGeometry(); o.setAttribute('position',new THREE.Float32BufferAttribute(P,3)); o.setAttribute('normal',new THREE.Float32BufferAttribute(N,3)); o.setAttribute('uv',new THREE.Float32BufferAttribute(U,2)); return KK.groundGeo[n]=o; };
 { const _rw=rebuildWorld;
   rebuildWorld=function(){ _rw(); if(!KK.bkReady||!scene) return; iGround.count=0;
-    const ice=typeof iceOn==='function'&&iceOn(), jg=(MAPS[game.opts.map]||{}).jungle; let sig=0; for(let i=0;i<floorT.length;i++) if(floorT[i]===1) sig=(Math.imul(sig,31)+i+region[i])|0; sig=sig+'|'+ice+'|'+game.opts.map;
+    const ice=typeof iceOn==='function'&&iceOn(), jg=(MAPS[game.opts.map]||{}).jungle, shipOn=!['citadel','tempest','jungle','atoll'].includes(game.opts.map)&&!!(KK.kn&&KK.kn['pirate/ship-pirate-large']); let sig=0; for(let i=0;i<floorT.length;i++) if(floorT[i]===1) sig=(Math.imul(sig,31)+i+region[i])|0; sig=sig+'|'+ice+'|'+game.opts.map+'|'+shipOn;
     if(sig===KK.gsig&&KK.GCH.length) return; KK.gsig=sig;
     if(KK.gGroup) scene.remove(KK.gGroup); const G=KK.gGroup=new THREE.Group(); scene.add(G); KK.GCH=[]; const bins={}, col=new THREE.Color();
-    for(let ty=0;ty<H;ty++)for(let tx=0;tx<W;tx++){ const i=idx(tx,ty); if(floorT[i]!==1) continue; const reg=region[i], h=hash(tx,ty), chk=((tx+ty)&1)?.93:1; let c=chk, n;
+    for(let ty=0;ty<H;ty++)for(let tx=0;tx<W;tx++){ const i=idx(tx,ty); if(floorT[i]!==1) continue; const reg=region[i], h=hash(tx,ty), chk=((tx+ty)&1)?.93:1; let c=chk, n; if(reg===4&&shipOn) continue; /* le pont du navire fait office de sol : aucun bloc visible au centre */
       if(reg>=0&&reg<4){ const td=TD[reg], d=Math.max(Math.abs(tx-td.bx),Math.abs(ty-td.by)), beach=Math.hypot(tx-td.bx,ty-td.by)>4.2;
         if(d<=1){ n='decorative_block_'+KK.TC[reg]; c=1; } else if(d===2) n='bricks_A'; else if(ice) n='snow'; else if(!beach&&(h%3!==0||jg)) n='sand_with_grass'; else n='sand_B'; }
       else if(reg===4){ n=(Math.abs(tx-CX)<=3&&Math.abs(ty-CY)<=6)?'wood':'gravel'; if(ice) n='snow'; }
