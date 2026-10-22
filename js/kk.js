@@ -15,7 +15,7 @@ KK.make=function(name,sz){
   const src=KK.chars[name]||KK.chars.Rogue_Hooded, model=THREE.SkeletonUtils.clone(src.scene), mat=new THREE.MeshStandardMaterial({roughness:.8,metalness:0}); let first=null;
   model.traverse(o=>{ if(o.isMesh||o.isSkinnedMesh){ if(!first) first=o.material; o.material=mat; o.castShadow=true; o.receiveShadow=false; o.frustumCulled=false; } });
   if(first&&first.map){ mat.map=first.map; }
-  model.scale.setScalar(KK.H/KK.h/.46*(sz||1)); const hand=model.getObjectByName('handslot.r'), head=model.getObjectByName('head');
+  model.scale.setScalar(KK.H/KK.h/.46*(sz||1)); model.rotation.y=Math.PI/2; /* les modèles regardent vers +Z, le jeu vers +X */ const hand=model.getObjectByName('handslot.r'), head=model.getObjectByName('head');
   return {model,mat,hand,head,mixer:new THREE.AnimationMixer(model),act:{},cur:null,name};
 };
 KK.play=function(k,clip,o){
