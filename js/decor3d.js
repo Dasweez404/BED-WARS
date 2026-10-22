@@ -73,7 +73,7 @@ function decBuild(){
     for(const [x,y] of tiles){ if(!free(x,y)) continue; const r=R(), nb=near(x,y,5);
       if(nb&&r>.04) continue; if(r<.07) put('jtree',x,y,{s:.9+R()*.7}); else if(r<.2) put('fern',x,y,{s:.9+R()*.8}); else if(r<.23) put('shroom',x,y,{s:1+R()}); else if(r<.25) put('vine',x,y); else if(r<.28) put('tiare',x,y,{s:1.3}); }
   } else if(id==='tempest'){
-    put('wreck',CX,CY,{s:2.2,ry:.5,rz:.12,rx:.05}); put('bow',CX+4,CY-5,{s:1.6}); put('ribs',CX-5,CY+4,{s:1.5}); put('anchor',CX+3,CY+5,{s:1.4});
+    put('bow',CX+4,CY-5,{s:1.6}); put('ribs',CX-5,CY+4,{s:1.5}); put('anchor',CX+3,CY+5,{s:1.4});
     for(const [x,y] of tiles){ if(!free(x,y)) continue; const e=edge(x,y), r=R(); if(near(x,y,6)) continue;
       if(r<.012) put('wreck',x,y,{s:1.1,rz:(R()-.5)*.25}); else if(r<.02) put('bow',x,y,{rz:(R()-.5)*.4}); else if(r<.03) put('ribs',x,y); else if(e&&r<.06) put('anchor',x,y,{s:.9}); else if(r<.09) put('shell',x,y); }
     for(let y=14;y<86;y+=3)for(let x=14;x<86;x+=3){ const p=[x+Math.floor(R()*3),y+Math.floor(R()*3)]; if(!water(p[0],p[1])) continue; if(R()<.06){ put(R()<.5?'wreck':'bow',p[0],p[1],{y:-.7,rz:.5*(R()-.5),rx:.2*(R()-.5),s:1.15}); } else if(R()<.04) put('buoy',p[0],p[1],{y:-.15}); }
