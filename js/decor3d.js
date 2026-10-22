@@ -71,7 +71,7 @@ function decBuild(){
   } else if(id==='jungle'){
     put('volcano',CX,CY,{s:1.5,ry:0}); put('fern',CX+5,CY+3,{s:1.6}); put('fern',CX-5,CY-3,{s:1.6});
     for(const [x,y] of tiles){ if(!free(x,y)) continue; const r=R(), nb=near(x,y,5);
-      if(nb&&r>.04) continue; if(r<.07) put('jtree',x,y,{s:.9+R()*.7}); else if(r<.2) put('fern',x,y,{s:.9+R()*.8}); else if(r<.23) put('shroom',x,y,{s:1+R()}); else if(r<.25) put('vine',x,y); else if(r<.28) put('tiare',x,y,{s:1.3}); }
+      if(nb&&r>.04) continue; if(r<.2) put('fern',x,y,{s:.9+R()*.8}); else if(r<.23) put('shroom',x,y,{s:1+R()}); else if(r<.25) put('vine',x,y); else if(r<.28) put('tiare',x,y,{s:1.3}); }
   } else if(id==='tempest'){
     put('bow',CX+4,CY-5,{s:1.6}); put('ribs',CX-5,CY+4,{s:1.5}); put('anchor',CX+3,CY+5,{s:1.4});
     for(const [x,y] of tiles){ if(!free(x,y)) continue; const e=edge(x,y), r=R(); if(near(x,y,6)) continue;
