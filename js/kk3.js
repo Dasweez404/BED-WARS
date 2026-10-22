@@ -16,7 +16,7 @@ function kkDungeon(){
     // coffre : le modèle KayKit remplace le coffre cube (on garde l'aura, le drapeau et l'animation du couvercle)
     TD.forEach((td,i)=>{ const g=coreM[i]; if(!g||g.userData.kkChest) return; const u=g.userData;
       g.traverse(o=>{ if(o.isMesh&&o!==u.glow&&o!==u.flag) o.visible=false; });
-      const sb=KK.dg.chest_gold, sl=KK.dg.chest_gold_lid; if(!sb||!sl) return; const k=.8/KK.dgh.chest_gold.h, grp=new THREE.Group(); grp.scale.setScalar(k); g.add(grp);
+      const sb=KK.dg.chest_gold, sl=KK.dg.chest_gold_lid; if(!sb||!sl) return; const k=.5/KK.dgh.chest_gold.h, grp=new THREE.Group(); grp.scale.setScalar(k); g.add(grp);
       grp.add(sb.clone(true)); const pv=new THREE.Group(); pv.position.set(0,.5,-.62); grp.add(pv); const lo=sl.clone(true); lo.position.set(0,-.5,.62); pv.add(lo); u.lid=pv;
       u.kkChest=true; });
     // décor de base : bannière de l'équipe, torches, tonneaux, caisses, piles de pièces

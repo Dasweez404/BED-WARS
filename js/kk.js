@@ -1,12 +1,13 @@
 'use strict';
 /* ===== Personnages KayKit (CC0) riggés et animés, à la place des pirates-cubes (3D uniquement) =====
    Chargés en arrière-plan : tant que ce n'est pas prêt (ou si un fichier manque), le rendu cube d'origine reste en place. */
-const KK={ok:false,failed:false,chars:{},clips:{},H:1.02,corpses:[],cls:{matelot:'Rogue_Hooded',corsaire:'Knight',canonnier:'Ranger',eclaireur:'Rogue',charpentier:'Barbarian',brute:'Barbarian',mystique:'Mage',pillard:'Rogue_Hooded'},sz:{brute:1.18,charpentier:1.04,eclaireur:.94,mystique:.98},rest:['Rogue_Hooded','Rogue','Mage','Ranger','Knight','Barbarian']};
+const KK={ok:false,failed:false,chars:{},clips:{},H:1.02,corpses:[],cls:{matelot:'Rogue_Hooded',corsaire:'Knight',canonnier:'Ranger',eclaireur:'Rogue',charpentier:'Barbarian',brute:'Barbarian',mystique:'Mage',pillard:'Rogue_Hooded'},sz:{brute:1.03,charpentier:1,eclaireur:.98,mystique:1},rest:['Rogue_Hooded','Rogue','Mage','Ranger','Knight','Barbarian']};
+KK.hs={};
 KK.load=function(){
   if(typeof THREE.GLTFLoader!=='function'||KK.loading) return; KK.loading=true; const L=new THREE.GLTFLoader(), P=f=>new Promise((res,rej)=>L.load(f,res,undefined,rej));
   const chars=['Rogue_Hooded','Rogue','Mage','Ranger','Knight','Barbarian'], packs=['General','MovementBasic','CombatMelee','CombatRanged','Tools','MovementAdvanced','Simulation'];
   Promise.all(chars.map(n=>P('assets/kk/chars/'+n+'.glb').then(g=>{ KK.chars[n]=g; })).concat(packs.map(n=>P('assets/kk/anim/Rig_Medium_'+n+'.glb').then(g=>{ for(const c of g.animations) if(!KK.clips[c.name]) KK.clips[c.name]=c; }))))
-    .then(()=>{ const bb=new THREE.Box3().setFromObject(KK.chars.Knight.scene); KK.h=(bb.max.y-bb.min.y)||2; KK.ok=true; })
+    .then(()=>{ KK.hs={}; for(const n in KK.chars){ const bb=new THREE.Box3().setFromObject(KK.chars[n].scene); KK.hs[n]=(bb.max.y-bb.min.y)||2; } KK.h=KK.hs.Knight||2; KK.ok=true; })
     .catch(e=>{ KK.failed=true; console.warn('KayKit : chargement impossible, rendu cube conservé',e); });
 };
 KK.name=cls=>KK.cls[cls]||KK.rest[Math.abs(String(cls).length)%6];
@@ -15,7 +16,7 @@ KK.make=function(name,sz){
   const src=KK.chars[name]||KK.chars.Rogue_Hooded, model=THREE.SkeletonUtils.clone(src.scene), mat=new THREE.MeshStandardMaterial({roughness:.8,metalness:0}); let first=null;
   model.traverse(o=>{ if(o.isMesh||o.isSkinnedMesh){ if(!first) first=o.material; o.material=mat; o.castShadow=true; o.receiveShadow=false; o.frustumCulled=false; } });
   if(first&&first.map){ mat.map=first.map; }
-  model.scale.setScalar(KK.H/KK.h/.46*(sz||1)); model.rotation.y=Math.PI/2; /* les modèles regardent vers +Z, le jeu vers +X */ const hand=model.getObjectByName('handslot.r'), head=model.getObjectByName('head');
+  model.scale.setScalar(KK.H/(KK.hs[name]||KK.h)/.46*(sz||1)); model.rotation.y=Math.PI/2; /* les modèles regardent vers +Z, le jeu vers +X */ const hand=model.getObjectByName('handslot.r'), head=model.getObjectByName('head');
   return {model,mat,hand,head,mixer:new THREE.AnimationMixer(model),act:{},cur:null,name};
 };
 KK.play=function(k,clip,o){
@@ -26,7 +27,7 @@ KK.play=function(k,clip,o){
 const KK_ATK={sword:'Melee_1H_Attack_Slice_Horizontal',axe:'Melee_1H_Attack_Chop',glove:'Melee_Unarmed_Attack_Punch_A'};
 function kkAttach(g){
   const u=g.userData; if(u.kk||!KK.ok||!u.kkArgs) return; const a=u.kkArgs, name=a.opts&&a.opts.neutral?'Rogue_Hooded':KK.name((a.opts&&a.opts.cls)||'matelot');
-  const k=KK.make(name,a.opts&&a.opts.neutral?1:KK.size((a.opts&&a.opts.cls)||'matelot')); u.kk=k; u.body.visible=false; g.add(k.model); u.mat=k.mat; u.mats={shirt:k.mat,skin:k.mat,dark:k.mat,hat:k.mat,band:k.mat};
+  const k=KK.make(name,a.opts&&a.opts.neutral?1:KK.size((a.opts&&a.opts.cls)||'matelot')); u.kk=k; u.base=(a.opts&&a.opts.scale)||.46; /* même taille de base pour toutes les classes */ u.body.visible=false; g.add(k.model); u.mat=k.mat; u.mats={shirt:k.mat,skin:k.mat,dark:k.mat,hat:k.mat,band:k.mat};
   const td=a.td||{}; const tc=new THREE.Color(td.col||'#ffffff'); k.team=new THREE.Color('#ffffff').lerp(tc,.4);
   k.hold=new THREE.Group(); k.hold.scale.setScalar(1.35); k.hold.rotation.set(-Math.PI/2,0,0); (k.hand||k.model).add(k.hold);
   KK.play(k,'Idle_A');
